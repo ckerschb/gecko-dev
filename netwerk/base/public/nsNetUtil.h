@@ -83,6 +83,7 @@
 #include "nsCategoryCache.h"
 #include "nsStringStream.h"
 #include "nsIViewSourceChannel.h"
+#include "nsIContentPolicy.h"
 
 #include <limits>
 
@@ -233,6 +234,26 @@ NS_NewChannel(nsIChannel           **result,
                 chan.forget(result);
         }
     }
+    return rv;
+}
+inline nsresult
+NS_NewChannel2(nsIChannel            **result,
+               nsIURI                *uri,
+               nsIIOService          *ioService = nullptr,    // pass in nsIIOService to optimize callers
+               nsILoadGroup          *loadGroup = nullptr,
+               nsIInterfaceRequestor *callbacks = nullptr,
+               uint32_t              loadFlags = nsIRequest::LOAD_NORMAL,
+               nsIChannelPolicy      *channelPolicy = nullptr,
+               nsContentPolicyType   aType = nsIContentPolicy::TYPE_OTHER,
+               nsIPrincipal          *aRequestingPrincipal = nullptr,
+               nsISupports           *aRequestingContext = nullptr)
+{
+    nsresult rv;
+    rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
+    printf("\nSetting Content Policy Type in NS_NewChannel2 to %i\n", aType);
+    (*result)->SetContentPolicyType(aType);
+    (*result)->SetRequestingContext(aRequestingContext);
+    (*result)->SetRequestingPrincipal(aRequestingPrincipal);
     return rv;
 }
 
