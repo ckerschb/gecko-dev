@@ -181,6 +181,11 @@ NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen(nsIStreamListener *listener, nsISu
   return OpenURL();
 }
 
+NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
+{
+  return AsyncOpen(listener, ctxt);
+}
+
 NS_IMETHODIMP nsExtProtocolChannel::GetLoadFlags(nsLoadFlags *aLoadFlags)
 {
   *aLoadFlags = mLoadFlags;
@@ -201,6 +206,40 @@ NS_IMETHODIMP nsExtProtocolChannel::GetContentType(nsACString &aContentType)
 NS_IMETHODIMP nsExtProtocolChannel::SetContentType(const nsACString &aContentType)
 {
   return NS_ERROR_FAILURE;
+}
+
+NS_IMETHODIMP nsExtProtocolChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP nsExtProtocolChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsExtProtocolChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsExtProtocolChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsExtProtocolChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsExtProtocolChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP nsExtProtocolChannel::GetContentCharset(nsACString &aContentCharset)

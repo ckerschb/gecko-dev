@@ -105,6 +105,11 @@ NS_IMETHODIMP DummyChannel::AsyncOpen(nsIStreamListener* aListener, nsISupports*
   return NS_OK;
 }
 
+NS_IMETHODIMP DummyChannel::AsyncOpen2(nsIStreamListener* aListener, nsISupports* aContext)
+{
+  return AsyncOpen(aListener, aContext);
+}
+
 // nsIJarChannel, needed for XHR to turn NS_ERROR_FILE_NOT_FOUND into
 // a 404 error.
 NS_IMETHODIMP DummyChannel::GetIsUnsafe(bool *aResult)
@@ -208,6 +213,40 @@ NS_IMETHODIMP DummyChannel::GetContentType(nsACString&)
 }
 
 NS_IMETHODIMP DummyChannel::SetContentType(const nsACString&)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP DummyChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP DummyChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+DummyChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+DummyChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+DummyChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+DummyChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
 {
   return NS_ERROR_NOT_IMPLEMENTED;
 }
