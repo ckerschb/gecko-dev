@@ -702,12 +702,6 @@ nsJSChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
     return rv;
 }
 
-NS_IMETHODIMP
-nsJSChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
-{
-  return AsyncOpen(aListener, aContext);
-}
-
 void
 nsJSChannel::EvaluateScript()
 {
@@ -979,42 +973,6 @@ NS_IMETHODIMP
 nsJSChannel::SetContentType(const nsACString &aContentType)
 {
     return mStreamChannel->SetContentType(aContentType);
-}
-
-NS_IMETHODIMP
-nsJSChannel::GetContentPolicyType(nsContentPolicyType *aType)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsJSChannel::SetContentPolicyType(nsContentPolicyType aType)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsJSChannel::GetRequestingContext(nsISupports **aRequestingContext)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsJSChannel::SetRequestingContext(nsISupports *aRequestingContext)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsJSChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsJSChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP

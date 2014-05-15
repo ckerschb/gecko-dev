@@ -21,7 +21,6 @@
 #include "nsISeekableStream.h"
 #include "nsILoadGroupChild.h"
 #include "nsIProtocolProxyService2.h"
-#include "nsContentPolicyUtils.h" // NS_CheckContentLoadPolicy(...)
 #include "nsMimeTypes.h"
 #include "nsNetUtil.h"
 #include "prprf.h"
@@ -67,7 +66,6 @@
 #include "nsPerformance.h"
 #include "CacheObserver.h"
 #include "mozilla/Telemetry.h"
-
 
 namespace mozilla { namespace net {
 
@@ -4525,108 +4523,6 @@ nsHttpChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *context)
 
     return rv;
 }
-
-
-nsresult
-nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
-{
-    LOG(("nsHttpChannel::AsyncOpen2 [this=%p]\n", this));
-    nsresult rv;
-
-
-    //Call Content Policies
-    //Call content policies to see if this load is allowed
-    int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-
-    nsIPrincipal *principal = GetPrincipal();
-    if (!principal)
-       return NS_ERROR_FAILURE;
-
-
-    /* Debugging */
-    printf("\n\nAsyncOpen2 Debugging\n");
-
-    //What does GetPrincipal give you?
-    if(principal) {
-      nsAutoCString host;
-      nsCOMPtr<nsIURI> requestingLocation;
-      principal->GetURI(getter_AddRefs(requestingLocation));
-
-      if(requestingLocation) {
-        requestingLocation->GetSpec(host);
-        printf("\n\nPrincipal Location is %s\n", host.get());
-      }
-
-      nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(principal);
-      if (expanded) {
-        printf("principal is an Expanded principal\n");
-      }
-    } else {
-      printf("\n\nNo Principal\n");
-    }
-
-
-    //TANVI's notes - How do we figure out the context
-    /*In docshell we do:
-    nsCOMPtr<Element> requestingElement;
-    if (mScriptGlobal)
-       requestingElement = mScriptGlobal->GetFrameElementInternal();
-
-     nsISupports* context = requestingElement;
-     if (!context) {
-         context = ToSupports(mScriptGlobal);
-     } //what if there is no mScriptGlobal?
-     */
-     // But how do i get the context or the global window from the channel?
-     // You can't - you have to pass it in.
-     /*
-     //Is it from the loadGroup or from the nsILoadContext?
-     //
-     //From the loadcontext -
-     nsCOMPtr<nsIInterfaceRequestor> notificationCallbacks;
-     GetNotificationCallbacks(getter_AddRefs(notificationCallbacks));  //This is the right context.
-     nsCOMPtr<nsILoadContext> loadContext = do_GetInterface(notificationCallbacks);
-
-     //OR
-
-     //From the loadGroup -
-     nsCOMPtr<nsIInterfaceRequestor> notificationCallbacks2;
-     if (mLoadGroup) {
-       mLoadGroup->GetNotificationCallbacks(getter_AddRefs(notificationCallbacks2));
-       if (notificationCallbacks2) {
-         nsCOMPtr<nsILoadContext> loadContext2 = do_GetInterface(notificationCallbacks2);
-       }
-     }
-     */
-
-
-
-     //TANVI TODO - Remember to make sure variables exist and check return values once you've figured it out.
-
-     rv = NS_CheckContentLoadPolicy(mContentPolicyType,
-                                   mURI,
-                                   mRequestingPrincipal,
-                                   mRequestingContext, //context is missing
-                                   EmptyCString(), //mime guess
-                                   nullptr,         //extra
-                                   &shouldLoad);
-    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-        if (NS_SUCCEEDED(rv) && shouldLoad == nsIContentPolicy::REJECT_TYPE) {
-            return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
-        }
-
-        return NS_ERROR_CONTENT_BLOCKED;
-    }
-
-
-
-    //Do other security checks
-
-    //Call AsyncOpen()
-    rv = AsyncOpen(listener, context);
-    return rv;
-}
-
 
 nsresult
 nsHttpChannel::BeginConnect()

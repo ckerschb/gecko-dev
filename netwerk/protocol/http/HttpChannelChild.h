@@ -69,7 +69,6 @@ public:
   // nsIChannel
   NS_IMETHOD GetSecurityInfo(nsISupports **aSecurityInfo);
   NS_IMETHOD AsyncOpen(nsIStreamListener *listener, nsISupports *aContext);
-  NS_IMETHOD AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext);
   // HttpBaseChannel::nsIHttpChannel
   NS_IMETHOD SetRequestHeader(const nsACString& aHeader,
                               const nsACString& aValue,

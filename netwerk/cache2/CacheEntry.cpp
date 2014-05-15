@@ -286,11 +286,6 @@ void CacheEntry::AsyncOpen(nsICacheEntryOpenCallback* aCallback, uint32_t aFlags
   InvokeCallbacks();
 }
 
-/*void CacheEntry::AsyncOpen2(nsICacheEntryOpenCallback* aCallback, uint32_t aFlags)
-{
-  //Not implemented yet
-}*/
-
 bool CacheEntry::Load(bool aTruncate, bool aPriority)
 {
   LOG(("CacheEntry::Load [this=%p, trunc=%d]", this, aTruncate));

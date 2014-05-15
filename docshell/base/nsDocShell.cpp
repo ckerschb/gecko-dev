@@ -9611,7 +9611,7 @@ nsDocShell::InternalLoad(nsIURI * aURI,
                    (aFlags & INTERNAL_LOAD_FLAGS_FIRST_LOAD) != 0,
                    (aFlags & INTERNAL_LOAD_FLAGS_BYPASS_CLASSIFIER) != 0,
                    (aFlags & INTERNAL_LOAD_FLAGS_FORCE_ALLOW_COOKIES) != 0,
-                   srcdoc, aBaseURI, contentType);
+                   srcdoc, aBaseURI);
     if (req && aRequest)
         NS_ADDREF(*aRequest = req);
 
@@ -9691,8 +9691,7 @@ nsDocShell::DoURILoad(nsIURI * aURI,
                       bool aBypassClassifier,
                       bool aForceAllowCookies,
                       const nsAString &aSrcdoc,
-                      nsIURI * aBaseURI,
-                      nsContentPolicyType aContentType)
+                      nsIURI * aBaseURI)
 {
 #ifdef MOZ_VISUAL_EVENT_TRACER
     nsAutoCString urlSpec;
@@ -9762,59 +9761,13 @@ nsDocShell::DoURILoad(nsIURI * aURI,
 
     bool isSrcdoc = !aSrcdoc.IsVoid();
     if (!isSrcdoc) {
-
-        // Here we compuate the requestingContext and the requestingPrincipal.  Alternatively, we could pass those in from InternalLoad to DoURILoad()
-
-        // Get the RequestingContext, the same way we get it in InternalLoad to pass into content policy
-        nsCOMPtr<Element> requestingElement;
-        // Use nsPIDOMWindow since we _want_ to cross the chrome boundary if needed
-        if (mScriptGlobal)
-          requestingElement = mScriptGlobal->GetFrameElementInternal();
-
-        nsISupports* requestingContext = requestingElement;
-        
-        if (!requestingContext) {
-          requestingContext = ToSupports(mScriptGlobal);
-        }
-
-        /* OR make it a bit cleaner - 
-        nsCOMPtr<nsISupports> requestingContext = mScriptGlobal->GetFrameElementInternal();
-        if (!requestingContext)
-          requestingContext = ToSupports(mScriptGlobal);
-        */
-
-
-        // Get the requestingPrincipal in the same way we get it in InternalLoad to pass into content policy
-        // TANVI - Is this going to be the same principal that is associated with the context?
-        // Ex: for loads initiated by css, the principal from the requestingContext and the requestingPrincipal are not the same.
-        // But since this is nsDocShell and the content type is TYPE_DOCUMENT or TYPE_SUBDOCUMENT, perhaps they will yield the same result here.
-        // This is somethign we will have to reserach and followup on.  For now, get it the same way we got it in InternalLoad
-        //
-        // Also note, the owner passed into DoURILoad() could be different from the owner that InternalLoad used to calculate
-        // the principal.  Here we take into account whether we should inherit the principal before we call the content policies
-        // instead of after we call them.  Is that okay?  Something else to research and followup on
-        
-        // XXXbz would be nice to know the loading principal here... but we don't
-        nsCOMPtr<nsIPrincipal> loadingPrincipal = do_QueryInterface(aOwner);
-        if (!loadingPrincipal && aReferrerURI) {
-          nsCOMPtr<nsIScriptSecurityManager> secMan =
-              do_GetService(NS_SCRIPTSECURITYMANAGER_CONTRACTID, &rv);
-          NS_ENSURE_SUCCESS(rv, rv);
-
-          rv = secMan->GetSimpleCodebasePrincipal(aReferrerURI,
-                                                  getter_AddRefs(loadingPrincipal));
-        }
-
-        rv = NS_NewChannel2(getter_AddRefs(channel),
+        rv = NS_NewChannel(getter_AddRefs(channel),
                            aURI,
                            nullptr,
                            nullptr,
                            static_cast<nsIInterfaceRequestor *>(this),
                            loadFlags,
-                           channelPolicy,
-                           aContentType,
-                           loadingPrincipal,
-                           requestingContext);
+                           channelPolicy);
         if (NS_FAILED(rv)) {
             if (rv == NS_ERROR_UNKNOWN_PROTOCOL) {
                 // This is a uri with a protocol scheme we don't know how
