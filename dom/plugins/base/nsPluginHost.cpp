@@ -2856,6 +2856,10 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
   if (NS_FAILED(rv))
     return rv;
 
+  // set contentPolicyType and context on the channel to allow mixed content blocking
+  channel->SetContentPolicyType(nsIContentPolicy::TYPE_OBJECT_SUBREQUEST);
+  channel->SetRequestingContext(element);
+
   if (doc) {
     // Set the owner of channel to the document principal...
     channel->SetOwner(doc->NodePrincipal());

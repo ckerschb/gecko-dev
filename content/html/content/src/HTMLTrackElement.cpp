@@ -264,6 +264,10 @@ HTMLTrackElement::LoadResource()
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
   channel->SetNotificationCallbacks(mListener);
 
+  // set contentPolicyType and context on the channel to allow mixed content blocking
+  channel->SetContentPolicyType(nsIContentPolicy::TYPE_MEDIA);
+  channel->SetRequestingContext(static_cast<Element*>(this));
+
   LOG(PR_LOG_DEBUG, ("opening webvtt channel"));
   rv = channel->AsyncOpen2(mListener, nullptr);
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
