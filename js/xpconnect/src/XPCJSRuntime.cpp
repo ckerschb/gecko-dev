@@ -1386,8 +1386,7 @@ XPCJSRuntime::InterruptCallback(JSContext *cx)
     // returning to the event loop. See how long it's been, and what the limit
     // is.
     TimeDuration duration = TimeStamp::NowLoRes() - self->mSlowScriptCheckpoint;
-    bool chrome =
-      nsContentUtils::IsSystemPrincipal(nsContentUtils::GetSubjectPrincipal());
+    bool chrome = nsContentUtils::IsCallerChrome();
     const char *prefName = chrome ? "dom.max_chrome_script_run_time"
                                   : "dom.max_script_run_time";
     int32_t limit = Preferences::GetInt(prefName, chrome ? 20 : 10);
@@ -1551,6 +1550,7 @@ ReloadPrefsCallback(const char *pref, void *data)
     bool useBaseline = Preferences::GetBool(JS_OPTIONS_DOT_STR "baselinejit") && !safeMode;
     bool useIon = Preferences::GetBool(JS_OPTIONS_DOT_STR "ion") && !safeMode;
     bool useAsmJS = Preferences::GetBool(JS_OPTIONS_DOT_STR "asmjs") && !safeMode;
+    bool useNativeRegExp = Preferences::GetBool(JS_OPTIONS_DOT_STR "native_regexp") && !safeMode;
 
     bool parallelParsing = Preferences::GetBool(JS_OPTIONS_DOT_STR "parallel_parsing");
     bool parallelIonCompilation = Preferences::GetBool(JS_OPTIONS_DOT_STR
@@ -1563,7 +1563,8 @@ ReloadPrefsCallback(const char *pref, void *data)
 
     JS::RuntimeOptionsRef(rt).setBaseline(useBaseline)
                              .setIon(useIon)
-                           .  setAsmJS(useAsmJS);
+                             .setAsmJS(useAsmJS)
+                             .setNativeRegExp(useNativeRegExp);
 
     JS_SetParallelParsingEnabled(rt, parallelParsing);
     JS_SetParallelIonCompilationEnabled(rt, parallelIonCompilation);
@@ -2136,7 +2137,7 @@ ReportCompartmentStats(const JS::CompartmentStats &cStats,
 
     ZCREPORT_BYTES(cJSPathPrefix + NS_LITERAL_CSTRING("regexp-compartment"),
         cStats.regexpCompartment,
-        "The regexp compartment.");
+        "The regexp compartment and regexp data.");
 
     ZCREPORT_BYTES(cJSPathPrefix + NS_LITERAL_CSTRING("debuggees-set"),
         cStats.debuggeesSet,
@@ -2304,9 +2305,11 @@ ReportJSRuntimeExplicitTreeStats(const JS::RuntimeStats &rtStats,
         "Transient data (mostly parse nodes) held by the JSRuntime during "
         "compilation.");
 
+#ifdef JS_YARR
     RREPORT_BYTES(rtPath + NS_LITERAL_CSTRING("runtime/regexp-data"),
         KIND_NONHEAP, rtStats.runtime.regexpData,
         "Regexp JIT data.");
+#endif
 
     RREPORT_BYTES(rtPath + NS_LITERAL_CSTRING("runtime/interpreter-stack"),
         KIND_HEAP, rtStats.runtime.interpreterStack,
