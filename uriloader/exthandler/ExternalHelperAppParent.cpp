@@ -280,6 +280,12 @@ ExternalHelperAppParent::AsyncOpen(nsIStreamListener *aListener,
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
+NS_IMETHODIMP
+ExternalHelperAppParent::AsyncOpen2(nsIStreamListener *aListener,
+                                   nsISupports *aContext)
+{
+  return AsyncOpen(aListener, aContext);
+}
 
 NS_IMETHODIMP
 ExternalHelperAppParent::GetLoadFlags(nsLoadFlags *aLoadFlags)
@@ -352,6 +358,42 @@ NS_IMETHODIMP
 ExternalHelperAppParent::SetContentType(const nsACString& aContentType)
 {
   return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::GetContentPolicyType(nsContentPolicyType *aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::SetContentPolicyType(nsContentPolicyType aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ExternalHelperAppParent::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP

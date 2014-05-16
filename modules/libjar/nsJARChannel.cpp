@@ -644,6 +644,42 @@ nsJARChannel::SetContentType(const nsACString &aContentType)
 }
 
 NS_IMETHODIMP
+nsJARChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsJARChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsJARChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsJARChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsJARChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsJARChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
 nsJARChannel::GetContentCharset(nsACString &aContentCharset)
 {
     // If someone gives us a charset hint we should just use that charset.
@@ -799,6 +835,12 @@ nsJARChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 
     mOpened = true;
     return NS_OK;
+}
+
+NS_IMETHODIMP
+nsJARChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
+{
+  return AsyncOpen(listener, ctx);
 }
 
 //-----------------------------------------------------------------------------

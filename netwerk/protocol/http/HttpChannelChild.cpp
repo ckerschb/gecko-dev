@@ -1287,6 +1287,13 @@ HttpChannelChild::AsyncOpen(nsIStreamListener *listener, nsISupports *aContext)
   return NS_OK;
 }
 
+NS_IMETHODIMP
+HttpChannelChild::AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext)
+{
+  LOG(("HttpChannelChild::AsyncOpen2 [this=%p uri=%s]\n", this, mSpec.get()));
+  return AsyncOpen(listener, aContext);
+}
+
 //-----------------------------------------------------------------------------
 // HttpChannelChild::nsIHttpChannel
 //-----------------------------------------------------------------------------
