@@ -209,6 +209,13 @@ nsPartChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 }
 
 NS_IMETHODIMP
+nsPartChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
+{
+    // This channel cannot be opened!
+    return NS_ERROR_FAILURE;
+}
+
+NS_IMETHODIMP
 nsPartChannel::GetLoadFlags(nsLoadFlags *aLoadFlags)
 {
     *aLoadFlags = mLoadFlags;
@@ -282,6 +289,42 @@ nsPartChannel::SetContentType(const nsACString &aContentType)
     bool dummy;
     net_ParseContentType(aContentType, mContentType, mContentCharset, &dummy);
     return NS_OK;
+}
+
+NS_IMETHODIMP
+nsPartChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsPartChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsPartChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsPartChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsPartChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsPartChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
