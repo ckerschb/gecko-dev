@@ -107,7 +107,6 @@ public:
     // nsIChannel
     NS_IMETHOD GetSecurityInfo(nsISupports **aSecurityInfo);
     NS_IMETHOD AsyncOpen(nsIStreamListener *listener, nsISupports *aContext);
-    NS_IMETHOD AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext);
     // nsIHttpChannelInternal
     NS_IMETHOD SetupFallbackChannel(const char *aFallbackKey);
     // nsISupportsPriority

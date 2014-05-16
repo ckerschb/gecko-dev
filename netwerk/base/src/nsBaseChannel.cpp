@@ -59,7 +59,6 @@ nsBaseChannel::nsBaseChannel()
   , mStatus(NS_OK)
   , mContentDispositionHint(UINT32_MAX)
   , mContentLength(-1)
-  , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
 {
   mContentType.AssignLiteral(UNKNOWN_CONTENT_TYPE);
 }
@@ -262,8 +261,6 @@ nsBaseChannel::ContinueHandleAsyncRedirect(nsresult result)
 
   // Drop notification callbacks to prevent cycles.
   mCallbacks = nullptr;
-  mRequestingContext = nullptr;
-  mRequestingPrincipal = nullptr; //TANVI - Do we need this?
   CallbacksChanged();
 }
 
@@ -475,51 +472,6 @@ nsBaseChannel::SetContentType(const nsACString &aContentType)
 }
 
 NS_IMETHODIMP
-nsBaseChannel::GetContentPolicyType(nsContentPolicyType *aType)
-{
-  *aType = mContentPolicyType;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-nsBaseChannel::SetContentPolicyType(nsContentPolicyType aType)
-{
-  mContentPolicyType = aType;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-nsBaseChannel::GetRequestingContext(nsISupports **aRequestingContext)
-{
-  NS_ENSURE_ARG_POINTER(aRequestingContext);
-  NS_IF_ADDREF(*aRequestingContext = mRequestingContext);
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-nsBaseChannel::SetRequestingContext(nsISupports *aRequestingContext)
-{
-  mRequestingContext = aRequestingContext;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-nsBaseChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
-{
-  NS_ENSURE_ARG_POINTER(aRequestingPrincipal);
-  NS_IF_ADDREF(*aRequestingPrincipal = mRequestingPrincipal);
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-nsBaseChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
-{
-  mRequestingPrincipal = aRequestingPrincipal;
-  return NS_OK;
-}
-
-
-NS_IMETHODIMP
 nsBaseChannel::GetContentCharset(nsACString &aContentCharset)
 {
   aContentCharset = mContentCharset;
@@ -628,8 +580,6 @@ nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
   nsresult rv = NS_CheckPortSafety(mURI);
   if (NS_FAILED(rv)) {
     mCallbacks = nullptr;
-    mRequestingContext = nullptr;
-    mRequestingPrincipal = nullptr; //TANVI - do we need this?
     return rv;
   }
 
@@ -663,13 +613,6 @@ nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
   ClassifyURI();
 
   return NS_OK;
-}
-
-
-NS_IMETHODIMP
-nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
-{
-  return AsyncOpen(listener, ctxt);
 }
 
 //-----------------------------------------------------------------------------

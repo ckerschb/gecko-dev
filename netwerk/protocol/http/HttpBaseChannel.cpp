@@ -67,7 +67,6 @@ HttpBaseChannel::HttpBaseChannel()
   , mContentDispositionHint(UINT32_MAX)
   , mHttpHandler(gHttpHandler)
   , mRedirectCount(0)
-  , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
 {
   LOG(("Creating HttpBaseChannel @%x\n", this));
 
@@ -348,50 +347,6 @@ HttpBaseChannel::SetContentType(const nsACString& aContentType)
                          &dummy);
   }
 
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::GetContentPolicyType(nsContentPolicyType *aType)
-{
-  *aType = mContentPolicyType;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::SetContentPolicyType(nsContentPolicyType aType)
-{
-  mContentPolicyType = aType;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::GetRequestingContext(nsISupports **aRequestingContext)
-{
-  NS_ENSURE_ARG_POINTER(aRequestingContext);
-  NS_IF_ADDREF(*aRequestingContext = mRequestingContext);
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::SetRequestingContext(nsISupports *aRequestingContext)
-{
-  mRequestingContext = aRequestingContext;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
-{
-  NS_ENSURE_ARG_POINTER(aRequestingPrincipal);
-  NS_IF_ADDREF(*aRequestingPrincipal = mRequestingPrincipal);
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-HttpBaseChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
-{
-  mRequestingPrincipal = aRequestingPrincipal;
   return NS_OK;
 }
 
@@ -1731,8 +1686,6 @@ HttpBaseChannel::ReleaseListeners()
   mListenerContext = nullptr;
   mCallbacks = nullptr;
   mProgressSink = nullptr;
-  mRequestingContext = nullptr;
-  mRequestingPrincipal = nullptr; //TANVI - do we need this?
 }
 
 void

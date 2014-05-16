@@ -291,8 +291,7 @@ protected:
                                bool aBypassClassifier,
                                bool aForceAllowCookies,
                                const nsAString &aSrcdoc,
-                               nsIURI * baseURI,
-                               nsContentPolicyType aContentPolicy);
+                               nsIURI * baseURI);
     NS_IMETHOD AddHeadersToChannel(nsIInputStream * aHeadersData, 
                                   nsIChannel * aChannel);
     virtual nsresult DoChannelLoad(nsIChannel * aChannel,

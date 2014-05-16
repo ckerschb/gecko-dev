@@ -244,12 +244,6 @@ nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
     return rv;
 }
 
-NS_IMETHODIMP
-nsViewSourceChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
-{
-  return AsyncOpen(aListener, ctxt);
-}
-
 /*
  * Both the view source channel and mChannel are added to the
  * loadgroup.  There should never be more than one request in the
@@ -375,42 +369,6 @@ nsViewSourceChannel::SetContentCharset(const nsACString &aContentCharset)
     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);
 
     return mChannel->SetContentCharset(aContentCharset);
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::GetContentPolicyType(nsContentPolicyType *aType)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::SetContentPolicyType(nsContentPolicyType aType)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::GetRequestingContext(nsISupports **aRequestingContext)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::SetRequestingContext(nsISupports *aRequestingContext)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsViewSourceChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 // We don't forward these methods becacuse content-disposition isn't whitelisted
