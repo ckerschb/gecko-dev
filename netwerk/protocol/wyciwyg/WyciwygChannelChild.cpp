@@ -509,6 +509,42 @@ WyciwygChannelChild::SetContentType(const nsACString & aContentType)
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
+NS_IMETHODIMP
+WyciwygChannelChild::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+WyciwygChannelChild::SetContentPolicyType(nsContentPolicyType aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+WyciwygChannelChild::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+WyciwygChannelChild::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+WyciwygChannelChild::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+WyciwygChannelChild::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
 /* attribute ACString contentCharset; */
 NS_IMETHODIMP
 WyciwygChannelChild::GetContentCharset(nsACString & aContentCharset)
@@ -617,6 +653,12 @@ WyciwygChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aConte
   return NS_OK;
 }
 
+NS_IMETHODIMP
+WyciwygChannelChild::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
+{
+  LOG(("WyciwygChannelChild::AsyncOpen2 [this=%p]\n", this));
+  return AsyncOpen(aListener, aContext);
+}
 //-----------------------------------------------------------------------------
 // nsIWyciwygChannel
 //-----------------------------------------------------------------------------

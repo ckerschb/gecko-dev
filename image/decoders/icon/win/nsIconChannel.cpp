@@ -217,6 +217,11 @@ NS_IMETHODIMP nsIconChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports
   return rv;
 }
 
+NS_IMETHODIMP nsIconChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
+{
+  return AsyncOpen(aListener, ctxt);
+}
+
 static DWORD GetSpecialFolderIcon(nsIFile* aFile, int aFolder, SHFILEINFOW* aSFI, UINT aInfoFlags)
 {
   DWORD shellResult = 0;
@@ -593,6 +598,42 @@ nsIconChannel::SetContentType(const nsACString &aContentType)
   // It doesn't make sense to set the content-type on this type
   // of channel...
   return NS_ERROR_FAILURE;
+}
+
+NS_IMETHODIMP
+nsIconChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsIconChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsIconChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsIconChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsIconChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsIconChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP nsIconChannel::GetContentCharset(nsACString &aContentCharset) 

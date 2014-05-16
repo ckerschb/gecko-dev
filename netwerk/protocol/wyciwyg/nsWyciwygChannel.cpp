@@ -334,6 +334,42 @@ nsWyciwygChannel::SetContentType(const nsACString &aContentType)
 }
 
 NS_IMETHODIMP
+nsWyciwygChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
 nsWyciwygChannel::GetContentCharset(nsACString &aContentCharset)
 {
   aContentCharset.AssignLiteral("UTF-16");
@@ -431,6 +467,13 @@ nsWyciwygChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
     mLoadGroup->AddRequest(this, nullptr);
 
   return NS_OK;
+}
+
+NS_IMETHODIMP
+nsWyciwygChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
+{
+  LOG(("nsWyciwygChannel::AsyncOpen2 [this=%p]\n", this));
+  return AsyncOpen(listener, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////////////

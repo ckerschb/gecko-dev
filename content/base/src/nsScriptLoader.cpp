@@ -264,17 +264,21 @@ nsScriptLoader::ShouldLoadScript(nsIDocument* aDocument,
                                  const nsAString &aType)
 {
   // Check that the containing page is allowed to load this URI.
+  // We will eventually move this to AsyncOpen2 or after.
   nsresult rv = nsContentUtils::GetSecurityManager()->
     CheckLoadURIWithPrincipal(aDocument->NodePrincipal(), aURI,
                               nsIScriptSecurityManager::ALLOW_CHROME);
 
   NS_ENSURE_SUCCESS(rv, rv);
 
+  /* Removing content policy check here, since we will call it in AsyncOpen2()
   // After the security manager, the content-policy stuff gets a veto
   rv = CheckContentPolicy(aDocument, aContext, aURI, aType);
   if (NS_FAILED(rv)) {
     return rv;
   }
+  */
+  printf("Inside ShouldLoadScript - No longer calling Content Policies from ShouldLoadScript.  I beleive this is preload time.  Confirm that they do get called after this from AsyncOpen2\n");
 
   return NS_OK;
 }
@@ -320,10 +324,14 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   }
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel),
+  // Call NS_NewChannel2
+  // We have a weak reference to the document.  Use that to get the principal.
+  // Alternatively, we could use the context to get the principal, but the current implementation uses mDocument, so let's do that for now.
+
+  rv = NS_NewChannel2(getter_AddRefs(channel),
                      aRequest->mURI, nullptr, loadGroup, prompter,
                      nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
-                     channelPolicy);
+                     channelPolicy, nsIContentPolicy::TYPE_SCRIPT, mDocument->NodePrincipal(), context);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsIScriptElement *script = aRequest->mElement;
@@ -370,7 +378,8 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
     listener = corsListener;
   }
 
-  rv = channel->AsyncOpen(listener, aRequest);
+  // Use AsyncOpen2 instead.
+  rv = channel->AsyncOpen2(listener, aRequest);
   NS_ENSURE_SUCCESS(rv, rv);
 
   return NS_OK;
@@ -650,6 +659,10 @@ nsScriptLoader::ProcessScriptElement(nsIScriptElement *aElement)
       aElement->GetScriptCharset(elementCharset);
       if (elementCharset.Equals(preloadCharset) &&
           ourCORSMode == request->mCORSMode) {
+        // TANVI - We cannot remove this call to Content Policies.  AsyncOpen or AsyncOpen2 are not called after ProcessScriptElement, hence if
+        // we remove this we wouldn't have our second call to shouldLoad at rendering time.  is that okay?  Do we want two calls to shouldLoad?  If the first preload call succeeds
+        // are we happy enough with that?
+        printf("\n\n\nProcessScriptElement calling content policies. AsyncOpen doesn't get called after this!----------------------------\n");
         rv = CheckContentPolicy(mDocument, aElement, request->mURI, type);
         NS_ENSURE_SUCCESS(rv, false);
       } else {
