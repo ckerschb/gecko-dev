@@ -2352,6 +2352,10 @@ nsObjectLoadingContent::OpenChannel()
 
   NS_ENSURE_SUCCESS(rv, rv);
 
+  // set contentPolicyType and context on the channel to allow mixed content blocking
+  chan->SetContentPolicyType(nsIContentPolicy::TYPE_OBJECT);
+  chan->SetRequestingContext(doc);
+
   // Referrer
   nsCOMPtr<nsIHttpChannel> httpChan(do_QueryInterface(chan));
   if (httpChan) {
