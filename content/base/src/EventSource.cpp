@@ -756,20 +756,25 @@ EventSource::InitChannelAndRequestEventSource()
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_DATAREQUEST);
   }
 
-  nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), mSrc, nullptr, mLoadGroup,
-                     nullptr, loadFlags, channelPolicy);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  mHttpChannel = do_QueryInterface(channel);
-  
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_DATAREQUEST);
   nsIScriptContext* sc = GetContextForEventHandlers(&rv);
   nsCOMPtr<nsIDocument> doc =
     nsContentUtils::GetDocumentFromScriptContext(sc);
-  channel->SetRequestingContext(doc);
 
+  nsCOMPtr<nsIChannel> channel;
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      mSrc,
+                      nullptr,   // cached IOService
+                      mLoadGroup,
+                      nullptr,   // callbacks
+                      loadFlags,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_DATAREQUEST,
+                      mPrincipal,
+                      doc);
+
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  mHttpChannel = do_QueryInterface(channel);
   NS_ENSURE_TRUE(mHttpChannel, NS_ERROR_NO_INTERFACE);
 
   rv = SetupHttpChannel();
@@ -788,7 +793,7 @@ EventSource::InitChannelAndRequestEventSource()
   NS_ENSURE_SUCCESS(rv, rv);
 
   // Start reading from the channel
-  rv = mHttpChannel->AsyncOpen(listener, nullptr);
+  rv = mHttpChannel->AsyncOpen2(listener, nullptr);
   if (NS_SUCCEEDED(rv)) {
     mWaitingForOnStopRequest = true;
   }
