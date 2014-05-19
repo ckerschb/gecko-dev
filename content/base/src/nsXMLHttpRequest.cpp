@@ -1726,21 +1726,21 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_XMLHTTPREQUEST);
   }
-  rv = NS_NewChannel(getter_AddRefs(mChannel),
+  rv = NS_NewChannel2(getter_AddRefs(mChannel),
                      uri,
                      nullptr,                    // ioService
                      loadGroup,
                      nullptr,                    // callbacks
                      nsIRequest::LOAD_BACKGROUND,
-                     channelPolicy);
+                     channelPolicy,
+                     nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+                     mPrincipal,
+                     doc);
+
   if (NS_FAILED(rv)) return rv;
 
   mState &= ~(XML_HTTP_REQUEST_USE_XSITE_AC |
               XML_HTTP_REQUEST_NEED_AC_PREFLIGHT);
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  mChannel->SetContentPolicyType(nsIContentPolicy::TYPE_XMLHTTPREQUEST);
-  mChannel->SetRequestingContext(doc);
 
   nsCOMPtr<nsIHttpChannel> httpChannel(do_QueryInterface(mChannel));
   if (httpChannel) {
@@ -2974,7 +2974,7 @@ nsXMLHttpRequest::Send(nsIVariant* aVariant, const Nullable<RequestBody>& aBody)
       }
     }
     // Start reading from the channel
-    rv = mChannel->AsyncOpen(listener, nullptr);
+    rv = mChannel->AsyncOpen2(listener, nullptr);
   }
 
   if (NS_FAILED(rv)) {
