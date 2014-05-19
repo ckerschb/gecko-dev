@@ -1302,32 +1302,32 @@ nsObjectLoadingContent::CheckLoadPolicy(int16_t *aContentPolicy)
     return false;
   }
 
-  nsCOMPtr<nsIContent> thisContent =
-    do_QueryInterface(static_cast<nsIImageLoadingContent*>(this));
-  NS_ASSERTION(thisContent, "Must be an instance of content");
+  // nsCOMPtr<nsIContent> thisContent =
+  //   do_QueryInterface(static_cast<nsIImageLoadingContent*>(this));
+  // NS_ASSERTION(thisContent, "Must be an instance of content");
 
-  nsIDocument* doc = thisContent->OwnerDoc();
+  // nsIDocument* doc = thisContent->OwnerDoc();
 
-  *aContentPolicy = nsIContentPolicy::ACCEPT;
-  nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OBJECT,
-                                          mURI,
-                                          doc->NodePrincipal(),
-                                          thisContent,
-                                          mContentType,
-                                          nullptr, //extra
-                                          aContentPolicy,
-                                          nsContentUtils::GetContentPolicy(),
-                                          nsContentUtils::GetSecurityManager());
-  NS_ENSURE_SUCCESS(rv, false);
-  if (NS_CP_REJECTED(*aContentPolicy)) {
-    nsAutoCString uri;
-    nsAutoCString baseUri;
-    mURI->GetSpec(uri);
-    mURI->GetSpec(baseUri);
-    LOG(("OBJLC [%p]: Content policy denied load of %s (base %s)",
-         this, uri.get(), baseUri.get()));
-    return false;
-  }
+  // *aContentPolicy = nsIContentPolicy::ACCEPT;
+  // nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OBJECT,
+  //                                         mURI,
+  //                                         doc->NodePrincipal(),
+  //                                         thisContent,
+  //                                         mContentType,
+  //                                         nullptr, //extra
+  //                                         aContentPolicy,
+  //                                         nsContentUtils::GetContentPolicy(),
+  //                                         nsContentUtils::GetSecurityManager());
+  // NS_ENSURE_SUCCESS(rv, false);
+  // if (NS_CP_REJECTED(*aContentPolicy)) {
+  //   nsAutoCString uri;
+  //   nsAutoCString baseUri;
+  //   mURI->GetSpec(uri);
+  //   mURI->GetSpec(baseUri);
+  //   LOG(("OBJLC [%p]: Content policy denied load of %s (base %s)",
+  //        this, uri.get(), baseUri.get()));
+  //   return false;
+  // }
 
   return true;
 }
