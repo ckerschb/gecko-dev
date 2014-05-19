@@ -2339,15 +2339,18 @@ nsObjectLoadingContent::OpenChannel()
   }
   nsRefPtr<ObjectInterfaceRequestorShim> shim =
     new ObjectInterfaceRequestorShim(this);
-  rv = NS_NewChannel(getter_AddRefs(chan), mURI, nullptr, group, shim,
-                     nsIChannel::LOAD_CALL_CONTENT_SNIFFERS |
-                     nsIChannel::LOAD_CLASSIFY_URI,
-                     channelPolicy);
-  NS_ENSURE_SUCCESS(rv, rv);
+  rv = NS_NewChannel2(getter_AddRefs(chan),
+                      mURI,
+                      nullptr, // cached IOService
+                      group,
+                      shim,
+                      nsIChannel::LOAD_CALL_CONTENT_SNIFFERS | nsIChannel::LOAD_CLASSIFY_URI,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_OBJECT,
+                      thisContent->NodePrincipal(),
+                      doc);
 
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  chan->SetContentPolicyType(nsIContentPolicy::TYPE_OBJECT);
-  chan->SetRequestingContext(doc);
+  NS_ENSURE_SUCCESS(rv, rv);
 
   // Referrer
   nsCOMPtr<nsIHttpChannel> httpChan(do_QueryInterface(chan));
@@ -2383,7 +2386,7 @@ nsObjectLoadingContent::OpenChannel()
   }
 
   // AsyncOpen can fail if a file does not exist.
-  rv = chan->AsyncOpen(shim, nullptr);
+  rv = chan->AsyncOpen2(shim, nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
   LOG(("OBJLC [%p]: Channel opened", this));
   mChannel = chan;
