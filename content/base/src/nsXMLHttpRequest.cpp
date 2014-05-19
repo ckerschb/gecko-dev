@@ -1648,21 +1648,21 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
 
   rv = CheckInnerWindowCorrectness();
   NS_ENSURE_SUCCESS(rv, rv);
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_XMLHTTPREQUEST,
-                                 uri,
-                                 mPrincipal,
-                                 doc,
-                                 EmptyCString(), //mime guess
-                                 nullptr,         //extra
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-  if (NS_FAILED(rv)) return rv;
-  if (NS_CP_REJECTED(shouldLoad)) {
-    // Disallowed by content policy
-    return NS_ERROR_CONTENT_BLOCKED;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+  //                                uri,
+  //                                mPrincipal,
+  //                                doc,
+  //                                EmptyCString(), //mime guess
+  //                                nullptr,         //extra
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
+  // if (NS_FAILED(rv)) return rv;
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   // Disallowed by content policy
+  //   return NS_ERROR_CONTENT_BLOCKED;
+  // }
 
   // XXXbz this is wrong: we should only be looking at whether
   // user/password were passed, not at the values!  See bug 759624.
