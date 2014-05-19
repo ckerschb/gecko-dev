@@ -1080,7 +1080,7 @@ EventSource::CheckCanRequestSrc(nsIURI* aSrc)
   }
 
   bool isValidURI = false;
-  bool isValidContentLoadPolicy = false;
+  // bool isValidContentLoadPolicy = false;
   bool isValidProtocol = false;
 
   nsCOMPtr<nsIURI> srcToTest = aSrc ? aSrc : mSrc.get();
@@ -1106,17 +1106,17 @@ EventSource::CheckCanRequestSrc(nsIURI* aSrc)
   // Still need to consider the case that doc is nullptr however.
   rv = CheckInnerWindowCorrectness();
   NS_ENSURE_SUCCESS(rv, false);
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_DATAREQUEST,
-                                 srcToTest,
-                                 mPrincipal,
-                                 doc,
-                                 NS_LITERAL_CSTRING(TEXT_EVENT_STREAM),
-                                 nullptr,    // extra
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-  isValidContentLoadPolicy = NS_SUCCEEDED(rv) && NS_CP_ACCEPTED(shouldLoad);
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_DATAREQUEST,
+  //                                srcToTest,
+  //                                mPrincipal,
+  //                                doc,
+  //                                NS_LITERAL_CSTRING(TEXT_EVENT_STREAM),
+  //                                nullptr,    // extra
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
+  // isValidContentLoadPolicy = NS_SUCCEEDED(rv) && NS_CP_ACCEPTED(shouldLoad);
 
   nsAutoCString targetURIScheme;
   rv = srcToTest->GetScheme(targetURIScheme);
@@ -1126,7 +1126,8 @@ EventSource::CheckCanRequestSrc(nsIURI* aSrc)
                       targetURIScheme.EqualsLiteral("https");
   }
 
-  return isValidURI && isValidContentLoadPolicy && isValidProtocol;
+  // return isValidURI && isValidContentLoadPolicy && isValidProtocol;
+  return isValidURI && isValidProtocol;
 }
 
 // static
