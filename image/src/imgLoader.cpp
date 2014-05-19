@@ -463,7 +463,8 @@ static nsresult NewImageChannel(nsIChannel **aResult,
                                 const nsCString& aAcceptHeader,
                                 nsLoadFlags aLoadFlags,
                                 nsIChannelPolicy *aPolicy,
-                                nsIPrincipal *aLoadingPrincipal)
+                                nsIPrincipal *aLoadingPrincipal,
+                                nsISupports* aContext)
 {
   nsresult rv;
   nsCOMPtr<nsIHttpChannel> newHttpChannel;
@@ -487,20 +488,19 @@ static nsresult NewImageChannel(nsIChannel **aResult,
   // If all of the proxy requests are canceled then this request should be
   // canceled too.
   //
-  rv = NS_NewChannel(aResult,
-                     aURI,        // URI
-                     nullptr,      // Cached IOService
-                     nullptr,      // LoadGroup
-                     callbacks,   // Notification Callbacks
+  rv = NS_NewChannel2(aResult,
+                     aURI,
+                     nullptr, // cached IOService
+                     nullptr, // loadgroup
+                     callbacks,
                      aLoadFlags,
-                     aPolicy);
+                     aPolicy,
+                     nsIContentPolicy::TYPE_IMAGE,
+                     aLoadingPrincipal,
+                     aContext); // requestingContext
+
   if (NS_FAILED(rv))
     return rv;
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  (*aResult)->SetContentPolicyType(nsIContentPolicy::TYPE_IMAGE);
-  // NEEDINFO: what context can we use here (mContext is not available)
-  // (*aResult)->SetRequestingContext(mContext);
 
   *aForcePrincipalCheckForCacheEntry = false;
 
@@ -1275,7 +1275,8 @@ bool imgLoader::ValidateRequestWithNewChannel(imgRequest *request,
                          mAcceptHeader,
                          aLoadFlags,
                          aPolicy,
-                         aLoadingPrincipal);
+                         aLoadingPrincipal,
+                         aCX);
     if (NS_FAILED(rv)) {
       return false;
     }
@@ -1335,7 +1336,7 @@ bool imgLoader::ValidateRequestWithNewChannel(imgRequest *request,
     mozilla::net::SeerLearn(aURI, aInitialDocumentURI,
         nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
 
-    rv = newChannel->AsyncOpen(listener, nullptr);
+    rv = newChannel->AsyncOpen2(listener, nullptr);
     if (NS_SUCCEEDED(rv))
       NS_ADDREF(*aProxyRequest = req.get());
 
@@ -1774,7 +1775,8 @@ nsresult imgLoader::LoadImage(nsIURI *aURI,
                          mAcceptHeader,
                          requestFlags,
                          aPolicy,
-                         aLoadingPrincipal);
+                         aLoadingPrincipal,
+                         aCX);
     if (NS_FAILED(rv))
       return NS_ERROR_FAILURE;
 
@@ -1834,7 +1836,7 @@ nsresult imgLoader::LoadImage(nsIURI *aURI,
     mozilla::net::SeerLearn(aURI, aInitialDocumentURI,
         nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
 
-    nsresult openRes = newChannel->AsyncOpen(listener, nullptr);
+    nsresult openRes = newChannel->AsyncOpen2(listener, nullptr);
 
     if (NS_FAILED(openRes)) {
       PR_LOG(GetImgLog(), PR_LOG_DEBUG,
