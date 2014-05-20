@@ -1072,20 +1072,20 @@ nsresult HTMLMediaElement::LoadResource()
     return NS_ERROR_FAILURE;
   }
 
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_MEDIA,
-                                          mLoadingSrc,
-                                          NodePrincipal(),
-                                          static_cast<Element*>(this),
-                                          EmptyCString(), // mime type
-                                          nullptr, // extra
-                                          &shouldLoad,
-                                          nsContentUtils::GetContentPolicy(),
-                                          nsContentUtils::GetSecurityManager());
-  NS_ENSURE_SUCCESS(rv, rv);
-  if (NS_CP_REJECTED(shouldLoad)) {
-    return NS_ERROR_FAILURE;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_MEDIA,
+  //                                         mLoadingSrc,
+  //                                         NodePrincipal(),
+  //                                         static_cast<Element*>(this),
+  //                                         EmptyCString(), // mime type
+  //                                         nullptr, // extra
+  //                                         &shouldLoad,
+  //                                         nsContentUtils::GetContentPolicy(),
+  //                                         nsContentUtils::GetSecurityManager());
+  // NS_ENSURE_SUCCESS(rv, rv);
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   return NS_ERROR_FAILURE;
+  // }
 
   // Set the media element's CORS mode only when loading a resource
   mCORSMode = AttrValueToCORSMode(GetParsedAttr(nsGkAtoms::crossorigin));
@@ -1097,7 +1097,7 @@ nsresult HTMLMediaElement::LoadResource()
     if (NS_SUCCEEDED(rv))
       return rv;
   }
-
+  nsresult rv = NS_OK;
   if (IsMediaStreamURI(mLoadingSrc)) {
     nsCOMPtr<nsIDOMMediaStream> stream;
     rv = NS_GetStreamForMediaStreamURI(mLoadingSrc, getter_AddRefs(stream));
@@ -1150,14 +1150,18 @@ nsresult HTMLMediaElement::LoadResource()
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_MEDIA);
   }
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     mLoadingSrc,
-                     nullptr,
-                     loadGroup,
-                     nullptr,
-                     nsICachingChannel::LOAD_BYPASS_LOCAL_CACHE_IF_BUSY |
-                     nsIChannel::LOAD_TREAT_APPLICATION_OCTET_STREAM_AS_UNKNOWN,
-                     channelPolicy);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      mLoadingSrc,
+                      nullptr,
+                      loadGroup,
+                      nullptr,
+                      nsICachingChannel::LOAD_BYPASS_LOCAL_CACHE_IF_BUSY |
+                      nsIChannel::LOAD_TREAT_APPLICATION_OCTET_STREAM_AS_UNKNOWN,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_MEDIA,
+                      NodePrincipal(),
+                      static_cast<Element*>(this));
+
   NS_ENSURE_SUCCESS(rv,rv);
 
   // The listener holds a strong reference to us.  This creates a
@@ -1169,10 +1173,6 @@ nsresult HTMLMediaElement::LoadResource()
   nsRefPtr<MediaLoadListener> loadListener = new MediaLoadListener(this);
 
   channel->SetNotificationCallbacks(loadListener);
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_MEDIA);
-  channel->SetRequestingContext(static_cast<Element*>(this));
 
   nsCOMPtr<nsIStreamListener> listener;
   if (ShouldCheckAllowOrigin()) {
@@ -1204,7 +1204,7 @@ nsresult HTMLMediaElement::LoadResource()
     SetRequestHeaders(hc);
   }
 
-  rv = channel->AsyncOpen(listener, nullptr);
+  rv = channel->AsyncOpen2(listener, nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
 
   // Else the channel must be open and starting to download. If it encounters
