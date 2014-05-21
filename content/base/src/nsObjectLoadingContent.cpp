@@ -2339,7 +2339,10 @@ nsObjectLoadingContent::OpenChannel()
   }
   nsRefPtr<ObjectInterfaceRequestorShim> shim =
     new ObjectInterfaceRequestorShim(this);
-  rv = NS_NewChannel2(getter_AddRefs(chan),
+  nsCOMPtr<nsINode> node = do_QueryInterface(doc);
+  NS_ASSERTION(node, "Can not create channel without a node");
+
+  rv = NS_NewChannel3(getter_AddRefs(chan),
                       mURI,
                       nullptr, // cached IOService
                       group,
@@ -2347,8 +2350,7 @@ nsObjectLoadingContent::OpenChannel()
                       nsIChannel::LOAD_CALL_CONTENT_SNIFFERS | nsIChannel::LOAD_CLASSIFY_URI,
                       channelPolicy,
                       nsIContentPolicy::TYPE_OBJECT,
-                      thisContent->NodePrincipal(),
-                      doc);
+                      node);
 
   NS_ENSURE_SUCCESS(rv, rv);
 
