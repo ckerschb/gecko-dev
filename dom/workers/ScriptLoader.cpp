@@ -67,22 +67,22 @@ ChannelFromScriptURL(nsIPrincipal* principal,
     return NS_ERROR_DOM_SYNTAX_ERR;
   }
 
-  // If we're part of a document then check the content load policy.
-  if (parentDoc) {
-    int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-    rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_SCRIPT, uri,
-                                   principal, parentDoc,
-                                   NS_LITERAL_CSTRING("text/javascript"),
-                                   nullptr, &shouldLoad,
-                                   nsContentUtils::GetContentPolicy(),
-                                   secMan);
-    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-      if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
-        return rv = NS_ERROR_CONTENT_BLOCKED;
-      }
-      return rv = NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
-    }
-  }
+  // // If we're part of a document then check the content load policy.
+  // if (parentDoc) {
+  //   int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  //   rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_SCRIPT, uri,
+  //                                  principal, parentDoc,
+  //                                  NS_LITERAL_CSTRING("text/javascript"),
+  //                                  nullptr, &shouldLoad,
+  //                                  nsContentUtils::GetContentPolicy(),
+  //                                  secMan);
+  //   if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+  //     if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
+  //       return rv = NS_ERROR_CONTENT_BLOCKED;
+  //     }
+  //     return rv = NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+  //   }
+  // }
 
   // If this script loader is being used to make a new worker then we need
   // to do a same-origin check. Otherwise we need to clear the load with the
@@ -124,13 +124,18 @@ ChannelFromScriptURL(nsIPrincipal* principal,
   uint32_t flags = nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI;
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), uri, ios, loadGroup, nullptr,
-                     flags, channelPolicy);
-  NS_ENSURE_SUCCESS(rv, rv);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      ios,
+                      loadGroup,
+                      nullptr,
+                      flags,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_SCRIPT,
+                      principal,
+                      parentDoc);
 
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_SCRIPT);
-  channel->SetRequestingContext(parentDoc);
+  NS_ENSURE_SUCCESS(rv, rv);
 
   channel.forget(aChannel);
   return rv;
@@ -404,7 +409,7 @@ private:
       rv = NS_NewStreamLoader(getter_AddRefs(loader), this);
       NS_ENSURE_SUCCESS(rv, rv);
 
-      rv = channel->AsyncOpen(loader, indexSupports);
+      rv = channel->AsyncOpen2(loader, indexSupports);
       NS_ENSURE_SUCCESS(rv, rv);
 
       loadInfo.mChannel.swap(channel);
