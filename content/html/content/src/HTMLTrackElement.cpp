@@ -247,7 +247,7 @@ HTMLTrackElement::LoadResource()
   }
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsILoadGroup> loadGroup = OwnerDoc()->GetDocumentLoadGroup();
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       uri,
                       nullptr,
                       loadGroup,
@@ -255,18 +255,13 @@ HTMLTrackElement::LoadResource()
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_MEDIA,
-                      NodePrincipal(),
-                      static_cast<Element*>(this));
+                      OwnerDoc());
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
 
   mListener = new WebVTTListener(this);
   rv = mListener->LoadResource();
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
   channel->SetNotificationCallbacks(mListener);
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_MEDIA);
-  channel->SetRequestingContext(static_cast<Element*>(this));
 
   LOG(PR_LOG_DEBUG, ("opening webvtt channel"));
   rv = channel->AsyncOpen2(mListener, nullptr);
