@@ -292,19 +292,13 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                          ? static_cast<nsISupports *>(aRequest->mElement.get())
                          : static_cast<nsISupports *>(mDocument);
 
- // nsINode
  // Get the corresponding nsINode
- // Instead of passing the Principal and the Context to NS_NewChannel2, lets see if we can pass an nsINode
  nsCOMPtr<nsINode> node;
 
- // if we have an nsIScriptElement, we would pass that as the context
- // else use the document
- if (aRequest->mElement.get()) {
+ if (aRequest->mElement) {
    // In which cases do we fall in this if statement vs the else below?
    printf("We have a script element\n\n");
-   nsCOMPtr<nsIContent> scriptContent(do_QueryInterface(aRequest->mElement));
-   nsCOMPtr<nsIDocument> doc = scriptContent->OwnerDoc();
-   node = static_cast<nsINode *>(doc);
+   node = do_QueryInterface(aRequest->mElement);
  } else {
     node = static_cast<nsINode *>(mDocument);
  }
@@ -354,7 +348,6 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   // Call NS_NewChannel2
   // We have a weak reference to the document.  Use that to get the principal.
   // Alternatively, we could use the context to get the principal, but the current implementation uses mDocument, so let's do that for now.
-
   rv = NS_NewChannel2(getter_AddRefs(channel),
                      aRequest->mURI, nullptr, loadGroup, prompter,
                      nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
