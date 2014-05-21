@@ -2841,7 +2841,7 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
     return rv;
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       url,
                       nullptr, // cached iosService
       // do not add this internal plugin's channel on the load group otherwise this
@@ -2851,8 +2851,7 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelpolicy
                       nsIContentPolicy::TYPE_OBJECT_SUBREQUEST,
-                      (doc ? doc->NodePrincipal() : nullptr), // TODO: ckb
-                      element);
+                      doc); // TODO, doc might be null here!!!
   if (NS_FAILED(rv))
     return rv;
 

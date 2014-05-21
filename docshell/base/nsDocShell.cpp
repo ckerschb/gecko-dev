@@ -9798,19 +9798,16 @@ nsDocShell::DoURILoad(nsIURI * aURI,
            For compataiblity, I'm not going to change this right now, since we currently use the outer window.
         */
         nsCOMPtr<nsINode> requestingNode;
-        nsCOMPtr<nsIDocument> requestingDocument;
         if (mScriptGlobal) {
-          nsCOMPtr<Element> requestingElement = mScriptGlobal->GetFrameElementInternal();
-          if (requestingElement) {
-              requestingNode = requestingElement;
-          } else {
-              nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
-              requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
+          requestingNode =  mScriptGlobal->GetFrameElementInternal();
+          if (!requestingNode) {
+            nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
+            requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
           }
         }
+        NS_ASSERTION(requestingNode, "Can not create channel without a node");
 
-
-        rv = NS_NewChannel2(getter_AddRefs(channel),
+        rv = NS_NewChannel3(getter_AddRefs(channel),
                            aURI,
                            nullptr,
                            nullptr,
@@ -9818,8 +9815,7 @@ nsDocShell::DoURILoad(nsIURI * aURI,
                            loadFlags,
                            channelPolicy,
                            aContentType,
-                           loadingPrincipal,
-                           requestingContext);
+                           requestingNode);
         if (NS_FAILED(rv)) {
             if (rv == NS_ERROR_UNKNOWN_PROTOCOL) {
                 // This is a uri with a protocol scheme we don't know how
