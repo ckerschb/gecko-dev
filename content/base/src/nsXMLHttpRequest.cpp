@@ -77,7 +77,6 @@
 #include "nsZipArchive.h"
 #include "mozilla/Preferences.h"
 #include "private/pprio.h"
-#include "nsINode.h"
 
 using namespace mozilla;
 using namespace mozilla::dom;
