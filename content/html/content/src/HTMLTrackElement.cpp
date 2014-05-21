@@ -214,20 +214,20 @@ HTMLTrackElement::LoadResource()
                               nsIScriptSecurityManager::STANDARD);
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
 
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_MEDIA,
-                                 uri,
-                                 NodePrincipal(),
-                                 static_cast<Element*>(this),
-                                 NS_LITERAL_CSTRING("text/vtt"), // mime type
-                                 nullptr, // extra
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-  NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
-  if (NS_CP_REJECTED(shouldLoad)) {
-    return;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_MEDIA,
+  //                                uri,
+  //                                NodePrincipal(),
+  //                                static_cast<Element*>(this),
+  //                                NS_LITERAL_CSTRING("text/vtt"), // mime type
+  //                                nullptr, // extra
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
+  // NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   return;
+  // }
 
   CreateTextTrack();
 
@@ -247,13 +247,16 @@ HTMLTrackElement::LoadResource()
   }
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsILoadGroup> loadGroup = OwnerDoc()->GetDocumentLoadGroup();
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     uri,
-                     nullptr,
-                     loadGroup,
-                     nullptr,
-                     nsIRequest::LOAD_NORMAL,
-                     channelPolicy);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr,
+                      loadGroup,
+                      nullptr,
+                      nsIRequest::LOAD_NORMAL,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_MEDIA,
+                      NodePrincipal(),
+                      static_cast<Element*>(this));
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
 
   mListener = new WebVTTListener(this);
@@ -266,7 +269,7 @@ HTMLTrackElement::LoadResource()
   channel->SetRequestingContext(static_cast<Element*>(this));
 
   LOG(PR_LOG_DEBUG, ("opening webvtt channel"));
-  rv = channel->AsyncOpen(mListener, nullptr);
+  rv = channel->AsyncOpen2(mListener, nullptr);
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
 
   mChannel = channel;

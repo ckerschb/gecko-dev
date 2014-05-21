@@ -254,34 +254,34 @@ nsFontFaceLoader::CheckLoadAllowed(nsIPrincipal* aSourcePrincipal,
                                    nsIURI* aTargetURI,
                                    nsISupports* aContext)
 {
-  nsresult rv;
+  // nsresult rv;
+  // TODO: interesting, isn't that a problem right now???
+  // if (!aSourcePrincipal)
+  //   return NS_OK;
 
-  if (!aSourcePrincipal)
-    return NS_OK;
+  // // check with the security manager
+  // nsIScriptSecurityManager* secMan = nsContentUtils::GetSecurityManager();
+  // rv = secMan->CheckLoadURIWithPrincipal(aSourcePrincipal, aTargetURI,
+  //                                       nsIScriptSecurityManager::STANDARD);
+  // if (NS_FAILED(rv)) {
+  //   return rv;
+  // }
 
-  // check with the security manager
-  nsIScriptSecurityManager* secMan = nsContentUtils::GetSecurityManager();
-  rv = secMan->CheckLoadURIWithPrincipal(aSourcePrincipal, aTargetURI,
-                                        nsIScriptSecurityManager::STANDARD);
-  if (NS_FAILED(rv)) {
-    return rv;
-  }
+  // // check content policy
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_FONT,
+  //                                aTargetURI,
+  //                                aSourcePrincipal,
+  //                                aContext,
+  //                                EmptyCString(), // mime type
+  //                                nullptr,
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
 
-  // check content policy
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_FONT,
-                                 aTargetURI,
-                                 aSourcePrincipal,
-                                 aContext,
-                                 EmptyCString(), // mime type
-                                 nullptr,
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-
-  if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-    return NS_ERROR_CONTENT_BLOCKED;
-  }
+  // if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+  //   return NS_ERROR_CONTENT_BLOCKED;
+  // }
 
   return NS_OK;
 }
@@ -343,14 +343,16 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_FONT);
   }
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     aFontFaceSrc->mURI,
-                     nullptr,
-                     loadGroup,
-                     nullptr,
-                     nsIRequest::LOAD_NORMAL,
-                     channelPolicy);
-
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      aFontFaceSrc->mURI,
+                      nullptr,
+                      loadGroup,
+                      nullptr,
+                      nsIRequest::LOAD_NORMAL,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_FONT,
+                      aProxy->mPrincipal,
+                      mPresContext->PresShell()->GetDocument());
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsRefPtr<nsFontFaceLoader> fontLoader =
@@ -392,13 +394,13 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
                            &inherits);
   if (NS_SUCCEEDED(rv) && inherits) {
     // allow data, javascript, etc URI's
-    rv = channel->AsyncOpen(streamLoader, nullptr);
+    rv = channel->AsyncOpen2(streamLoader, nullptr);
   } else {
     nsRefPtr<nsCORSListenerProxy> listener =
       new nsCORSListenerProxy(streamLoader, aProxy->mPrincipal, false);
     rv = listener->Init(channel);
     if (NS_SUCCEEDED(rv)) {
-      rv = channel->AsyncOpen(listener, nullptr);
+      rv = channel->AsyncOpen2(listener, nullptr);
     }
     if (NS_FAILED(rv)) {
       fontLoader->DropChannel();  // explicitly need to break ref cycle
@@ -936,13 +938,16 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_FONT);
   }
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     aFontFaceSrc->mURI,
-                     nullptr,
-                     nullptr,
-                     nullptr,
-                     nsIRequest::LOAD_NORMAL,
-                     channelPolicy);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      aFontFaceSrc->mURI,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nsIRequest::LOAD_NORMAL,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_FONT,
+                      aFontToLoad->mPrincipal,
+                      mPresContext->PresShell()->GetDocument());
 
   NS_ENSURE_SUCCESS(rv, rv);
 

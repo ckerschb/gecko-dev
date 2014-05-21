@@ -1518,10 +1518,16 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
   }
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     aLoadData->mURI, nullptr, loadGroup, nullptr,
-                     nsIChannel::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
-                     channelPolicy);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      aLoadData->mURI,
+                      nullptr,
+                      loadGroup,
+                      nullptr,
+                      nsIChannel::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_STYLESHEET,
+                      mDocument->NodePrincipal(),
+                      mDocument);
 
   if (NS_FAILED(rv)) {
 #ifdef DEBUG
@@ -1623,7 +1629,7 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
                             nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, mDocument);
   }
 
-  rv = channel->AsyncOpen(channelListener, nullptr);
+  rv = channel->AsyncOpen2(channelListener, nullptr);
 
 #ifdef DEBUG
   mSyncCallback = false;

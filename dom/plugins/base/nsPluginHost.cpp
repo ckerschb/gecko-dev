@@ -2817,20 +2817,20 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
     owner->GetDocument(getter_AddRefs(doc));
   }
 
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OBJECT_SUBREQUEST,
-                                 url,
-                                 (doc ? doc->NodePrincipal() : nullptr),
-                                 element,
-                                 EmptyCString(), //mime guess
-                                 nullptr,         //extra
-                                 &shouldLoad);
-  if (NS_FAILED(rv))
-    return rv;
-  if (NS_CP_REJECTED(shouldLoad)) {
-    // Disallowed by content policy
-    return NS_ERROR_CONTENT_BLOCKED;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OBJECT_SUBREQUEST,
+  //                                url,
+  //                                (doc ? doc->NodePrincipal() : nullptr),
+  //                                element,
+  //                                EmptyCString(), //mime guess
+  //                                nullptr,         //extra
+  //                                &shouldLoad);
+  // if (NS_FAILED(rv))
+  //   return rv;
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   // Disallowed by content policy
+  //   return NS_ERROR_CONTENT_BLOCKED;
+  // }
 
   nsRefPtr<nsPluginStreamListenerPeer> listenerPeer = new nsPluginStreamListenerPeer();
   if (!listenerPeer)
@@ -2841,11 +2841,18 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
     return rv;
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), url, nullptr,
-    nullptr, /* do not add this internal plugin's channel
-            on the load group otherwise this channel could be canceled
-            form |nsDocShell::OnLinkClickSync| bug 166613 */
-    listenerPeer);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      url,
+                      nullptr, // cached iosService
+      // do not add this internal plugin's channel on the load group otherwise this
+      // channel could be canceled form |nsDocShell::OnLinkClickSync| bug 166613
+                      nullptr, //loadgroup
+                      listenerPeer,
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelpolicy
+                      nsIContentPolicy::TYPE_OBJECT_SUBREQUEST,
+                      (doc ? doc->NodePrincipal() : nullptr), // TODO: ckb
+                      element);
   if (NS_FAILED(rv))
     return rv;
 
@@ -2912,7 +2919,7 @@ nsresult nsPluginHost::NewPluginURLStream(const nsString& aURL,
       NS_ENSURE_SUCCESS(rv,rv);
     }
   }
-  rv = channel->AsyncOpen(listenerPeer, nullptr);
+  rv = channel->AsyncOpen2(listenerPeer, nullptr);
   if (NS_SUCCEEDED(rv))
     listenerPeer->TrackRequest(channel);
   return rv;

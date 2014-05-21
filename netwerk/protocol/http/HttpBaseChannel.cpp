@@ -66,6 +66,7 @@ HttpBaseChannel::HttpBaseChannel()
   , mProxyResolveFlags(0)
   , mContentDispositionHint(UINT32_MAX)
   , mHttpHandler(gHttpHandler)
+  , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
   , mRedirectCount(0)
   , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
 {
