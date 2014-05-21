@@ -9814,17 +9814,11 @@ nsDocShell::DoURILoad(nsIURI * aURI,
         if (mScriptGlobal) {
           nsCOMPtr<Element> requestingElement = mScriptGlobal->GetFrameElementInternal();
           if (requestingElement) {
-              nsCOMPtr<nsIContent> content(do_QueryInterface(requestingElement));
-              requestingDocument = content->OwnerDoc();
-              // smaug says you can call ownerDoc directly, but that doesn't compile.  doublecheck this.
-              // requestingDocument = requestingElement->OwnerDoc();
+              requestingNode = requestingElement;
           } else {
               nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
-              requestingDocument = win->GetCurrentInnerWindow()->GetExtantDoc();
+              requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
           }
-        }
-        if(requestingDocument) {
-          requestingNode = static_cast<nsINode *>(requestingDocument);
         }
 
 
