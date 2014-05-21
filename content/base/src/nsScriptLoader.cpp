@@ -292,25 +292,7 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                          ? static_cast<nsISupports *>(aRequest->mElement.get())
                          : static_cast<nsISupports *>(mDocument);
 
- // Get the corresponding nsINode
- nsCOMPtr<nsINode> node;
-
- if (aRequest->mElement) {
-   // In which cases do we fall in this if statement vs the else below?
-   printf("We have a script element\n\n");
-   node = do_QueryInterface(aRequest->mElement);
- } else {
-    node = static_cast<nsINode *>(mDocument);
- }
- if(!node) {
-   printf("\n------------------------\n-----*********TANVI, you didn't get the node****************-----------\n------------------------------\n");
-   // This is only here for testing purposes and will be removed.  I just want to make sure we do infact get a node.
-   //assert(false);
-    NS_ASSERTION(node, "No node to set on the channel in nsScriptLoader:StartLoad");
- }
-
-
-
+  // TODO, I guess we can eliminate the call to ShouldLoadScript completely
   nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
   if (NS_FAILED(rv)) {
     return rv;
@@ -344,14 +326,17 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_SCRIPT);
   }
 
+
   nsCOMPtr<nsIChannel> channel;
-  // Call NS_NewChannel2
-  // We have a weak reference to the document.  Use that to get the principal.
-  // Alternatively, we could use the context to get the principal, but the current implementation uses mDocument, so let's do that for now.
-  rv = NS_NewChannel2(getter_AddRefs(channel),
-                     aRequest->mURI, nullptr, loadGroup, prompter,
-                     nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
-                     channelPolicy, nsIContentPolicy::TYPE_SCRIPT, mDocument->NodePrincipal(), context);
+  rv = NS_NewChannel3(getter_AddRefs(channel),
+                      aRequest->mURI,
+                      nullptr,
+                      loadGroup,
+                      prompter,
+                      nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_SCRIPT,
+                      mDocument);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsIScriptElement *script = aRequest->mElement;
@@ -398,7 +383,6 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
     listener = corsListener;
   }
 
-  // Use AsyncOpen2 instead.
   rv = channel->AsyncOpen2(listener, aRequest);
   NS_ENSURE_SUCCESS(rv, rv);
 
