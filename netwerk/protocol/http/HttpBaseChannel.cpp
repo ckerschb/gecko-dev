@@ -68,7 +68,6 @@ HttpBaseChannel::HttpBaseChannel()
   , mHttpHandler(gHttpHandler)
   , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
   , mRedirectCount(0)
-  , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
 {
   LOG(("Creating HttpBaseChannel @%x\n", this));
 
