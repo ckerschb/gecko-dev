@@ -124,7 +124,7 @@ ChannelFromScriptURL(nsIPrincipal* principal,
   uint32_t flags = nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI;
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       uri,
                       ios,
                       loadGroup,
@@ -132,14 +132,9 @@ ChannelFromScriptURL(nsIPrincipal* principal,
                       flags,
                       channelPolicy,
                       nsIContentPolicy::TYPE_SCRIPT,
-                      principal,
                       parentDoc);
 
   NS_ENSURE_SUCCESS(rv, rv);
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_SCRIPT);
-  channel->SetRequestingContext(parentDoc);
 
   channel.forget(aChannel);
   return rv;
