@@ -187,6 +187,7 @@
 #include "nsIURILoader.h"
 #include "nsIWebBrowserFind.h"
 #include "nsIWidget.h"
+#include "nsINode.h"
 #include "mozilla/dom/EncodingUtils.h"
 
 static NS_DEFINE_CID(kAppShellCID, NS_APPSHELL_CID);
@@ -9777,12 +9778,6 @@ nsDocShell::DoURILoad(nsIURI * aURI,
           requestingContext = ToSupports(mScriptGlobal);
         }
 
-        /* OR make it a bit cleaner - 
-        nsCOMPtr<nsISupports> requestingContext = mScriptGlobal->GetFrameElementInternal();
-        if (!requestingContext)
-          requestingContext = ToSupports(mScriptGlobal);
-        */
-
 
         // Get the requestingPrincipal in the same way we get it in InternalLoad to pass into content policy
         // TANVI - Is this going to be the same principal that is associated with the context?
@@ -9804,6 +9799,34 @@ nsDocShell::DoURILoad(nsIURI * aURI,
           rv = secMan->GetSimpleCodebasePrincipal(aReferrerURI,
                                                   getter_AddRefs(loadingPrincipal));
         }
+
+
+        /* nsINode
+           Get the corresponding nsINode
+           Instead of passing the Principal and the Context to NS_NewChannel2, lets see if we can pass an nsINode
+           mScriptGlobal is an nsGlobalWindow.  To get a node from it, QI to nsPIDOMWindow, then get the inner window, then call GetExtantDoc and get the node.
+           mscriptglobal->getframelemeentinternal is an Element.  We can get the owner doc and then get the node from it.
+           In the case that we have a requestingElement, we are in an iframe.  Note that here we will get the outer window, even though we have agreed we want the inner window.
+           For compataiblity, I'm not going to change this right now, since we currently use the outer window.
+        */
+        nsCOMPtr<nsINode> requestingNode;
+        nsCOMPtr<nsIDocument> requestingDocument;
+        if (mScriptGlobal) {
+          nsCOMPtr<Element> requestingElement = mScriptGlobal->GetFrameElementInternal();
+          if (requestingElement) {
+              nsCOMPtr<nsIContent> content(do_QueryInterface(requestingElement));
+              requestingDocument = content->OwnerDoc();
+              // smaug says you can call ownerDoc directly, but that doesn't compile.  doublecheck this.
+              // requestingDocument = requestingElement->OwnerDoc();
+          } else {
+              nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
+              requestingDocument = win->GetCurrentInnerWindow()->GetExtantDoc();
+          }
+        }
+        if(requestingDocument) {
+          requestingNode = static_cast<nsINode *>(requestingDocument);
+        }
+
 
         rv = NS_NewChannel2(getter_AddRefs(channel),
                            aURI,
