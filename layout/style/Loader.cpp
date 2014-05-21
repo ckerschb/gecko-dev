@@ -1518,7 +1518,7 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
   }
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       aLoadData->mURI,
                       nullptr,
                       loadGroup,
@@ -1526,7 +1526,6 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
                       nsIChannel::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
                       channelPolicy,
                       nsIContentPolicy::TYPE_STYLESHEET,
-                      mDocument->NodePrincipal(),
                       mDocument);
 
   if (NS_FAILED(rv)) {
@@ -1537,13 +1536,6 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
     SheetComplete(aLoadData, rv);
     return rv;
   }
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_STYLESHEET);
-  // NEEDINFO: mDocument is not necessarily the right context here,
-  // might be aElement, see
-  // Loader::LoadStyleLink(nsIContent* aElement,
-  channel->SetRequestingContext(mDocument);
 
   nsCOMPtr<nsIHttpChannelInternal>
     internalHttpChannel(do_QueryInterface(channel));

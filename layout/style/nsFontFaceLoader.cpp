@@ -343,7 +343,7 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_FONT);
   }
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       aFontFaceSrc->mURI,
                       nullptr,
                       loadGroup,
@@ -351,7 +351,6 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_FONT,
-                      aProxy->mPrincipal,
                       mPresContext->PresShell()->GetDocument());
   NS_ENSURE_SUCCESS(rv, rv);
 
@@ -938,7 +937,7 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_FONT);
   }
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       aFontFaceSrc->mURI,
                       nullptr,
                       nullptr,
@@ -946,7 +945,6 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_FONT,
-                      aFontToLoad->mPrincipal,
                       mPresContext->PresShell()->GetDocument());
 
   NS_ENSURE_SUCCESS(rv, rv);
@@ -955,11 +953,6 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
   nsCOMPtr<nsIInputStream> stream;
   rv = channel->Open(getter_AddRefs(stream));
   NS_ENSURE_SUCCESS(rv, rv);
-
-  // set contentPolicyType and context on the channel to allow mixed content blocking
-  channel->SetContentPolicyType(nsIContentPolicy::TYPE_FONT);
-  nsCOMPtr<nsIPresShell> ps = mPresContext->PresShell();
-  channel->SetRequestingContext(ps->GetDocument());
 
   uint64_t bufferLength64;
   rv = stream->Available(&bufferLength64);
