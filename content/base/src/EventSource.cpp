@@ -760,8 +760,11 @@ EventSource::InitChannelAndRequestEventSource()
   nsCOMPtr<nsIDocument> doc =
     nsContentUtils::GetDocumentFromScriptContext(sc);
 
+  nsCOMPtr<nsINode> node = do_QueryInterface(doc);
+  NS_ASSERTION(node, "Can not create channel without a node");
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       mSrc,
                       nullptr,   // cached IOService
                       mLoadGroup,
@@ -769,9 +772,7 @@ EventSource::InitChannelAndRequestEventSource()
                       loadFlags,
                       channelPolicy,
                       nsIContentPolicy::TYPE_DATAREQUEST,
-                      mPrincipal,
-                      doc);
-
+                      node);
   NS_ENSURE_SUCCESS(rv, rv);
 
   mHttpChannel = do_QueryInterface(channel);
