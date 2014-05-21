@@ -77,6 +77,7 @@
 #include "nsZipArchive.h"
 #include "mozilla/Preferences.h"
 #include "private/pprio.h"
+#include "nsINode.h"
 
 using namespace mozilla;
 using namespace mozilla::dom;
@@ -1665,6 +1666,10 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
   NS_ENSURE_SUCCESS(rv, rv);
   nsCOMPtr<nsIDocument> doc =
     nsContentUtils::GetDocumentFromScriptContext(sc);
+
+  // nsINode
+  // Get the corresponding nsINode to pass into NS_NewChannel2 in the future
+  nsCOMPtr<nsINode> node = static_cast<nsINode *>(doc);
   
   nsCOMPtr<nsIURI> baseURI;
   if (mBaseURI) {
