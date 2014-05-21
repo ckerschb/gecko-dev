@@ -1518,7 +1518,7 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
   }
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       aLoadData->mURI,
                       nullptr,
                       loadGroup,
@@ -1526,7 +1526,6 @@ Loader::LoadSheet(SheetLoadData* aLoadData, StyleSheetState aSheetState)
                       nsIChannel::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
                       channelPolicy,
                       nsIContentPolicy::TYPE_STYLESHEET,
-                      mDocument->NodePrincipal(),
                       mDocument);
 
   if (NS_FAILED(rv)) {
