@@ -247,7 +247,7 @@ HTMLTrackElement::LoadResource()
   }
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsILoadGroup> loadGroup = OwnerDoc()->GetDocumentLoadGroup();
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       uri,
                       nullptr,
                       loadGroup,
@@ -255,8 +255,7 @@ HTMLTrackElement::LoadResource()
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_MEDIA,
-                      NodePrincipal(),
-                      static_cast<Element*>(this));
+                      OwnerDoc());
   NS_ENSURE_TRUE_VOID(NS_SUCCEEDED(rv));
 
   mListener = new WebVTTListener(this);

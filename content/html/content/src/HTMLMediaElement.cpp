@@ -1150,7 +1150,7 @@ nsresult HTMLMediaElement::LoadResource()
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_MEDIA);
   }
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel2(getter_AddRefs(channel),
+  rv = NS_NewChannel3(getter_AddRefs(channel),
                       mLoadingSrc,
                       nullptr,
                       loadGroup,
@@ -1159,9 +1159,7 @@ nsresult HTMLMediaElement::LoadResource()
                       nsIChannel::LOAD_TREAT_APPLICATION_OCTET_STREAM_AS_UNKNOWN,
                       channelPolicy,
                       nsIContentPolicy::TYPE_MEDIA,
-                      NodePrincipal(),
-                      static_cast<Element*>(this));
-
+                      OwnerDoc());
   NS_ENSURE_SUCCESS(rv,rv);
 
   // The listener holds a strong reference to us.  This creates a
