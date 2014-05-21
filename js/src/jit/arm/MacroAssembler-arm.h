@@ -814,6 +814,7 @@ class MacroAssemblerARMCompat : public MacroAssemblerARM
     void unboxString(const ValueOperand &operand, Register dest);
     void unboxString(const Address &src, Register dest);
     void unboxObject(const ValueOperand &src, Register dest);
+    void unboxObject(const Address &src, Register dest);
     void unboxValue(const ValueOperand &src, AnyRegister dest);
     void unboxPrivate(const ValueOperand &src, Register dest);
 
@@ -1433,6 +1434,9 @@ class MacroAssemblerARMCompat : public MacroAssemblerARM
     }
     void addPtr(ImmPtr imm, const Register dest) {
         addPtr(ImmWord(uintptr_t(imm.value)), dest);
+    }
+    void mulBy3(const Register &src, const Register &dest) {
+        as_add(dest, src, lsl(src, 1));
     }
 
     void setStackArg(Register reg, uint32_t arg);

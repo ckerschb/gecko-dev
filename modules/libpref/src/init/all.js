@@ -1420,6 +1420,7 @@ pref("network.proxy.socks",                 "");
 pref("network.proxy.socks_port",            0);
 pref("network.proxy.socks_version",         5);
 pref("network.proxy.socks_remote_dns",      false);
+pref("network.proxy.proxy_over_tls",        true);
 pref("network.proxy.no_proxies_on",         "localhost, 127.0.0.1");
 pref("network.proxy.failover_timeout",      1800); // 30 minutes
 pref("network.online",                      true); //online/offline
@@ -2087,6 +2088,13 @@ pref("svg.svg-iframe.enabled", false);
 pref("svg.svg-iframe.enabled", false);
 #endif
 
+// Is support for the new getBBox method from SVG 2 enabled?  
+// See https://svgwg.org/svg2-draft/single-page.html#types-SVGBoundingBoxOptions
+#ifdef RELEASE_BUILD
+pref("svg.new-getBBox.enabled", false);
+#else
+pref("svg.new-getBBox.enabled", true);
+#endif
 
 // Default font types and sizes by locale
 pref("font.default.ar", "sans-serif");
@@ -3734,8 +3742,12 @@ pref("layers.offmainthreadcomposition.frame-rate", -1);
 #ifndef XP_WIN
 // Asynchonous video compositing using the ImageBridge IPDL protocol.
 // requires off-main-thread compositing.
-// Never works on Windows, so no point pref'ing it on.
 pref("layers.async-video.enabled",false);
+#endif
+
+#ifdef XP_WIN
+pref("layers.offmainthreadcomposition.enabled", true);
+pref("layers.async-video.enabled", true);
 #endif
 
 #ifdef MOZ_X11

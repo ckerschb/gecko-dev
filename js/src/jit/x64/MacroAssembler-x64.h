@@ -572,6 +572,9 @@ class MacroAssemblerX64 : public MacroAssemblerX86Shared
     void subPtr(Register src, const Address &dest) {
         subq(src, Operand(dest));
     }
+    void mulBy3(const Register &src, const Register &dest) {
+        lea(Operand(src, src, TimesTwo), dest);
+    }
 
     void branch32(Condition cond, AbsoluteAddress lhs, Imm32 rhs, Label *label) {
         if (JSC::X86Assembler::isAddressImmediate(lhs.addr)) {
@@ -1086,6 +1089,7 @@ class MacroAssemblerX64 : public MacroAssemblerX86Shared
 
     void unboxObject(const ValueOperand &src, Register dest) { unboxNonDouble(src, dest); }
     void unboxObject(const Operand &src, Register dest) { unboxNonDouble(src, dest); }
+    void unboxObject(const Address &src, Register dest) { unboxNonDouble(Operand(src), dest); }
 
     // Extended unboxing API. If the payload is already in a register, returns
     // that register. Otherwise, provides a move to the given scratch register,

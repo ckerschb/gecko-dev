@@ -490,7 +490,7 @@ MacroAssemblerARM::ma_mov(ImmGCPtr ptr, Register dest)
     else
         rs = L_LDR;
 
-    ma_movPatchable(Imm32(ptr.value), dest, Always, rs);
+    ma_movPatchable(Imm32(uintptr_t(ptr.value)), dest, Always, rs);
 }
 
     // Shifts (just a move with a shifting op2)
@@ -3094,6 +3094,12 @@ void
 MacroAssemblerARMCompat::unboxObject(const ValueOperand &src, Register dest)
 {
     ma_mov(src.payloadReg(), dest);
+}
+
+void
+MacroAssemblerARMCompat::unboxObject(const Address &src, Register dest)
+{
+    ma_ldr(payloadOf(src), dest);
 }
 
 void
