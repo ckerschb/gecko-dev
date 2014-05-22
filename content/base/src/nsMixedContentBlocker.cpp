@@ -271,89 +271,89 @@ nsMixedContentBlocker::ShouldLoad(uint32_t aContentType,
 
 
 /* Debugging */
-printf("\n\nnsMixedContentBlocker ShouldLoad Debugging----------------------------\n");
-nsAutoCString host;
-printf("aContentType is %i\n", aContentType);
+// printf("\n\nnsMixedContentBlocker ShouldLoad Debugging----------------------------\n");
+// nsAutoCString host;
+// printf("aContentType is %i\n", aContentType);
 
-//Content Location
-if(aContentLocation) {
-  aContentLocation->GetSpec(host);
-  printf("\n\naContentLocation is %s\n", host.get());
-} else {
-  printf("\n\nNo ContentLocation\n");
-}
+// //Content Location
+// if(aContentLocation) {
+//   aContentLocation->GetSpec(host);
+//   printf("\n\naContentLocation is %s\n", host.get());
+// } else {
+//   printf("\n\nNo ContentLocation\n");
+// }
 
-//Url from RequestingContext
-if(aRequestingContext) {
-
-
-  nsCOMPtr<nsIPrincipal> principal;
-  // 1a) Try to get the principal if aRequestingContext is a node.
-  nsCOMPtr<nsINode> node = do_QueryInterface(aRequestingContext);
-  if (node) {
-    printf("Context is a node\n");
-    principal = node->NodePrincipal();
-  }
-
-  // 1b) Try using the window's script object principal if it's not a node.
-  if (!principal) {
-    nsCOMPtr<nsIScriptObjectPrincipal> scriptObjPrin = do_QueryInterface(aRequestingContext);
-    if (scriptObjPrin) {
-      printf("Context is a script object\n");
-      principal = scriptObjPrin->GetPrincipal();
-    }
-  }
-
-  nsCOMPtr<nsIURI> requestingLocation;
-  if (principal) {
-    principal->GetURI(getter_AddRefs(requestingLocation));
-  }
-  if(requestingLocation) {
-    requestingLocation->GetSpec(host);
-    printf("\n\nContext Location is %s\n", host.get());
-  }
-
-  if (principal && !requestingLocation) {
-    if (nsContentUtils::IsSystemPrincipal(principal)) {
-      printf("Context yields system principal\n");
-    }
-  }
-
-} else {
-  printf("\n\nNo aRequestingContext\n");
-}
+// //Url from RequestingContext
+// if(aRequestingContext) {
 
 
-//Url from aRequestingLocation
-if(aRequestingLocation) {
-  aRequestingLocation->GetSpec(host);
-  printf("\n\naRequestingtLocation is %s\n", host.get());
-} else {
-  printf("\n\nNo aRequestingLocation\n");
-}
+//   nsCOMPtr<nsIPrincipal> principal;
+//   // 1a) Try to get the principal if aRequestingContext is a node.
+//   nsCOMPtr<nsINode> node = do_QueryInterface(aRequestingContext);
+//   if (node) {
+//     printf("Context is a node\n");
+//     principal = node->NodePrincipal();
+//   }
+
+//   // 1b) Try using the window's script object principal if it's not a node.
+//   if (!principal) {
+//     nsCOMPtr<nsIScriptObjectPrincipal> scriptObjPrin = do_QueryInterface(aRequestingContext);
+//     if (scriptObjPrin) {
+//       printf("Context is a script object\n");
+//       principal = scriptObjPrin->GetPrincipal();
+//     }
+//   }
+
+//   nsCOMPtr<nsIURI> requestingLocation;
+//   if (principal) {
+//     principal->GetURI(getter_AddRefs(requestingLocation));
+//   }
+//   if(requestingLocation) {
+//     requestingLocation->GetSpec(host);
+//     printf("\n\nContext Location is %s\n", host.get());
+//   }
+
+//   if (principal && !requestingLocation) {
+//     if (nsContentUtils::IsSystemPrincipal(principal)) {
+//       printf("Context yields system principal\n");
+//     }
+//   }
+
+// } else {
+//   printf("\n\nNo aRequestingContext\n");
+// }
+
+
+// //Url from aRequestingLocation
+// if(aRequestingLocation) {
+//   aRequestingLocation->GetSpec(host);
+//   printf("\n\naRequestingtLocation is %s\n", host.get());
+// } else {
+//   printf("\n\nNo aRequestingLocation\n");
+// }
 
 
 
-//Url from aRequestPrincipal.
-//This should be the same as aRequestingLocation, because we get that from the principal in nsContentPolicyUtils.h
-if(aRequestPrincipal) {
-  nsCOMPtr<nsIURI> requestingLocation2;
-  aRequestPrincipal->GetURI(getter_AddRefs(requestingLocation2));
+// //Url from aRequestPrincipal.
+// //This should be the same as aRequestingLocation, because we get that from the principal in nsContentPolicyUtils.h
+// if(aRequestPrincipal) {
+//   nsCOMPtr<nsIURI> requestingLocation2;
+//   aRequestPrincipal->GetURI(getter_AddRefs(requestingLocation2));
 
-  if(requestingLocation2) {
-    requestingLocation2->GetSpec(host);
-    printf("\n\nPrincipal Location is %s\n", host.get());
-  }
+//   if(requestingLocation2) {
+//     requestingLocation2->GetSpec(host);
+//     printf("\n\nPrincipal Location is %s\n", host.get());
+//   }
 
-  nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(aRequestPrincipal);
-  if (expanded) {
-    printf("aRequestPrincipal is an Expanded principal\n");
-  }
-} else {
-  printf("\n\nNo aRequestPrincipal\n");
-}
+//   nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(aRequestPrincipal);
+//   if (expanded) {
+//     printf("aRequestPrincipal is an Expanded principal\n");
+//   }
+// } else {
+//   printf("\n\nNo aRequestPrincipal\n");
+// }
 
-printf("\n\n");
+// printf("\n\n");
 
 
 

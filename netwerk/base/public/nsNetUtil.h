@@ -238,6 +238,38 @@ NS_NewChannel(nsIChannel           **result,
     return rv;
 }
 
+// TODO: delete this function
+// helper function to translate the contentPolicyType to a string
+inline const char* contentTypeToString(nsContentPolicyType aType) {
+  NS_ASSERTION(static_cast<uint32_t>(aType) <=
+               static_cast<uint32_t>(nsIContentPolicy::TYPE_BEACON),
+               "Can not convert contentype to string");
+
+  static const char* kContentTypes[] = {
+    "TYPE_DYMMY"                              // 0 should never be called
+    "TYPE_OTHER",                             // 1
+    "TYPE_SCRIPT",                            // 2
+    "TYPE_IMAGE",                             // 3
+    "TYPE_STYLESHEET",                        // 4
+    "TYPE_OBJECT",                            // 5
+    "TYPE_DOCUMENT",                          // 6
+    "TYPE_SUBDOCUMENT",                       // 7
+    "TYPE_REFRESH",                           // 8
+    "TYPE_XBL",                               // 9
+    "TYPE_PING",                              // 10
+    "TYPE_XMLHTTPREQUEST | TYPE_DATAREQUEST", // 11
+    "TYPE_OBJECT_SUBREQUEST"                  // 12
+    "TYPE_DTD"                                // 13
+    "TYPE_FONT",                              // 14
+    "TYPE_MEDIA",                             // 15
+    "TYPE_WEBSOCKET",                         // 16
+    "TYPE_CSP_REPORT",                        // 17
+    "TYPE_XSLT",                              // 18
+    "TYPE_BEACON",                            // 19
+  };
+  return kContentTypes[static_cast<uint32_t>(aType)];
+}
+
 inline nsresult
 NS_NewChannel2(nsIChannel            **result,
                nsIURI                *uri,
@@ -253,12 +285,20 @@ NS_NewChannel2(nsIChannel            **result,
   { // debug
     nsAutoCString spec;
     uri->GetSpec(spec);
-    fprintf(stderr, "\nNS_NewChannel2 (contenType: %d), uri: %s\n", aType, spec.get());
+    fprintf(stderr, "\nNS_NewChannel2 {\n");
+    fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
+    fprintf(stderr, "  uri: %s\n", spec.get());
+    fprintf(stderr, "}\n\n");
   }
   NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
   // TODO, we should uncomment the next line, but we can't, because we call AsyncOpen2 only if we 
   // can not query a Node (oterhwise we would call AsyncOpen3), therefore the context is null for those cases.
   // NS_ASSERTION(aRequestingContext, "NS_NewChannel2 can not create channel with aRequestingContext");
+
+  // TODO: uncomment, the following assertion will make sure that every call site specicies a contenType
+  // NS_ASSERTION(aType != nsIContentPolicy::TYPE_OTHER,
+  //              "Can not create channel with contentType TYPE_OTHER");
+
 
   nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
   (*result)->SetContentPolicyType(aType);
@@ -281,7 +321,10 @@ NS_NewChannel3(nsIChannel            **result,
   { // debug
     nsAutoCString spec;
     uri->GetSpec(spec);
-    fprintf(stderr, "\nNS_NewChannel3 (contenType: %d), uri: %s\n", aType, spec.get());
+    fprintf(stderr, "\nNS_NewChannel3 {\n");
+    fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
+    fprintf(stderr, "  uri: %s\n", spec.get());
+    fprintf(stderr, "}\n\n");
   }
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
 
