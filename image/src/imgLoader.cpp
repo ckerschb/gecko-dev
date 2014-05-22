@@ -488,18 +488,32 @@ static nsresult NewImageChannel(nsIChannel **aResult,
   // If all of the proxy requests are canceled then this request should be
   // canceled too.
   //
-  nsCOMPtr<nsINode> requestingNode = do_QueryInterface(aContext);
-  NS_ASSERTION(requestingNode, "Can not create channel without a node");
 
-  rv = NS_NewChannel3(aResult,
-                      aURI,
-                      nullptr, // cached IOService
-                      nullptr, // loadgroup
-                      callbacks,
-                      aLoadFlags,
-                      aPolicy,
-                      nsIContentPolicy::TYPE_IMAGE,
-                      requestingNode);
+  // TODO: Verify that we can not query the node here.
+  nsCOMPtr<nsINode> requestingNode = do_QueryInterface(aContext);
+  if (requestingNode) {
+    rv = NS_NewChannel3(aResult,
+                        aURI,
+                        nullptr, // cached IOService
+                        nullptr, // loadgroup
+                        callbacks,
+                        aLoadFlags,
+                        aPolicy,
+                        nsIContentPolicy::TYPE_IMAGE,
+                        requestingNode);
+  }
+  else {
+    rv = NS_NewChannel2(aResult,
+                        aURI,
+                        nullptr, // cached IOService
+                        nullptr, // loadgroup
+                        callbacks,
+                        aLoadFlags,
+                        aPolicy,
+                        nsIContentPolicy::TYPE_IMAGE,
+                        aLoadingPrincipal,
+                        requestingNode);
+  }
 
   if (NS_FAILED(rv))
     return rv;

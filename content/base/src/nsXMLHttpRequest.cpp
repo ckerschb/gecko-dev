@@ -1726,15 +1726,29 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_XMLHTTPREQUEST);
   }
-  rv = NS_NewChannel3(getter_AddRefs(mChannel),
-                      uri,
-                      nullptr,  // ioService
-                      loadGroup,
-                      nullptr,  // callbacks
-                      nsIRequest::LOAD_BACKGROUND,
-                      channelPolicy,
-                      nsIContentPolicy::TYPE_XMLHTTPREQUEST,
-                      doc);
+  if (doc) {
+    rv = NS_NewChannel3(getter_AddRefs(mChannel),
+                        uri,
+                        nullptr,  // ioService
+                        loadGroup,
+                        nullptr,  // callbacks
+                        nsIRequest::LOAD_BACKGROUND,
+                        channelPolicy,
+                        nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+                        doc);
+  }
+  else {
+    rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                        uri,
+                        nullptr,  // ioService
+                        loadGroup,
+                        nullptr,  // callbacks
+                        nsIRequest::LOAD_BACKGROUND,
+                        channelPolicy,
+                        nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+                        mPrincipal,
+                        doc);
+  }
 
   if (NS_FAILED(rv)) return rv;
 

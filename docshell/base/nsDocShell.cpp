@@ -9689,7 +9689,6 @@ nsDocShell::DoURILoad(nsIURI * aURI,
     MOZ_EVENT_TRACER_NAME_OBJECT(this, urlSpec.BeginReading());
     MOZ_EVENT_TRACER_EXEC(this, "docshell::pageload");
 #endif
-
     nsresult rv;
     nsCOMPtr<nsIURILoader> uriLoader;
 
@@ -9802,20 +9801,21 @@ nsDocShell::DoURILoad(nsIURI * aURI,
           requestingNode =  mScriptGlobal->GetFrameElementInternal();
           if (!requestingNode) {
             nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
-            requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
+            if (win) {
+              requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
+            }
           }
         }
         NS_ASSERTION(requestingNode, "Can not create channel without a node");
-
         rv = NS_NewChannel3(getter_AddRefs(channel),
-                           aURI,
-                           nullptr,
-                           nullptr,
-                           static_cast<nsIInterfaceRequestor *>(this),
-                           loadFlags,
-                           channelPolicy,
-                           aContentType,
-                           requestingNode);
+                            aURI,
+                            nullptr,
+                            nullptr,
+                            static_cast<nsIInterfaceRequestor *>(this),
+                            loadFlags,
+                            channelPolicy,
+                            aContentType,
+                            requestingNode);
         if (NS_FAILED(rv)) {
             if (rv == NS_ERROR_UNKNOWN_PROTOCOL) {
                 // This is a uri with a protocol scheme we don't know how
