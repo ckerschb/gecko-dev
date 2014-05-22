@@ -250,13 +250,21 @@ NS_NewChannel2(nsIChannel            **result,
                nsIPrincipal          *aRequestingPrincipal = nullptr,
                nsISupports           *aRequestingContext = nullptr)
 {
-    nsresult rv;
-    rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
-    printf("\nSetting Content Policy Type in NS_NewChannel2 to %i\n", aType);
-    (*result)->SetContentPolicyType(aType);
-    (*result)->SetRequestingContext(aRequestingContext);
-    (*result)->SetRequestingPrincipal(aRequestingPrincipal);
-    return rv;
+  { // debug
+    nsAutoCString spec;
+    uri->GetSpec(spec);
+    fprintf(stderr, "\nNS_NewChannel2 (contenType: %d), uri: %s\n", aType, spec.get());
+  }
+  NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
+  // TODO, we should uncomment the next line, but we can't, because we call AsyncOpen2 only if we 
+  // can not query a Node (oterhwise we would call AsyncOpen3), therefore the context is null for those cases.
+  // NS_ASSERTION(aRequestingContext, "NS_NewChannel2 can not create channel with aRequestingContext");
+
+  nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
+  (*result)->SetContentPolicyType(aType);
+  (*result)->SetRequestingContext(aRequestingContext);
+  (*result)->SetRequestingPrincipal(aRequestingPrincipal);
+  return rv;
 }
 
 inline nsresult
@@ -270,14 +278,19 @@ NS_NewChannel3(nsIChannel            **result,
                nsContentPolicyType   aType = nsIContentPolicy::TYPE_OTHER,
                nsINode               *aRequestingNode = nullptr)
 {
-    nsresult rv;
-    rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
-    printf("\nSetting Content Policy Type in NS_NewChannel3 to %i\n", aType);
-    (*result)->SetContentPolicyType(aType);
-    
-    // Get the principal from the node and set it on the channel.
-    (*result)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
-    return rv;
+  { // debug
+    nsAutoCString spec;
+    uri->GetSpec(spec);
+    fprintf(stderr, "\nNS_NewChannel3 (contenType: %d), uri: %s\n", aType, spec.get());
+  }
+  NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
+
+  nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
+  NS_ENSURE_SUCCESS(rv, rv);
+  (*result)->SetContentPolicyType(aType);
+  // Get the principal from the node and set it on the channel.
+  (*result)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
+  return rv;
 }
 
 // Use this function with CAUTION. It creates a stream that blocks when you

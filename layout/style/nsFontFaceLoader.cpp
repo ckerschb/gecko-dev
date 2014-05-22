@@ -324,7 +324,6 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
                          const gfxFontFaceSrc* aFontFaceSrc)
 {
   nsresult rv;
-
   nsIPresShell* ps = mPresContext->PresShell();
   if (!ps)
     return NS_ERROR_FAILURE;
@@ -351,7 +350,7 @@ nsUserFontSet::StartLoad(gfxMixedFontFamily* aFamily,
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_FONT,
-                      mPresContext->PresShell()->GetDocument());
+                      ps->GetDocument());
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsRefPtr<nsFontFaceLoader> fontLoader =
@@ -925,7 +924,6 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
                                 uint32_t& aBufferLength)
 {
   nsresult rv;
-
   nsCOMPtr<nsIChannel> channel;
   // get Content Security Policy from principal to pass into channel
   nsCOMPtr<nsIChannelPolicy> channelPolicy;
@@ -937,6 +935,11 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_FONT);
   }
+  nsCOMPtr<nsINode> requestingNode;
+  if (mPresContext) {
+    requestingNode = mPresContext->PresShell()->GetDocument();
+  }
+  NS_ASSERTION(requestingNode, "Can not create channel without node");
   rv = NS_NewChannel3(getter_AddRefs(channel),
                       aFontFaceSrc->mURI,
                       nullptr,
@@ -945,8 +948,7 @@ nsUserFontSet::SyncLoadFontData(gfxProxyFontEntry* aFontToLoad,
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_FONT,
-                      mPresContext->PresShell()->GetDocument());
-
+                      requestingNode);
   NS_ENSURE_SUCCESS(rv, rv);
 
   // blocking stream is OK for data URIs

@@ -23,6 +23,7 @@
 #include "nsContentUtils.h"
 #include "nsDocShellCID.h"
 #include "nsISupportsPrimitives.h"
+#include "nsINode.h"
 #include "nsNetUtil.h"
 #include "nsScriptLoader.h"
 #include "nsString.h"
@@ -123,16 +124,36 @@ ChannelFromScriptURL(nsIPrincipal* principal,
 
   uint32_t flags = nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI;
 
+  // TODO: confirm we get the node in the right order
+  // try to get the node from the parentdoc
+
+  // If we're part of a document then check the content load policy.
+  // NS_ASSERTION(requestingNode, "can not create channel without a node");
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel3(getter_AddRefs(channel),
-                      uri,
-                      ios,
-                      loadGroup,
-                      nullptr,
-                      flags,
-                      channelPolicy,
-                      nsIContentPolicy::TYPE_SCRIPT,
-                      parentDoc);
+  if (parentDoc) {
+    rv = NS_NewChannel3(getter_AddRefs(channel),
+                        uri,
+                        ios,
+                        loadGroup,
+                        nullptr,
+                        flags,
+                        channelPolicy,
+                        nsIContentPolicy::TYPE_SCRIPT,
+                        parentDoc);
+  }
+  else {
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        ios,
+                        loadGroup,
+                        nullptr,
+                        flags,
+                        channelPolicy,
+                        nsIContentPolicy::TYPE_SCRIPT,
+                        principal,
+                        parentDoc);
+  }
 
   NS_ENSURE_SUCCESS(rv, rv);
 

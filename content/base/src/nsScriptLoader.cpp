@@ -326,6 +326,14 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_SCRIPT);
   }
 
+  // TODO: confirm that we get the node in the right order;
+  // we try to use the document (if available) otherwise fall back
+  nsCOMPtr<nsINode> requestingNode = mDocument;
+  requestingNode = mDocument;
+  if (!requestingNode) {
+    requestingNode = do_QueryInterface(aRequest->mElement);
+  }
+  NS_ASSERTION(requestingNode, "can not create channel without a node");
 
   nsCOMPtr<nsIChannel> channel;
   rv = NS_NewChannel3(getter_AddRefs(channel),
