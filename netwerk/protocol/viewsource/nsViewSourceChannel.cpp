@@ -247,6 +247,7 @@ nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
 NS_IMETHODIMP
 nsViewSourceChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
 {
+  fprintf(stderr, "\n\nnsViewSourceChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(aListener, ctxt);
 }
 

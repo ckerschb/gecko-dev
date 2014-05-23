@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "nsBaseChannel.h"
+#include "nsContentPolicyUtils.h"
 #include "nsURLHelper.h"
 #include "nsNetUtil.h"
 #include "nsMimeTypes.h"
@@ -669,6 +670,52 @@ nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 NS_IMETHODIMP
 nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
 {
+  fprintf(stderr, "\n\nnsBaseChannel::AsyncOpen2 {\n");
+  fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
+
+  if (!mRequestingPrincipal) {
+    fprintf(stderr, "  NO PRINCIPAL - return ERROR\n}\n");
+    return NS_ERROR_FAILURE;
+  }
+
+  nsAutoCString host;
+  nsCOMPtr<nsIURI> requestingLocation;
+  mRequestingPrincipal->GetURI(getter_AddRefs(requestingLocation));
+
+  if(requestingLocation) {
+    requestingLocation->GetSpec(host);
+    fprintf(stderr, "  reqeustingLocation: %s\n", host.get());
+  }
+
+  nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(mRequestingPrincipal);
+  if (expanded) {
+      fprintf(stderr, "  Principal is the expanded principal\n");
+  }
+
+  //Call content policies to see if this load is allowed
+  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+
+  nsresult rv = NS_CheckContentLoadPolicy(mContentPolicyType,
+                                          mURI,
+                                          mRequestingPrincipal,
+                                          mRequestingContext, //context is missing
+                                          EmptyCString(), //mime guess
+                                          nullptr,         //extra
+                                          &shouldLoad);
+  if (NS_FAILED(rv)) {
+    fprintf(stderr, "  NS_CheckContentLoadPolicy FAILED\n}\n");
+    // TODO: should we return this here? TANVI??
+    return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+  }
+
+  if (NS_CP_REJECTED(shouldLoad)) {
+    fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED\n}\n");
+    return NS_ERROR_CONTENT_BLOCKED;
+  }
+
+  fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
+
+    // Do other security checks
   return AsyncOpen(listener, ctxt);
 }
 

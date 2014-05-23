@@ -107,6 +107,7 @@ NS_IMETHODIMP DummyChannel::AsyncOpen(nsIStreamListener* aListener, nsISupports*
 
 NS_IMETHODIMP DummyChannel::AsyncOpen2(nsIStreamListener* aListener, nsISupports* aContext)
 {
+  fprintf(stderr, "\n\nDummyChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(aListener, aContext);
 }
 

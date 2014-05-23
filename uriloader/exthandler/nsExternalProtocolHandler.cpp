@@ -183,6 +183,7 @@ NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen(nsIStreamListener *listener, nsISu
 
 NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
 {
+  fprintf(stderr, "\n\nnsExtProtocolChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(listener, ctxt);
 }
 

@@ -472,7 +472,7 @@ nsWyciwygChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 NS_IMETHODIMP
 nsWyciwygChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
 {
-  LOG(("nsWyciwygChannel::AsyncOpen2 [this=%p]\n", this));
+  fprintf(stderr, "\n\nnsWyciwygChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(listener, ctx);
 }
 

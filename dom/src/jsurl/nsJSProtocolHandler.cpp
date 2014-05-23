@@ -705,6 +705,7 @@ nsJSChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 NS_IMETHODIMP
 nsJSChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
 {
+  fprintf(stderr, "\n\nnsJSChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(aListener, aContext);
 }
 

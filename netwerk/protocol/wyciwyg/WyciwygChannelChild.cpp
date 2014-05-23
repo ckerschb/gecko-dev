@@ -656,7 +656,7 @@ WyciwygChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aConte
 NS_IMETHODIMP
 WyciwygChannelChild::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
 {
-  LOG(("WyciwygChannelChild::AsyncOpen2 [this=%p]\n", this));
+  fprintf(stderr, "\n\nWyciwygChannelChild::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(aListener, aContext);
 }
 //-----------------------------------------------------------------------------

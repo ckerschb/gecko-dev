@@ -4512,6 +4512,7 @@ nsresult
 nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
 {
     fprintf(stderr, "\n\nnsHttpChannel::AsyncOpen2 {\n");
+    fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
 
     nsIPrincipal *principal = GetPrincipal();
     if (!principal) {

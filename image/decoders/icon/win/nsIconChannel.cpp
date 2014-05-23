@@ -219,6 +219,7 @@ NS_IMETHODIMP nsIconChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports
 
 NS_IMETHODIMP nsIconChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
 {
+  fprintf(stderr, "\n\nnsIconChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(aListener, ctxt);
 }
 

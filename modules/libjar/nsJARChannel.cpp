@@ -840,6 +840,7 @@ nsJARChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 NS_IMETHODIMP
 nsJARChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
 {
+  fprintf(stderr, "\n\nnsJARChannel::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(listener, ctx);
 }
 

@@ -1290,7 +1290,7 @@ HttpChannelChild::AsyncOpen(nsIStreamListener *listener, nsISupports *aContext)
 NS_IMETHODIMP
 HttpChannelChild::AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext)
 {
-  LOG(("HttpChannelChild::AsyncOpen2 [this=%p uri=%s]\n", this, mSpec.get()));
+  fprintf(stderr, "\n\nHttpChannelChild::AsyncOpen2 REVAMP_ERROR\n\n");
   return AsyncOpen(listener, aContext);
 }
 
