@@ -792,6 +792,11 @@ EventSource::InitChannelAndRequestEventSource()
 
   // Start reading from the channel
   rv = mHttpChannel->AsyncOpen2(listener, nullptr);
+  if (NS_FAILED(rv)) {
+    // Probably we have to modify all nsresults to be consistent
+    DispatchFailConnection();
+    return NS_ERROR_DOM_SECURITY_ERR;
+  }
   if (NS_SUCCEEDED(rv)) {
     mWaitingForOnStopRequest = true;
   }
