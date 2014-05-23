@@ -678,18 +678,37 @@ nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
     return NS_ERROR_FAILURE;
   }
 
-  nsAutoCString host;
+  nsAutoCString uri;
+  mURI->GetSpec(uri);
+  fprintf(stderr, "  channelURI (mURI): %s\n", uri.get());
+
+  // print the context
+  nsCOMPtr<nsINode> node = do_QueryInterface(mRequestingContext);
+  if (node) {
+    nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
+    if (nodePrincipal) {
+      nsCOMPtr<nsIURI> nodeURI;
+      nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+      if (nodeURI) {
+        nsAutoCString nodeSpec;
+        nodeURI->GetSpec(nodeSpec);
+        fprintf(stderr, "  nodePrincpal (mRequestingContext): %s\n", nodeSpec.get());
+      }
+    }
+  }
+
+  // print the principal
   nsCOMPtr<nsIURI> requestingLocation;
   mRequestingPrincipal->GetURI(getter_AddRefs(requestingLocation));
-
-  if(requestingLocation) {
-    requestingLocation->GetSpec(host);
-    fprintf(stderr, "  reqeustingLocation: %s\n", host.get());
+  if (requestingLocation) {
+    nsAutoCString spec;
+    requestingLocation->GetSpec(spec);
+    fprintf(stderr, "  Principal (mPrincipal): %s\n", spec.get());
   }
 
   nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(mRequestingPrincipal);
   if (expanded) {
-      fprintf(stderr, "  Principal is the expanded principal\n");
+    fprintf(stderr, "  Principal (mPrincipal) is nsIExpandedPrincipal\n");
   }
 
   //Call content policies to see if this load is allowed

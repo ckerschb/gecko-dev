@@ -4520,18 +4520,37 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
       return NS_ERROR_FAILURE;
     }
 
-    nsAutoCString host;
+    nsAutoCString uri;
+    mURI->GetSpec(uri);
+    fprintf(stderr, "  channelURI (mURI): %s\n", uri.get());
+
+    // print the context
+    nsCOMPtr<nsINode> node = do_QueryInterface(mRequestingContext);
+    if (node) {
+      nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
+      if (nodePrincipal) {
+        nsCOMPtr<nsIURI> nodeURI;
+        nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+        if (nodeURI) {
+          nsAutoCString nodeSpec;
+          nodeURI->GetSpec(nodeSpec);
+          fprintf(stderr, "  nodePrincpal (mRequestingContext): %s\n", nodeSpec.get());
+        }
+      }
+    }
+
+    // print the principal
     nsCOMPtr<nsIURI> requestingLocation;
     principal->GetURI(getter_AddRefs(requestingLocation));
-
-    if(requestingLocation) {
-      requestingLocation->GetSpec(host);
-      fprintf(stderr, "  reqeustingLocation: %s\n", host.get());
+    if (requestingLocation) {
+      nsAutoCString spec;
+      requestingLocation->GetSpec(spec);
+      fprintf(stderr, "  Principal (mPrincipal): %s\n", spec.get());
     }
 
     nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(principal);
     if (expanded) {
-        fprintf(stderr, "  Principal is the expanded principal\n");
+      fprintf(stderr, "  Principal (mPrincipal) is nsIExpandedPrincipal\n");
     }
 
     //Call content policies to see if this load is allowed
@@ -4539,20 +4558,18 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
 
     nsresult rv = NS_CheckContentLoadPolicy(mContentPolicyType,
                                             mURI,
-                                            mRequestingPrincipal,
-                                            mRequestingContext, //context is missing
-                                            EmptyCString(), //mime guess
-                                            nullptr,         //extra
+                                            principal,
+                                            mRequestingContext,
+                                            EmptyCString(),    //mime guess
+                                            nullptr,           //extra
                                             &shouldLoad);
-    if (NS_FAILED(rv)) {
-      fprintf(stderr, "  NS_CheckContentLoadPolicy FAILED\n}\n");
-      // TODO: should we return this here? TANVI??
+    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+      if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
+        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED)\n}\n");
+        return NS_ERROR_CONTENT_BLOCKED;
+      }
+      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT)\n}\n");
       return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
-    }
-
-    if (NS_CP_REJECTED(shouldLoad)) {
-      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED\n}\n");
-      return NS_ERROR_CONTENT_BLOCKED;
     }
 
     fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");

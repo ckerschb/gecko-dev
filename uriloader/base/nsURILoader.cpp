@@ -818,7 +818,7 @@ NS_IMETHODIMP nsURILoader::OpenURI(nsIChannel *channel,
 
     //need to add the principal as the last arguement
     //aWindowContext is no the context we want here, get it from the channel.
-    printf("\nCall AsyncOpen2\n\n\n\n");
+    // printf("\nCall AsyncOpen2\n\n\n\n");
     rv = channel->AsyncOpen2(loader, nullptr);
     // no content from this load - that's OK.
     if (rv == NS_ERROR_NO_CONTENT) {

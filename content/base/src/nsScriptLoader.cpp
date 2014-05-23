@@ -56,7 +56,6 @@
 #include "mozilla/Attributes.h"
 #include "mozilla/Telemetry.h"
 #include "mozilla/unused.h"
-#include "assert.h"
 
 #ifdef PR_LOGGING
 static PRLogModuleInfo* gCspPRLog;
@@ -272,14 +271,12 @@ nsScriptLoader::ShouldLoadScript(nsIDocument* aDocument,
 
   NS_ENSURE_SUCCESS(rv, rv);
 
-  /* Removing content policy check here, since we will call it in AsyncOpen2()
+  // Removing content policy check here, since we will call it in AsyncOpen2()
   // After the security manager, the content-policy stuff gets a veto
   rv = CheckContentPolicy(aDocument, aContext, aURI, aType);
   if (NS_FAILED(rv)) {
     return rv;
   }
-  */
-  printf("Inside ShouldLoadScript - No longer calling Content Policies from ShouldLoadScript.  I beleive this is preload time.  Confirm that they do get called after this from AsyncOpen2\n");
 
   return NS_OK;
 }
@@ -292,7 +289,7 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                          ? static_cast<nsISupports *>(aRequest->mElement.get())
                          : static_cast<nsISupports *>(mDocument);
 
-  // TODO, I guess we can eliminate the call to ShouldLoadScript completely
+  // TODO, I guess we can eliminate the ShouldLoadScript completely
   nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
   if (NS_FAILED(rv)) {
     return rv;
@@ -392,7 +389,11 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   }
 
   rv = channel->AsyncOpen2(listener, aRequest);
-  NS_ENSURE_SUCCESS(rv, rv);
+  if (NS_FAILED(rv)) {
+    // do we need to cancel?
+    // channel->Cancel(NS_BINDING_ABORTED);
+    return rv;
+  }
 
   return NS_OK;
 }
@@ -674,7 +675,7 @@ nsScriptLoader::ProcessScriptElement(nsIScriptElement *aElement)
         // TANVI - We cannot remove this call to Content Policies.  AsyncOpen or AsyncOpen2 are not called after ProcessScriptElement, hence if
         // we remove this we wouldn't have our second call to shouldLoad at rendering time.  is that okay?  Do we want two calls to shouldLoad?  If the first preload call succeeds
         // are we happy enough with that?
-        printf("\n\n\nProcessScriptElement calling content policies. AsyncOpen doesn't get called after this!----------------------------\n");
+        // printf("\n\n\nProcessScriptElement calling content policies. AsyncOpen doesn't get called after this!----------------------------\n");
         rv = CheckContentPolicy(mDocument, aElement, request->mURI, type);
         NS_ENSURE_SUCCESS(rv, false);
       } else {

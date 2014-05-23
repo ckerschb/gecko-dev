@@ -396,7 +396,9 @@ nsFrameLoader::LoadURI(nsIURI* aURI)
   nsCOMPtr<nsIDocument> doc = mOwnerContent->OwnerDoc();
 
   nsresult rv = CheckURILoad(aURI);
-  NS_ENSURE_SUCCESS(rv, rv);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
 
   mURIToLoad = aURI;
   rv = doc->InitializeFrameLoader(this);

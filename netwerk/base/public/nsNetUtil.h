@@ -246,7 +246,7 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
                "Can not convert contentype to string");
 
   static const char* kContentTypes[] = {
-    "TYPE_DYMMY"                              // 0 should never be called
+    "TYPE_DYMMY",                             // 0 should never be called
     "TYPE_OTHER",                             // 1
     "TYPE_SCRIPT",                            // 2
     "TYPE_IMAGE",                             // 3
@@ -258,8 +258,8 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
     "TYPE_XBL",                               // 9
     "TYPE_PING",                              // 10
     "TYPE_XMLHTTPREQUEST | TYPE_DATAREQUEST", // 11
-    "TYPE_OBJECT_SUBREQUEST"                  // 12
-    "TYPE_DTD"                                // 13
+    "TYPE_OBJECT_SUBREQUEST",                 // 12
+    "TYPE_DTD",                               // 13
     "TYPE_FONT",                              // 14
     "TYPE_MEDIA",                             // 15
     "TYPE_WEBSOCKET",                         // 16
@@ -288,9 +288,24 @@ NS_NewChannel2(nsIChannel            **result,
     fprintf(stderr, "\nNS_NewChannel2 {\n");
     fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
     fprintf(stderr, "  uri: %s\n", spec.get());
+    if (aRequestingPrincipal) {
+       nsCOMPtr<nsIURI> principalURI;
+       aRequestingPrincipal->GetURI(getter_AddRefs(principalURI));
+       if (principalURI) {
+         nsAutoCString princeSpec;
+         principalURI->GetSpec(princeSpec);
+         fprintf(stderr, "  aRequestingPrincipal: %s\n", princeSpec.get());
+      }
+    }
     fprintf(stderr, "}\n\n");
   }
-  NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
+  // resource loads do not have a principal
+  bool schemeMatch = false;
+  NS_ENSURE_SUCCESS(uri->SchemeIs("resource", &schemeMatch), NS_OK);
+  if (!schemeMatch) {
+    NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
+  }
+
   // TODO, we should uncomment the next line, but we can't, because we call AsyncOpen2 only if we 
   // can not query a Node (oterhwise we would call AsyncOpen3), therefore the context is null for those cases.
   // NS_ASSERTION(aRequestingContext, "NS_NewChannel2 can not create channel with aRequestingContext");
@@ -324,6 +339,18 @@ NS_NewChannel3(nsIChannel            **result,
     fprintf(stderr, "\nNS_NewChannel3 {\n");
     fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
     fprintf(stderr, "  uri: %s\n", spec.get());
+    if (aRequestingNode) {
+      nsCOMPtr<nsIPrincipal> nodePrincipal = aRequestingNode->NodePrincipal();
+      if (nodePrincipal) {
+        nsCOMPtr<nsIURI> nodeURI;
+        nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+        if (nodeURI) {
+          nsAutoCString nodeSpec;
+          nodeURI->GetSpec(nodeSpec);
+          fprintf(stderr, "  aRequestingNode: %s\n", nodeSpec.get());
+        }
+      }
+    }
     fprintf(stderr, "}\n\n");
   }
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
@@ -331,6 +358,8 @@ NS_NewChannel3(nsIChannel            **result,
   nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
   NS_ENSURE_SUCCESS(rv, rv);
   (*result)->SetContentPolicyType(aType);
+  // we also need to set the requestingContext here because CSP queries it first!!!
+  (*result)->SetRequestingContext(aRequestingNode);
   // Get the principal from the node and set it on the channel.
   (*result)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
   return rv;
