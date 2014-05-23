@@ -1353,6 +1353,11 @@ bool imgLoader::ValidateRequestWithNewChannel(imgRequest *request,
         nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
 
     rv = newChannel->AsyncOpen2(listener, nullptr);
+    if (NS_FAILED(rv)) {
+return false;
+//return NS_ERROR_DOM_SECURITY_ERR;
+    }
+
     if (NS_SUCCEEDED(rv))
       NS_ADDREF(*aProxyRequest = req.get());
 
