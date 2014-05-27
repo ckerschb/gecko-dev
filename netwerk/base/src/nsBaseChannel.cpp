@@ -620,6 +620,69 @@ nsBaseChannel::Open(nsIInputStream **result)
 NS_IMETHODIMP
 nsBaseChannel::Open2(nsIInputStream **result)
 {
+  fprintf(stderr, "\n\nnsBaseChannel::Open2 {\n");
+  fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
+
+  if (!mRequestingPrincipal) {
+    fprintf(stderr, "  NO PRINCIPAL - return ERROR\n}\n");
+    return NS_ERROR_FAILURE;
+  }
+
+  nsAutoCString uri;
+  mURI->GetSpec(uri);
+  fprintf(stderr, "  channelURI (mURI): %s\n", uri.get());
+
+  // print the context
+  nsCOMPtr<nsINode> node = do_QueryInterface(mRequestingContext);
+  if (node) {
+    nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
+    if (nodePrincipal) {
+      nsCOMPtr<nsIURI> nodeURI;
+      nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+      if (nodeURI) {
+        nsAutoCString nodeSpec;
+        nodeURI->GetSpec(nodeSpec);
+        fprintf(stderr, "  nodePrincpal (mRequestingContext): %s\n", nodeSpec.get());
+      }
+    }
+  }
+
+  // print the principal
+  nsCOMPtr<nsIURI> requestingLocation;
+  mRequestingPrincipal->GetURI(getter_AddRefs(requestingLocation));
+  if (requestingLocation) {
+    nsAutoCString spec;
+    requestingLocation->GetSpec(spec);
+    fprintf(stderr, "  Principal (mPrincipal): %s\n", spec.get());
+  }
+
+  nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(mRequestingPrincipal);
+  if (expanded) {
+    fprintf(stderr, "  Principal (mPrincipal) is nsIExpandedPrincipal\n");
+  }
+
+  //Call content policies to see if this load is allowed
+  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+
+  nsresult rv = NS_CheckContentLoadPolicy(mContentPolicyType,
+                                          mURI,
+                                          mRequestingPrincipal,
+                                          mRequestingContext, //context is missing
+                                          EmptyCString(), //mime guess
+                                          nullptr,         //extra
+                                          &shouldLoad);
+  if (NS_FAILED(rv)) {
+    fprintf(stderr, "  NS_CheckContentLoadPolicy FAILED\n}\n");
+    // TODO: should we return this here? TANVI??
+    return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+  }
+
+  if (NS_CP_REJECTED(shouldLoad)) {
+    fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED\n}\n");
+    return NS_ERROR_CONTENT_BLOCKED;
+  }
+
+  fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
   return Open(result);
 }
 

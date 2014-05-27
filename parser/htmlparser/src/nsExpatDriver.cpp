@@ -773,19 +773,19 @@ nsExpatDriver::OpenInputStreamFromExternalDTD(const char16_t* aFPIStr,
                "mOriginalSink not the same object as mSink?");
   if (mOriginalSink)
     doc = do_QueryInterface(mOriginalSink->GetTarget());
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_DTD,
-                                uri,
-                                (doc ? doc->NodePrincipal() : nullptr),
-                                doc,
-                                EmptyCString(), //mime guess
-                                nullptr,         //extra
-                                &shouldLoad);
-  if (NS_FAILED(rv)) return rv;
-  if (NS_CP_REJECTED(shouldLoad)) {
-    // Disallowed by content policy
-    return NS_ERROR_CONTENT_BLOCKED;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_DTD,
+  //                               uri,
+  //                               (doc ? doc->NodePrincipal() : nullptr),
+  //                               doc,
+  //                               EmptyCString(), //mime guess
+  //                               nullptr,         //extra
+  //                               &shouldLoad);
+  // if (NS_FAILED(rv)) return rv;
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   // Disallowed by content policy
+  //   return NS_ERROR_CONTENT_BLOCKED;
+  // }
 
   nsAutoCString absURL;
   uri->GetSpec(absURL);
@@ -793,11 +793,23 @@ nsExpatDriver::OpenInputStreamFromExternalDTD(const char16_t* aFPIStr,
   CopyUTF8toUTF16(absURL, aAbsURL);
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), uri);
+  rv = NS_NewChannel3(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // interFaceRequestor
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_DTD,
+                      doc); // TODO: might be null, do we want to use SystemPrincipal?
   NS_ENSURE_SUCCESS(rv, rv);
 
   channel->SetContentType(NS_LITERAL_CSTRING("application/xml"));
-  return channel->Open(aStream);
+  rv = channel->Open2(aStream);
+  if (NS_FAILED(rv)) {
+    return NS_ERROR_CONTENT_BLOCKED;
+  }
+  return NS_OK;
 }
 
 static nsresult
