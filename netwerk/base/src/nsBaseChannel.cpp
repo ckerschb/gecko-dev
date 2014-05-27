@@ -618,6 +618,12 @@ nsBaseChannel::Open(nsIInputStream **result)
 }
 
 NS_IMETHODIMP
+nsBaseChannel::Open2(nsIInputStream **result)
+{
+  return Open(result);
+}
+
+NS_IMETHODIMP
 nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 {
   NS_ENSURE_TRUE(mURI, NS_ERROR_NOT_INITIALIZED);

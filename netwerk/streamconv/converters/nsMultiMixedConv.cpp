@@ -202,6 +202,13 @@ nsPartChannel::Open(nsIInputStream **result)
 }
 
 NS_IMETHODIMP
+nsPartChannel::Open2(nsIInputStream **result)
+{
+    // This channel cannot be opened!
+    return NS_ERROR_FAILURE;
+}
+
+NS_IMETHODIMP
 nsPartChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 {
     // This channel cannot be opened!

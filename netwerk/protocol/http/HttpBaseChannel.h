@@ -110,6 +110,7 @@ public:
   NS_IMETHOD GetContentLength(int64_t *aContentLength);
   NS_IMETHOD SetContentLength(int64_t aContentLength);
   NS_IMETHOD Open(nsIInputStream **aResult);
+  NS_IMETHOD Open2(nsIInputStream **aResult);
 
   // nsIEncodedChannel
   NS_IMETHOD GetApplyConversion(bool *value);

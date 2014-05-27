@@ -607,6 +607,12 @@ WyciwygChannelChild::Open(nsIInputStream **_retval)
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
+NS_IMETHODIMP
+WyciwygChannelChild::Open2(nsIInputStream **_retval)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
 static mozilla::dom::TabChild*
 GetTabChild(nsIChannel* aChannel)
 {

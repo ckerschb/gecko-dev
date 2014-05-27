@@ -434,6 +434,12 @@ nsWyciwygChannel::Open(nsIInputStream ** aReturn)
 }
 
 NS_IMETHODIMP
+nsWyciwygChannel::Open2(nsIInputStream ** aReturn)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
 nsWyciwygChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 {
   LOG(("nsWyciwygChannel::AsyncOpen [this=%p]\n", this));

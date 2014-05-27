@@ -513,6 +513,12 @@ HttpBaseChannel::Open(nsIInputStream **aResult)
   return NS_ImplementChannelOpen(this, aResult);
 }
 
+NS_IMETHODIMP
+HttpBaseChannel::Open2(nsIInputStream **aResult)
+{
+  return Open(aResult);
+}
+
 //-----------------------------------------------------------------------------
 // HttpBaseChannel::nsIUploadChannel
 //-----------------------------------------------------------------------------

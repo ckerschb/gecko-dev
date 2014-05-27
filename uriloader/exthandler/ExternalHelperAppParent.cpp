@@ -274,6 +274,12 @@ ExternalHelperAppParent::Open(nsIInputStream **aResult)
 }
 
 NS_IMETHODIMP
+ExternalHelperAppParent::Open2(nsIInputStream **aResult)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
 ExternalHelperAppParent::AsyncOpen(nsIStreamListener *aListener,
                                    nsISupports *aContext)
 {

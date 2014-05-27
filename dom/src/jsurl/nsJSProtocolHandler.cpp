@@ -592,6 +592,12 @@ nsJSChannel::Open(nsIInputStream **aResult)
 }
 
 NS_IMETHODIMP
+nsJSChannel::Open2(nsIInputStream **aResult)
+{
+    return Open(aResult);
+}
+
+NS_IMETHODIMP
 nsJSChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 {
     NS_ENSURE_ARG(aListener);

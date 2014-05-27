@@ -171,6 +171,11 @@ NS_IMETHODIMP nsExtProtocolChannel::Open(nsIInputStream **_retval)
   return OpenURL();
 }
 
+NS_IMETHODIMP nsExtProtocolChannel::Open2(nsIInputStream **_retval)
+{
+  return Open(_retval);
+}
+
 NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 {
   NS_ENSURE_ARG_POINTER(listener);

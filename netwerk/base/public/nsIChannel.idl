@@ -163,6 +163,7 @@ interface nsIChannel : nsIRequest
      * is reopened.
      */
     nsIInputStream open();
+    nsIInputStream open2();
 
     /**
      * Asynchronously open this channel.  Data is fed to the specified stream

@@ -212,6 +212,12 @@ nsViewSourceChannel::Open(nsIInputStream **_retval)
 }
 
 NS_IMETHODIMP
+nsViewSourceChannel::Open2(nsIInputStream **_retval)
+{
+    return Open(_retval);
+}
+
+NS_IMETHODIMP
 nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
 {
     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);

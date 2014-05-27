@@ -88,6 +88,11 @@ NS_IMETHODIMP DummyChannel::Open(nsIInputStream**)
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
+NS_IMETHODIMP DummyChannel::Open2(nsIInputStream**)
+{
+  return NS_ERROR_NOT_IMPLEMENTED;
+}
+
 NS_IMETHODIMP DummyChannel::AsyncOpen(nsIStreamListener* aListener, nsISupports* aContext)
 {
   mListener = aListener;

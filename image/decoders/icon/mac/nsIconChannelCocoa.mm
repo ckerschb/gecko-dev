@@ -146,6 +146,12 @@ nsIconChannel::Open(nsIInputStream **_retval)
   return MakeInputStream(_retval, false);
 }
 
+NS_IMETHODIMP
+nsIconChannel::Open2(nsIInputStream **_retval)
+{
+  return Open(_retval);
+}
+
 nsresult nsIconChannel::ExtractIconInfoFromUrl(nsIFile ** aLocalFile, uint32_t * aDesiredImageSize, nsACString &aContentType, nsACString &aFileExtension)
 {
   nsresult rv = NS_OK;
