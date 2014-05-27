@@ -1294,21 +1294,21 @@ nsExternalResourceMap::PendingLoad::StartLoad(nsIURI* aURI,
   rv = requestingPrincipal->CheckMayLoad(aURI, true, true);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OTHER,
-                                 aURI,
-                                 requestingPrincipal,
-                                 aRequestingNode,
-                                 EmptyCString(), //mime guess
-                                 nullptr,         //extra
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-  if (NS_FAILED(rv)) return rv;
-  if (NS_CP_REJECTED(shouldLoad)) {
-    // Disallowed by content policy
-    return NS_ERROR_CONTENT_BLOCKED;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_OTHER,
+  //                                aURI,
+  //                                requestingPrincipal,
+  //                                aRequestingNode,
+  //                                EmptyCString(), //mime guess
+  //                                nullptr,         //extra
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
+  // if (NS_FAILED(rv)) return rv;
+  // if (NS_CP_REJECTED(shouldLoad)) {
+  //   // Disallowed by content policy
+  //   return NS_ERROR_CONTENT_BLOCKED;
+  // }
 
   nsIDocument* doc = aRequestingNode->OwnerDoc();
 
@@ -1317,12 +1317,23 @@ nsExternalResourceMap::PendingLoad::StartLoad(nsIURI* aURI,
 
   nsCOMPtr<nsILoadGroup> loadGroup = doc->GetDocumentLoadGroup();
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), aURI, nullptr, loadGroup, req);
+  rv = NS_NewChannel3(getter_AddRefs(channel),
+                      aURI,
+                      nullptr, // cached ioService
+                      loadGroup,
+                      req,
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelpolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      aRequestingNode);
   NS_ENSURE_SUCCESS(rv, rv);
 
   mURI = aURI;
-
-  return channel->AsyncOpen(this, nullptr);
+  rv = channel->AsyncOpen2(this, nullptr);
+  if (NS_FAILED(rv)) {
+    return NS_ERROR_CONTENT_BLOCKED;
+  }
+  return NS_OK;
 }
 
 NS_IMPL_ISUPPORTS(nsExternalResourceMap::LoadgroupCallbacks,
