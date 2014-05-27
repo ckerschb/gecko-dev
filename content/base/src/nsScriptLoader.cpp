@@ -286,15 +286,15 @@ nsresult
 nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                           bool aScriptFromHead)
 {
-  nsISupports *context = aRequest->mElement.get()
-                         ? static_cast<nsISupports *>(aRequest->mElement.get())
-                         : static_cast<nsISupports *>(mDocument);
+  // nsISupports *context = aRequest->mElement.get()
+  //                        ? static_cast<nsISupports *>(aRequest->mElement.get())
+  //                        : static_cast<nsISupports *>(mDocument);
 
-  // TODO, I guess we can eliminate the ShouldLoadScript completely
-  nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
-  if (NS_FAILED(rv)) {
-    return rv;
-  }
+  // // TODO, I guess we can eliminate the ShouldLoadScript completely
+  // nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
+  // if (NS_FAILED(rv)) {
+  //   return rv;
+  // }
 
   nsCOMPtr<nsILoadGroup> loadGroup = mDocument->GetDocumentLoadGroup();
 
@@ -316,7 +316,7 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   // that will be created to load the script
   nsCOMPtr<nsIChannelPolicy> channelPolicy;
   nsCOMPtr<nsIContentSecurityPolicy> csp;
-  rv = mDocument->NodePrincipal()->GetCsp(getter_AddRefs(csp));
+  nsresult rv = mDocument->NodePrincipal()->GetCsp(getter_AddRefs(csp));
   NS_ENSURE_SUCCESS(rv, rv);
   if (csp) {
     channelPolicy = do_CreateInstance("@mozilla.org/nschannelpolicy;1");
@@ -325,11 +325,11 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   }
 
   // TODO: confirm that we get the node in the right order;
-  // we try to use the document (if available) otherwise fall back
-  nsCOMPtr<nsINode> requestingNode = mDocument;
-  requestingNode = mDocument;
+  // in other cases we use mDocument first, in this case we use
+  // mDocument only if aRequest->mElement is null
+  nsCOMPtr<nsINode> requestingNode = do_QueryInterface(aRequest->mElement);
   if (!requestingNode) {
-    requestingNode = do_QueryInterface(aRequest->mElement);
+    requestingNode = mDocument;
   }
   NS_ASSERTION(requestingNode, "can not create channel without a node");
 
@@ -342,7 +342,7 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                       nsIRequest::LOAD_NORMAL | nsIChannel::LOAD_CLASSIFY_URI,
                       channelPolicy,
                       nsIContentPolicy::TYPE_SCRIPT,
-                      mDocument);
+                      requestingNode);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsIScriptElement *script = aRequest->mElement;

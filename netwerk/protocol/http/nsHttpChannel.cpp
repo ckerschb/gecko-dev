@@ -4553,6 +4553,15 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
       fprintf(stderr, "  Principal (mPrincipal) is nsIExpandedPrincipal\n");
     }
 
+    // if we are dealing with scripts, we have to perform the following additonal check
+    if (mContentPolicyType == nsIContentPolicy::TYPE_SCRIPT) {
+      fprintf(stderr, "  CheckLoadURIWithPrincipal\n");
+      nsresult rv = nsContentUtils::GetSecurityManager()->
+        CheckLoadURIWithPrincipal(principal, mURI,
+                                  nsIScriptSecurityManager::ALLOW_CHROME);
+      NS_ENSURE_SUCCESS(rv, rv);
+    }
+
     //Call content policies to see if this load is allowed
     int16_t shouldLoad = nsIContentPolicy::ACCEPT;
 
