@@ -299,10 +299,12 @@ NS_NewChannel2(nsIChannel            **result,
     }
     fprintf(stderr, "}\n\n");
   }
-  // resource loads do not have a principal
-  bool schemeMatch = false;
-  NS_ENSURE_SUCCESS(uri->SchemeIs("resource", &schemeMatch), NS_OK);
-  if (!schemeMatch) {
+  // resource and chrome loads do not have a principal
+  bool resourceMatch = false;
+  NS_ENSURE_SUCCESS(uri->SchemeIs("resource", &resourceMatch), NS_OK);
+  bool chromeMatch = false;
+  NS_ENSURE_SUCCESS(uri->SchemeIs("chrome", &chromeMatch), NS_OK);
+  if (!resourceMatch && !chromeMatch) {
     NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
   }
 
