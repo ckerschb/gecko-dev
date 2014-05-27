@@ -2634,6 +2634,12 @@ nsContentUtils::CanLoadImage(nsIURI* aURI, nsISupports* aContext,
 
   int16_t decision = nsIContentPolicy::ACCEPT;
 
+
+  /* Content Policy call for images
+     We now call content policy for images in AsyncOpen2, so we should be able to remove this one
+     But leaving it for now, since there are multiple callers and we will need to test further
+     to confirm. */
+
   rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_IMAGE,
                                  aURI,
                                  aLoadingPrincipal,

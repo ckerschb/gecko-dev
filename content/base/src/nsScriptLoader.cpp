@@ -271,7 +271,8 @@ nsScriptLoader::ShouldLoadScript(nsIDocument* aDocument,
 
   NS_ENSURE_SUCCESS(rv, rv);
 
-  // Removing content policy check here, since we will call it in AsyncOpen2()
+  // Ideally we should remove content policy check here, since we will call it in AsyncOpen2()
+  // But for now we need to keep the call or csp mochitests fail
   // After the security manager, the content-policy stuff gets a veto
   rv = CheckContentPolicy(aDocument, aContext, aURI, aType);
   if (NS_FAILED(rv)) {
@@ -672,7 +673,7 @@ nsScriptLoader::ProcessScriptElement(nsIScriptElement *aElement)
       aElement->GetScriptCharset(elementCharset);
       if (elementCharset.Equals(preloadCharset) &&
           ourCORSMode == request->mCORSMode) {
-        // TANVI - We cannot remove this call to Content Policies.  AsyncOpen or AsyncOpen2 are not called after ProcessScriptElement, hence if
+        // TANVI - It is debatable whether we can remove this call to Content Policies.  AsyncOpen or AsyncOpen2 are not called after ProcessScriptElement, hence if
         // we remove this we wouldn't have our second call to shouldLoad at rendering time.  is that okay?  Do we want two calls to shouldLoad?  If the first preload call succeeds
         // are we happy enough with that?
         // printf("\n\n\nProcessScriptElement calling content policies. AsyncOpen doesn't get called after this!----------------------------\n");
