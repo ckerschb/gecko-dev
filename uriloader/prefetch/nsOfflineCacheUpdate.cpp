@@ -44,6 +44,9 @@
 #include "mozilla/Preferences.h"
 #include "mozilla/Attributes.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 #include "nsXULAppAPI.h"
 
 using namespace mozilla;
@@ -181,10 +184,21 @@ nsManifestCheck::Begin()
     rv = mManifestHash->Init(nsICryptoHash::MD5);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = NS_NewChannel(getter_AddRefs(mChannel),
-                       mURI,
-                       nullptr, nullptr, nullptr,
-                       nsIRequest::LOAD_BYPASS_CACHE);
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                        mURI,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // callbacks
+                        nsIRequest::LOAD_BYPASS_CACHE,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
     NS_ENSURE_SUCCESS(rv, rv);
 
     // configure HTTP specific stuff
@@ -197,8 +211,10 @@ nsManifestCheck::Begin()
                                       false);
     }
 
-    rv = mChannel->AsyncOpen(this, nullptr);
-    NS_ENSURE_SUCCESS(rv, rv);
+    rv = mChannel->AsyncOpen2(this, nullptr);
+    if (NS_FAILED(rv)) {
+        return rv;
+    }
 
     return NS_OK;
 }
@@ -373,10 +389,21 @@ nsOfflineCacheUpdateItem::OpenChannel(nsOfflineCacheUpdate *aUpdate)
         flags |= nsIRequest::INHIBIT_CACHING;
     }
 
-    rv = NS_NewChannel(getter_AddRefs(mChannel),
-                       mURI,
-                       nullptr, nullptr, this,
-                       flags);
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                        mURI,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        this,
+                        flags,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
     NS_ENSURE_SUCCESS(rv, rv);
 
     nsCOMPtr<nsIApplicationCacheChannel> appCacheChannel =
