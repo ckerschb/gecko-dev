@@ -56,10 +56,16 @@ URIUtils::ResetWithSource(nsIDocument *aNewDoc, nsIDOMNode *aSourceNode)
     nsCOMPtr<nsIChannel> channel = sourceDoc->GetChannel();
     if (!channel) {
         // Need to synthesize one
-        if (NS_FAILED(NS_NewChannel(getter_AddRefs(channel),
+        if (NS_FAILED(NS_NewChannel2(getter_AddRefs(channel),
                                     sourceDoc->GetDocumentURI(),
-                                    nullptr,
-                                    loadGroup))) {
+                                    nullptr, // ioService
+                                    loadGroup,
+                                    nullptr, // callbacks
+                                    nsIRequest::LOAD_NORMAL,
+                                    nullptr, // channelpolicy
+                                    nsIContentPolicy::TYPE_OTHER,
+                                    sourcePrincipal,
+                                    nullptr))) { // requestingContext
             return;
         }
         channel->SetOwner(sourcePrincipal);

@@ -28,6 +28,8 @@
 #include "GeckoProfiler.h"
 #include "nsPluginInstanceOwner.h"
 #include "nsDataHashtable.h"
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
 
 #define MAGIC_REQUEST_CONTEXT 0x01020304
 
@@ -639,8 +641,23 @@ nsPluginStreamListenerPeer::RequestRead(NPByteRange* rangeList)
 
   nsCOMPtr<nsIInterfaceRequestor> callbacks = do_QueryReferent(mWeakPtrChannelCallbacks);
   nsCOMPtr<nsILoadGroup> loadGroup = do_QueryReferent(mWeakPtrChannelLoadGroup);
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), mURL, nullptr, loadGroup, callbacks);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      mURL,
+                      nullptr, // ioService
+                      loadGroup,
+                      callbacks,
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); //requestingContext
   if (NS_FAILED(rv))
     return rv;
 

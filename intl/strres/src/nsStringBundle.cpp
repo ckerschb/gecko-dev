@@ -15,6 +15,8 @@
 #include "nscore.h"
 #include "nsMemory.h"
 #include "nsNetUtil.h"
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
 #include "nsIObserverService.h"
 #include "nsCOMArray.h"
 #include "nsTextFormatter.h"
@@ -68,17 +70,32 @@ nsStringBundle::LoadProperties()
   rv = NS_NewURI(getter_AddRefs(uri), mPropertiesURL);
   if (NS_FAILED(rv)) return rv;
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
   // We don't use NS_OpenURI because we want to tweak the channel
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), uri);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy,
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // aRequestingContext
   if (NS_FAILED(rv)) return rv;
 
   // It's a string bundle.  We expect a text/plain type, so set that as hint
   channel->SetContentType(NS_LITERAL_CSTRING("text/plain"));
 
   nsCOMPtr<nsIInputStream> in;
-  rv = channel->Open(getter_AddRefs(in));
-  if (NS_FAILED(rv)) return rv;
+  rv = channel->Open2(getter_AddRefs(in));
+  if (NS_FAILED(rv)) {
+    return NS_ERROR_CONTENT_BLOCKED;
+  }
 
   NS_ASSERTION(NS_SUCCEEDED(rv) && in, "Error in OpenBlockingStream");
   NS_ENSURE_TRUE(NS_SUCCEEDED(rv) && in, NS_ERROR_FAILURE);

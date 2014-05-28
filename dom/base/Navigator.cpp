@@ -64,6 +64,8 @@
 #include "WidgetUtils.h"
 #include "mozIThirdPartyUtil.h"
 #include "nsChannelPolicy.h"
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
 
 #ifdef MOZ_MEDIA_NAVIGATOR
 #include "MediaManager.h"
@@ -952,16 +954,30 @@ Navigator::MozIsLocallyAvailable(const nsAString &aURI,
     loadGroup = doc->GetDocumentLoadGroup();
   }
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, false);
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), uri,
-                     nullptr, loadGroup, nullptr, loadFlags);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      loadGroup,
+                      nullptr, //callbacks
+                      loadFlags,
+                      nullptr,  // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // aRequestingContext
+
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
     return false;
   }
 
   nsCOMPtr<nsIInputStream> stream;
-  rv = channel->Open(getter_AddRefs(stream));
+  rv = channel->Open2(getter_AddRefs(stream));
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
     return false;
@@ -1138,21 +1154,21 @@ Navigator::SendBeacon(const nsAString& aUrl,
   }
 
   // Check whether the CSP allows us to load
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_BEACON,
-                                 uri,
-                                 principal,
-                                 doc,
-                                 EmptyCString(), //mime guess
-                                 nullptr,         //extra
-                                 &shouldLoad,
-                                 nsContentUtils::GetContentPolicy(),
-                                 nsContentUtils::GetSecurityManager());
-  if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-    // Disallowed by content policy
-    aRv.Throw(NS_ERROR_CONTENT_BLOCKED);
-    return false;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_BEACON,
+  //                                uri,
+  //                                principal,
+  //                                doc,
+  //                                EmptyCString(), //mime guess
+  //                                nullptr,         //extra
+  //                                &shouldLoad,
+  //                                nsContentUtils::GetContentPolicy(),
+  //                                nsContentUtils::GetSecurityManager());
+  // if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+  //   // Disallowed by content policy
+  //   aRv.Throw(NS_ERROR_CONTENT_BLOCKED);
+  //   return false;
+  // }
 
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsIChannelPolicy> channelPolicy;
@@ -1168,13 +1184,22 @@ Navigator::SendBeacon(const nsAString& aUrl,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_BEACON);
   }
-  rv = NS_NewChannel(getter_AddRefs(channel),
-                     uri,
-                     nullptr,
-                     nullptr,
-                     nullptr,
-                     nsIRequest::LOAD_NORMAL,
-                     channelPolicy);
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, false);
+
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_BEACON,
+                      systemPrincipal,
+                      nullptr); // requestingContext
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
     return false;
@@ -1323,7 +1348,7 @@ Navigator::SendBeacon(const nsAString& aUrl,
                                unsafeHeaders,
                                getter_AddRefs(preflightChannel));
   } else {
-    rv = channel->AsyncOpen(cors, nullptr);
+    rv = channel->AsyncOpen2(cors, nullptr);
   }
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);

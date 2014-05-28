@@ -456,7 +456,16 @@ txCompileObserver::startLoad(nsIURI* aUri, txStylesheetCompiler* aCompiler,
                              nsIPrincipal* aReferrerPrincipal)
 {
     nsCOMPtr<nsIChannel> channel;
-    nsresult rv = NS_NewChannel(getter_AddRefs(channel), aUri);
+    nsresult rv = NS_NewChannel2(getter_AddRefs(channel),
+                                 aUri,
+                                 nullptr, // ioservice
+                                 nullptr, // loadgroup
+                                 nullptr, // callbacks
+                                 nsIRequest::LOAD_NORMAL,
+                                 nullptr, // channelPolicy
+                                 nsIContentPolicy::TYPE_STYLESHEET,
+                                 aReferrerPrincipal,
+                                 nullptr); // requestingContex
     NS_ENSURE_SUCCESS(rv, rv);
 
     channel->SetLoadGroup(mLoadGroup);
@@ -494,7 +503,12 @@ txCompileObserver::startLoad(nsIURI* aUri, txStylesheetCompiler* aCompiler,
     rv = listener->Init(channel);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    return channel->AsyncOpen(listener, parser);
+    rv = channel->AsyncOpen2(listener, parser);
+    if (NS_FAILED(rv)) {
+      // TODO this should be a consistent error everywhere
+      return NS_ERROR_DOM_BAD_URI;
+    }
+    return NS_OK;
 }
 
 nsresult
@@ -506,19 +520,19 @@ TX_LoadSheet(nsIURI* aUri, txMozillaXSLTProcessor* aProcessor,
     PR_LOG(txLog::xslt, PR_LOG_ALWAYS, ("TX_LoadSheet: %s\n", spec.get()));
 
     // Content Policy
-    int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-    nsresult rv =
-        NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_STYLESHEET,
-                                  aUri,
-                                  aCallerPrincipal,
-                                  aProcessor->GetSourceContentModel(),
-                                  NS_LITERAL_CSTRING("application/xml"),
-                                  nullptr,
-                                  &shouldLoad);
-    NS_ENSURE_SUCCESS(rv, rv);
-    if (NS_CP_REJECTED(shouldLoad)) {
-        return NS_ERROR_DOM_BAD_URI;
-    }
+    // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+    // nsresult rv =
+    //     NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_STYLESHEET,
+    //                               aUri,
+    //                               aCallerPrincipal,
+    //                               aProcessor->GetSourceContentModel(),
+    //                               NS_LITERAL_CSTRING("application/xml"),
+    //                               nullptr,
+    //                               &shouldLoad);
+    // NS_ENSURE_SUCCESS(rv, rv);
+    // if (NS_CP_REJECTED(shouldLoad)) {
+    //     return NS_ERROR_DOM_BAD_URI;
+    // }
 
     nsRefPtr<txCompileObserver> observer =
         new txCompileObserver(aProcessor, aLoadGroup);
