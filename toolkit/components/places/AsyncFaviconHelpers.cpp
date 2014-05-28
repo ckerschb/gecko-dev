@@ -21,6 +21,9 @@
 #include "nsISupportsPriority.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla::places;
 using namespace mozilla::storage;
 
@@ -540,8 +543,24 @@ AsyncFetchAndSetIconFromNetwork::Run()
   nsCOMPtr<nsIURI> iconURI;
   nsresult rv = NS_NewURI(getter_AddRefs(iconURI), mIcon.spec);
   NS_ENSURE_SUCCESS(rv, rv);
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), iconURI);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      iconURI,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // requestingContext
+
   NS_ENSURE_SUCCESS(rv, rv);
   nsCOMPtr<nsIInterfaceRequestor> listenerRequestor =
     do_QueryInterface(reinterpret_cast<nsISupports*>(this));
@@ -559,7 +578,7 @@ AsyncFetchAndSetIconFromNetwork::Run()
     priorityChannel->AdjustPriority(nsISupportsPriority::PRIORITY_LOWEST);
   }
 
-  return channel->AsyncOpen(this, nullptr);
+  return channel->AsyncOpen2(this, nullptr);
 }
 
 NS_IMETHODIMP
