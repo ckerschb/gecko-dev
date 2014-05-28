@@ -17,6 +17,8 @@
 #include "prlog.h"
 #include "nsIInterfaceRequestor.h"
 #include "mozilla/LoadContext.h"
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
 
 static const char* gQuitApplicationMessage = "quit-application";
 
@@ -106,8 +108,22 @@ nsUrlClassifierStreamUpdater::FetchUpdate(nsIURI *aUpdateUrl,
   nsresult rv;
   uint32_t loadFlags = nsIChannel::INHIBIT_CACHING |
                        nsIChannel::LOAD_BYPASS_CACHE;
-  rv = NS_NewChannel(getter_AddRefs(mChannel), aUpdateUrl, nullptr, nullptr, this,
-                     loadFlags);
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                      aUpdateUrl,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      this,
+                      loadFlags,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // requestingContext
   NS_ENSURE_SUCCESS(rv, rv);
 
   mBeganStream = false;
@@ -136,8 +152,10 @@ nsUrlClassifierStreamUpdater::FetchUpdate(nsIURI *aUpdateUrl,
   NS_ENSURE_SUCCESS(rv, rv);
 
   // Make the request
-  rv = mChannel->AsyncOpen(this, nullptr);
-  NS_ENSURE_SUCCESS(rv, rv);
+  rv = mChannel->AsyncOpen2(this, nullptr);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
 
   mStreamTable = aStreamTable;
 
