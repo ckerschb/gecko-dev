@@ -110,6 +110,9 @@
 #include "nsIStringBundle.h"
 #include "nsDOMClassInfo.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -2351,11 +2354,25 @@ nsHTMLDocument::CreateAndAddWyciwygChannel(void)
   nsCOMPtr<nsIURI> wcwgURI;
   NS_NewURI(getter_AddRefs(wcwgURI), url);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   // Create the nsIWyciwygChannel to store out-of-band
   // document.write() script to cache
   nsCOMPtr<nsIChannel> channel;
   // Create a wyciwyg Channel
-  rv = NS_NewChannel(getter_AddRefs(channel), wcwgURI);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      wcwgURI,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // requestingContext
   NS_ENSURE_SUCCESS(rv, rv);
 
   mWyciwygChannel = do_QueryInterface(channel);
