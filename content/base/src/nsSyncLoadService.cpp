@@ -220,7 +220,7 @@ nsSyncLoader::PushAsyncStream(nsIStreamListener* aListener)
     mAsyncLoadStatus = NS_OK;
 
     // Start reading from the channel
-    nsresult rv = mChannel->AsyncOpen(this, nullptr);
+    nsresult rv = mChannel->AsyncOpen2(this, nullptr);
 
     if (NS_SUCCEEDED(rv)) {
         // process events until we're finished.
@@ -248,7 +248,7 @@ nsresult
 nsSyncLoader::PushSyncStream(nsIStreamListener* aListener)
 {
     nsCOMPtr<nsIInputStream> in;
-    nsresult rv = mChannel->Open(getter_AddRefs(in));
+    nsresult rv = mChannel->Open2(getter_AddRefs(in));
     NS_ENSURE_SUCCESS(rv, rv);
 
     mLoading = true;
@@ -308,8 +308,16 @@ nsSyncLoadService::LoadDocument(nsIURI *aURI, nsIPrincipal *aLoaderPrincipal,
                                 nsIDOMDocument** aResult)
 {
     nsCOMPtr<nsIChannel> channel;
-    nsresult rv = NS_NewChannel(getter_AddRefs(channel), aURI, nullptr,
-                                aLoadGroup);
+    nsresult rv = NS_NewChannel2(getter_AddRefs(channel),
+                                 aURI,
+                                 nullptr, // ioService
+                                 aLoadGroup,
+                                 nullptr, // callbacks
+                                 nsIRequest::LOAD_NORMAL,
+                                 nullptr, // channelPolicy
+                                 nsIContentPolicy::TYPE_OTHER,
+                                 aLoaderPrincipal,
+                                 nullptr); // requestingContext
     NS_ENSURE_SUCCESS(rv, rv);
 
     if (!aForceToXML) {
