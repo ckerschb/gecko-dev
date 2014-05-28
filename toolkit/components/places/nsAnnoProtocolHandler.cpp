@@ -29,6 +29,9 @@
 #include "nsIPipe.h"
 #include "Helpers.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 using namespace mozilla::places;
 
@@ -46,7 +49,21 @@ GetDefaultIcon(nsIChannel **aChannel)
   nsresult rv = NS_NewURI(getter_AddRefs(defaultIconURI),
                           NS_LITERAL_CSTRING(FAVICON_DEFAULT_URL));
   NS_ENSURE_SUCCESS(rv, rv);
-  return NS_NewChannel(aChannel, defaultIconURI);
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  return NS_NewChannel2(aChannel,
+                        defaultIconURI,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // callbacks
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // reqeustingContext
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +170,7 @@ public:
     rv = GetDefaultIcon(getter_AddRefs(newChannel));
     NS_ENSURE_SUCCESS(rv, mOutputStream->Close());
 
-    rv = newChannel->AsyncOpen(listener, nullptr);
+    rv = newChannel->AsyncOpen2(listener, nullptr);
     NS_ENSURE_SUCCESS(rv, mOutputStream->Close());
 
     return NS_OK;
