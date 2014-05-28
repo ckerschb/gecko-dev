@@ -1485,13 +1485,23 @@ nsFrameScriptExecutor::TryCacheLoadAndCompileScript(const nsAString& aURL,
   }
 
   nsCOMPtr<nsIChannel> channel;
-  NS_NewChannel(getter_AddRefs(channel), uri);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      mPrincipal,
+                      nullptr); // requestingContext
+  NS_ENSURE_SUCCESS(rv, /*void*/);
   if (!channel) {
     return;
   }
 
   nsCOMPtr<nsIInputStream> input;
-  channel->Open(getter_AddRefs(input));
+  channel->Open2(getter_AddRefs(input));
   nsString dataString;
   jschar* dataStringBuf = nullptr;
   size_t dataStringLength = 0;
