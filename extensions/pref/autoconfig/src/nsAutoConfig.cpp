@@ -23,6 +23,9 @@
 #include "nspr.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../../caps/include/nsScriptSecurityManager.h"
+
 PRLogModuleInfo *MCD;
 
 extern nsresult EvaluateAdminConfigScript(const char *js_buffer, size_t length,
@@ -278,12 +281,28 @@ nsresult nsAutoConfig::downloadAutoConfig()
     }
 
     PR_LOG(MCD, PR_LOG_DEBUG, ("running MCD url %s\n", mConfigURL.get()));
-    // open a channel for the url
-    rv = NS_NewChannel(getter_AddRefs(channel),url, nullptr, nullptr, nullptr, nsIRequest::INHIBIT_PERSISTENT_CACHING | nsIRequest::LOAD_BYPASS_CACHE);
-    if (NS_FAILED(rv)) 
-        return rv;
 
-    rv = channel->AsyncOpen(this, nullptr); 
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    // open a channel for the url
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        url,
+                        nullptr,  // ioService
+                        nullptr,  // loadGroup
+                        nullptr,  // callbacks,
+                        nsIRequest::INHIBIT_PERSISTENT_CACHING | nsIRequest::LOAD_BYPASS_CACHE,
+                        nullptr,  // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
+    if (NS_FAILED(rv)) {
+        return rv;
+    }
+
+    rv = channel->AsyncOpen2(this, nullptr); 
     if (NS_FAILED(rv)) {
         readOfflineFile();
         return rv;
