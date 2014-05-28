@@ -328,25 +328,25 @@ XMLDocument::Load(const nsAString& aUrl, ErrorResult& aRv)
       return false;
     }
 
-    int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-    rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_XMLHTTPREQUEST,
-                                   uri,
-                                   principal,
-                                   callingDoc ? callingDoc.get() :
-                                     static_cast<nsIDocument*>(this),
-                                   NS_LITERAL_CSTRING("application/xml"),
-                                   nullptr,
-                                   &shouldLoad,
-                                   nsContentUtils::GetContentPolicy(),
-                                   nsContentUtils::GetSecurityManager());
-    if (NS_FAILED(rv)) {
-      aRv.Throw(rv);
-      return false;
-    }
-    if (NS_CP_REJECTED(shouldLoad)) {
-      aRv.Throw(NS_ERROR_CONTENT_BLOCKED);
-      return false;
-    }
+    // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+    // rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+    //                                uri,
+    //                                principal,
+    //                                callingDoc ? callingDoc.get() :
+    //                                  static_cast<nsIDocument*>(this),
+    //                                NS_LITERAL_CSTRING("application/xml"),
+    //                                nullptr,
+    //                                &shouldLoad,
+    //                                nsContentUtils::GetContentPolicy(),
+    //                                nsContentUtils::GetSecurityManager());
+    // if (NS_FAILED(rv)) {
+    //   aRv.Throw(rv);
+    //   return false;
+    // }
+    // if (NS_CP_REJECTED(shouldLoad)) {
+    //   aRv.Throw(NS_ERROR_CONTENT_BLOCKED);
+    //   return false;
+    // }
   } else {
     // We're called from chrome, check to make sure the URI we're
     // about to load is also chrome.
@@ -425,8 +425,16 @@ XMLDocument::Load(const nsAString& aUrl, ErrorResult& aRv)
   nsCOMPtr<nsIChannel> channel;
   // nsIRequest::LOAD_BACKGROUND prevents throbber from becoming active,
   // which in turn keeps STOP button from becoming active  
-  rv = NS_NewChannel(getter_AddRefs(channel), uri, nullptr, loadGroup, req, 
-                     nsIRequest::LOAD_BACKGROUND);
+  rv = NS_NewChannel3(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService
+                      loadGroup,
+                      req,
+                      nsIRequest::LOAD_BACKGROUND,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_XMLHTTPREQUEST,
+                      callingDoc ? callingDoc.get() : static_cast<nsIDocument*>(this));
+
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
     return false;
@@ -455,12 +463,14 @@ XMLDocument::Load(const nsAString& aUrl, ErrorResult& aRv)
   // mChannelIsPending.
 
   // Start an asynchronous read of the XML document
-  rv = channel->AsyncOpen(listener, nullptr);
+  rv = channel->AsyncOpen2(listener, nullptr);
   if (NS_FAILED(rv)) {
     mChannelIsPending = false;
     aRv.Throw(rv);
     return false;
   }
+  // TODO, probably also do the following if load is rejected:
+  // aRv.Throw(NS_ERROR_CONTENT_BLOCKED);
 
   if (!mAsync) {
     nsCOMPtr<nsIThread> thread = do_GetCurrentThread();
