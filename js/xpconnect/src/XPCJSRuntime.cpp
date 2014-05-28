@@ -50,6 +50,9 @@
 #include "nsIXULRuntime.h"
 #include "nsJSPrincipals.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 #ifdef MOZ_CRASHREPORTER
 #include "nsExceptionHandler.h"
 #endif
@@ -2946,8 +2949,22 @@ ReadSourceFromFilename(JSContext *cx, const char *filename, jschar **src, size_t
     rv = NS_NewURI(getter_AddRefs(uri), filename);
     NS_ENSURE_SUCCESS(rv, rv);
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+     rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
     nsCOMPtr<nsIChannel> scriptChannel;
-    rv = NS_NewChannel(getter_AddRefs(scriptChannel), uri);
+    rv = NS_NewChannel2(getter_AddRefs(scriptChannel),
+                        uri,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // callbacks
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
     NS_ENSURE_SUCCESS(rv, rv);
 
     // Only allow local reading.
@@ -2961,8 +2978,10 @@ ReadSourceFromFilename(JSContext *cx, const char *filename, jschar **src, size_t
         return NS_OK;
 
     nsCOMPtr<nsIInputStream> scriptStream;
-    rv = scriptChannel->Open(getter_AddRefs(scriptStream));
-    NS_ENSURE_SUCCESS(rv, rv);
+    rv = scriptChannel->Open2(getter_AddRefs(scriptStream));
+    if (NS_FAILED(rv)) {
+      return rv;
+    }
 
     uint64_t rawLen;
     rv = scriptStream->Available(&rawLen);
