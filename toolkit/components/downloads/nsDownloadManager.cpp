@@ -40,6 +40,9 @@
 
 #include "mozilla/Preferences.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 #ifdef XP_WIN
 #include <shlobj.h>
 #include "nsWindowsHelpers.h"
@@ -3537,10 +3540,24 @@ nsDownload::Resume()
                             nsIWebBrowserPersist::PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION);
   NS_ENSURE_SUCCESS(rv, rv);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   // Create a new channel for the source URI
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsIInterfaceRequestor> ir(do_QueryInterface(wbp));
-  rv = NS_NewChannel(getter_AddRefs(channel), mSource, nullptr, nullptr, ir);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      mSource,
+                      nullptr, // ioService
+                      nullptr, // loadGrup
+                      ir,
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal,
+                      nullptr); // reqeustingContext
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIPrivateBrowsingChannel> pbChannel = do_QueryInterface(channel);
