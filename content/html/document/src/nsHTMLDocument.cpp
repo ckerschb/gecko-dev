@@ -1513,7 +1513,16 @@ nsHTMLDocument::Open(JSContext* cx,
   nsCOMPtr<nsIChannel> channel;
   nsCOMPtr<nsILoadGroup> group = do_QueryReferent(mDocumentLoadGroup);
 
-  rv = NS_NewChannel(getter_AddRefs(channel), uri, nullptr, group);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      nullptr, // ioService,
+                      group,
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      callerPrincipal,
+                      nullptr); // requestingContext
 
   if (rv.Failed()) {
     return nullptr;
