@@ -456,8 +456,16 @@ nsDOMFileReader::ReadFileContent(JSContext* aCx,
       }
     }
 
-    aRv = NS_NewChannel(getter_AddRefs(mChannel), uri, nullptr, loadGroup,
-                        nullptr, nsIRequest::LOAD_BACKGROUND);
+    aRv = NS_NewChannel2(getter_AddRefs(mChannel),
+                         uri,
+                         nullptr, // ioService
+                         loadGroup,
+                         nullptr, // callbacks
+                         nsIRequest::LOAD_BACKGROUND,
+                         nullptr, // channelPolicy
+                         nsIContentPolicy::TYPE_OTHER,
+                         mPrincipal,
+                         nullptr); // requestingContext
     NS_ENSURE_SUCCESS_VOID(aRv.ErrorCode());
   }
 
@@ -465,7 +473,7 @@ nsDOMFileReader::ReadFileContent(JSContext* aCx,
   mTotal = mozilla::dom::kUnknownSize;
   mFile->GetSize(&mTotal);
 
-  aRv = mChannel->AsyncOpen(this, nullptr);
+  aRv = mChannel->AsyncOpen2(this, nullptr);
   NS_ENSURE_SUCCESS_VOID(aRv.ErrorCode());
 
   //FileReader should be in loading state here
