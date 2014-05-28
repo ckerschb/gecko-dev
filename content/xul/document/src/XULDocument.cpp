@@ -2825,8 +2825,15 @@ XULDocument::LoadOverlayInternal(nsIURI* aURI, bool aIsDynamic,
 
         nsCOMPtr<nsILoadGroup> group = do_QueryReferent(mDocumentLoadGroup);
         nsCOMPtr<nsIChannel> channel;
-        rv = NS_NewChannel(getter_AddRefs(channel), aURI, nullptr, group);
-
+        rv = NS_NewChannel3(getter_AddRefs(channel),
+                            aURI,
+                            nullptr, // ioService
+                            group,
+                            nullptr, // callbacks
+                            nsIRequest::LOAD_NORMAL,
+                            nullptr, // channelpolicy
+                            nsIContentPolicy::TYPE_OTHER,
+                            static_cast<nsINode*>(this));
         if (NS_SUCCEEDED(rv)) {
             // Set the owner of the channel to be our principal so
             // that the overlay's JSObjects etc end up being created
@@ -2834,7 +2841,7 @@ XULDocument::LoadOverlayInternal(nsIURI* aURI, bool aIsDynamic,
             // compartment.
             channel->SetOwner(NodePrincipal());
 
-            rv = channel->AsyncOpen(listener, nullptr);
+            rv = channel->AsyncOpen2(listener, nullptr);
         }
 
         if (NS_FAILED(rv)) {
