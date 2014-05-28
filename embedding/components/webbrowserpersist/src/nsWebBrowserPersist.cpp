@@ -87,6 +87,9 @@
 #include "mozilla/dom/HTMLSharedElement.h"
 #include "mozilla/dom/HTMLSharedObjectElement.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -510,7 +513,7 @@ nsWebBrowserPersist::StartUpload(nsIInputStream *aInputStream,
     // NOTE: ALL data must be available in "inputstream"
     nsresult rv = uploadChannel->SetUploadStream(aInputStream, aContentType, -1);
     NS_ENSURE_SUCCESS(rv, NS_ERROR_FAILURE);
-    rv = destChannel->AsyncOpen(this, nullptr);
+    rv = destChannel->AsyncOpen2(this, nullptr);
     NS_ENSURE_SUCCESS(rv, NS_ERROR_FAILURE);
 
     // add this to the upload list
@@ -1198,11 +1201,23 @@ nsresult nsWebBrowserPersist::SaveURIInternal(
         }
     }
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
     // Open a channel to the URI
     nsCOMPtr<nsIChannel> inputChannel;
-    rv = NS_NewChannel(getter_AddRefs(inputChannel), aURI,
-            nullptr, nullptr, static_cast<nsIInterfaceRequestor*>(this),
-            loadFlags);
+    rv = NS_NewChannel2(getter_AddRefs(inputChannel),
+                        aURI,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        static_cast<nsIInterfaceRequestor*>(this),
+                        loadFlags,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
 
     nsCOMPtr<nsIPrivateBrowsingChannel> pbChannel = do_QueryInterface(inputChannel);
     if (pbChannel)
@@ -1330,7 +1345,7 @@ nsresult nsWebBrowserPersist::SaveChannelInternal(
     }
 
     // Read from the input channel
-    nsresult rv = aChannel->AsyncOpen(this, nullptr);
+    nsresult rv = aChannel->AsyncOpen2(this, nullptr);
     if (rv == NS_ERROR_NO_CONTENT)
     {
         // Assume this is a protocol such as mailto: which does not feed out
