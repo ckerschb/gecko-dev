@@ -151,8 +151,7 @@ ChannelFromScriptURL(nsIPrincipal* principal,
                         flags,
                         channelPolicy,
                         nsIContentPolicy::TYPE_SCRIPT,
-                        principal,
-                        parentDoc);
+                        principal);
   }
 
   NS_ENSURE_SUCCESS(rv, rv);

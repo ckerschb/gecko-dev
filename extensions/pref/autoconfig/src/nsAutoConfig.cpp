@@ -296,8 +296,7 @@ nsresult nsAutoConfig::downloadAutoConfig()
                         nsIRequest::INHIBIT_PERSISTENT_CACHING | nsIRequest::LOAD_BYPASS_CACHE,
                         nullptr,  // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     if (NS_FAILED(rv)) {
         return rv;
     }

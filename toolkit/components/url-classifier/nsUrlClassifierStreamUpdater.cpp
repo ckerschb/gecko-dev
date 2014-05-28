@@ -122,8 +122,7 @@ nsUrlClassifierStreamUpdater::FetchUpdate(nsIURI *aUpdateUrl,
                       loadFlags,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // requestingContext
+                      systemPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
 
   mBeganStream = false;

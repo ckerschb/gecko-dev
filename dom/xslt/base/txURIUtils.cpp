@@ -64,8 +64,7 @@ URIUtils::ResetWithSource(nsIDocument *aNewDoc, nsIDOMNode *aSourceNode)
                                     nsIRequest::LOAD_NORMAL,
                                     nullptr, // channelpolicy
                                     nsIContentPolicy::TYPE_OTHER,
-                                    sourcePrincipal,
-                                    nullptr))) { // requestingContext
+                                    sourcePrincipal))) {
             return;
         }
         channel->SetOwner(sourcePrincipal);

@@ -115,8 +115,7 @@ mozJSSubScriptLoader::ReadScript(nsIURI *uri, JSContext *cx, JSObject *targetObj
                                  nsIRequest::LOAD_NORMAL,
                                  nullptr, // channelPolicy
                                  nsIContentPolicy::TYPE_OTHER,
-                                 principal,
-                                 nullptr); // requestingContext
+                                 principal);
 
     if (NS_SUCCEEDED(rv)) {
         chan->SetContentType(NS_LITERAL_CSTRING("application/javascript"));
@@ -582,8 +581,7 @@ mozJSSubScriptLoader::PrecompileScript(nsIURI* aURI,
                                  nsIRequest::LOAD_NORMAL,
                                  nullptr, // channelPolicy
                                  nsIContentPolicy::TYPE_OTHER,
-                                 aPrincipal,
-                                 nullptr); // requestingContext
+                                 aPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     nsRefPtr<ScriptPrecompiler> loadObserver =

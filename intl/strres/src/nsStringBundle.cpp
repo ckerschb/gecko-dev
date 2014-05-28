@@ -84,8 +84,7 @@ nsStringBundle::LoadProperties()
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy,
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // aRequestingContext
+                      systemPrincipal);
   if (NS_FAILED(rv)) return rv;
 
   // It's a string bundle.  We expect a text/plain type, so set that as hint

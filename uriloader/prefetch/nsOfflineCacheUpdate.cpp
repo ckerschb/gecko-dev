@@ -197,8 +197,7 @@ nsManifestCheck::Begin()
                         nsIRequest::LOAD_BYPASS_CACHE,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     // configure HTTP specific stuff
@@ -402,8 +401,7 @@ nsOfflineCacheUpdateItem::OpenChannel(nsOfflineCacheUpdate *aUpdate)
                         flags,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     nsCOMPtr<nsIApplicationCacheChannel> appCacheChannel =

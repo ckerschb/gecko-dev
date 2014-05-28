@@ -558,8 +558,7 @@ AsyncFetchAndSetIconFromNetwork::Run()
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // requestingContext
+                      systemPrincipal);
 
   NS_ENSURE_SUCCESS(rv, rv);
   nsCOMPtr<nsIInterfaceRequestor> listenerRequestor =

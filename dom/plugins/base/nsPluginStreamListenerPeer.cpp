@@ -656,8 +656,7 @@ nsPluginStreamListenerPeer::RequestRead(NPByteRange* rangeList)
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); //requestingContext
+                      systemPrincipal);
   if (NS_FAILED(rv))
     return rv;
 

@@ -968,8 +968,7 @@ Navigator::MozIsLocallyAvailable(const nsAString &aURI,
                       loadFlags,
                       nullptr,  // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // aRequestingContext
+                      systemPrincipal);
 
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
@@ -1198,8 +1197,7 @@ Navigator::SendBeacon(const nsAString& aUrl,
                       nsIRequest::LOAD_NORMAL,
                       channelPolicy,
                       nsIContentPolicy::TYPE_BEACON,
-                      systemPrincipal,
-                      nullptr); // requestingContext
+                      systemPrincipal);
   if (NS_FAILED(rv)) {
     aRv.Throw(rv);
     return false;

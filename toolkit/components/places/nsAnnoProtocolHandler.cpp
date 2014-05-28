@@ -62,8 +62,7 @@ GetDefaultIcon(nsIChannel **aChannel)
                         nsIRequest::LOAD_NORMAL,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // reqeustingContext
+                        systemPrincipal);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

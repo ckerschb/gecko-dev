@@ -464,8 +464,7 @@ txCompileObserver::startLoad(nsIURI* aUri, txStylesheetCompiler* aCompiler,
                                  nsIRequest::LOAD_NORMAL,
                                  nullptr, // channelPolicy
                                  nsIContentPolicy::TYPE_STYLESHEET,
-                                 aReferrerPrincipal,
-                                 nullptr); // requestingContex
+                                 aReferrerPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     channel->SetLoadGroup(mLoadGroup);

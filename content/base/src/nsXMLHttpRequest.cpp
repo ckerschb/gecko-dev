@@ -1746,8 +1746,7 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
                         nsIRequest::LOAD_BACKGROUND,
                         channelPolicy,
                         nsIContentPolicy::TYPE_XMLHTTPREQUEST,
-                        mPrincipal,
-                        doc);
+                        mPrincipal);
   }
 
   if (NS_FAILED(rv)) return rv;

@@ -963,8 +963,7 @@ nsHTTPIndex::FireTimer(nsITimer* aTimer, void* aClosure)
                                 nsIRequest::LOAD_NORMAL,
                                 nullptr, // channelPolicy
                                 nsIContentPolicy::TYPE_OTHER,
-                                systemPrincipal,
-                                nullptr); // requestingContext
+                                systemPrincipal);
             NS_ENSURE_SUCCESS(rv, /* void */);
           }
           if (NS_SUCCEEDED(rv) && (channel)) {
@@ -1334,8 +1333,7 @@ nsDirectoryViewerFactory::CreateInstance(const char *aCommand,
                         nsIRequest::LOAD_NORMAL,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     nsCOMPtr<nsIStreamListener> listener;

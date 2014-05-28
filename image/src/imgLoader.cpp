@@ -511,8 +511,7 @@ static nsresult NewImageChannel(nsIChannel **aResult,
                         aLoadFlags,
                         aPolicy,
                         nsIContentPolicy::TYPE_IMAGE,
-                        aLoadingPrincipal,
-                        requestingNode);
+                        aLoadingPrincipal);
   }
 
   if (NS_FAILED(rv))

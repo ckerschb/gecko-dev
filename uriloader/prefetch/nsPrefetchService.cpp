@@ -204,8 +204,7 @@ nsPrefetchNode::OpenChannel()
                         nsICachingChannel::LOAD_ONLY_IF_MODIFIED,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     // configure HTTP specific stuff

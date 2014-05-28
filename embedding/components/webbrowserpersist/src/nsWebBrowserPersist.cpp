@@ -1216,8 +1216,7 @@ nsresult nsWebBrowserPersist::SaveURIInternal(
                         loadFlags,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
 
     nsCOMPtr<nsIPrivateBrowsingChannel> pbChannel = do_QueryInterface(inputChannel);
     if (pbChannel)

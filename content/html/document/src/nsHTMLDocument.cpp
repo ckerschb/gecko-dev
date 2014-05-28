@@ -1524,8 +1524,7 @@ nsHTMLDocument::Open(JSContext* cx,
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      callerPrincipal,
-                      nullptr); // requestingContext
+                      callerPrincipal);
 
   if (rv.Failed()) {
     return nullptr;
@@ -2371,8 +2370,7 @@ nsHTMLDocument::CreateAndAddWyciwygChannel(void)
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // requestingContext
+                      systemPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
 
   mWyciwygChannel = do_QueryInterface(channel);

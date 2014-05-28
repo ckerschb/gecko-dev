@@ -1171,8 +1171,7 @@ NS_StartCORSPreflight(nsIChannel* aRequestChannel,
                       loadFlags,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      aPrincipal,
-                      nullptr); // requestingContext
+                      aPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIHttpChannel> preHttp = do_QueryInterface(preflightChannel);

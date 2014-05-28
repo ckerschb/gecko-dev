@@ -316,8 +316,7 @@ nsSyncLoadService::LoadDocument(nsIURI *aURI, nsIPrincipal *aLoaderPrincipal,
                                  nsIRequest::LOAD_NORMAL,
                                  nullptr, // channelPolicy
                                  nsIContentPolicy::TYPE_OTHER,
-                                 aLoaderPrincipal,
-                                 nullptr); // requestingContext
+                                 aLoaderPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     if (!aForceToXML) {

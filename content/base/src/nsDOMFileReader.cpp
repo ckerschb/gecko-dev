@@ -464,8 +464,7 @@ nsDOMFileReader::ReadFileContent(JSContext* aCx,
                          nsIRequest::LOAD_BACKGROUND,
                          nullptr, // channelPolicy
                          nsIContentPolicy::TYPE_OTHER,
-                         mPrincipal,
-                         nullptr); // requestingContext
+                         mPrincipal);
     NS_ENSURE_SUCCESS_VOID(aRv.ErrorCode());
   }
 

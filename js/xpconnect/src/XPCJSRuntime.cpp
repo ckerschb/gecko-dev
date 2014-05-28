@@ -2963,8 +2963,7 @@ ReadSourceFromFilename(JSContext *cx, const char *filename, jschar **src, size_t
                         nsIRequest::LOAD_NORMAL,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        systemPrincipal,
-                        nullptr); // requestingContext
+                        systemPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     // Only allow local reading.

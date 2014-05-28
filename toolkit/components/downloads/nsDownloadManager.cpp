@@ -3556,8 +3556,7 @@ nsDownload::Resume()
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      systemPrincipal,
-                      nullptr); // reqeustingContext
+                      systemPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIPrivateBrowsingChannel> pbChannel = do_QueryInterface(channel);

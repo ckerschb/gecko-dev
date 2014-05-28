@@ -271,20 +271,19 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
 }
 
 inline nsresult
-NS_NewChannel2(nsIChannel            **result,
-               nsIURI                *uri,
-               nsIIOService          *ioService = nullptr,    // pass in nsIIOService to optimize callers
-               nsILoadGroup          *loadGroup = nullptr,
-               nsIInterfaceRequestor *callbacks = nullptr,
-               uint32_t              loadFlags = nsIRequest::LOAD_NORMAL,
-               nsIChannelPolicy      *channelPolicy = nullptr,
-               nsContentPolicyType   aType = nsIContentPolicy::TYPE_OTHER,
-               nsIPrincipal          *aRequestingPrincipal = nullptr,
-               nsISupports           *aRequestingContext = nullptr)
+NS_NewChannel2(nsIChannel**           outResult,
+               nsIURI*                aURI,
+               nsIIOService*          aIoService,    // pass in nsIIOService to optimize callers
+               nsILoadGroup*          aLoadGroup,
+               nsIInterfaceRequestor* aCallbacks,
+               uint32_t               aLoadFlags,
+               nsIChannelPolicy*      aChannelPolicy,
+               nsContentPolicyType    aType,
+               nsIPrincipal*          aRequestingPrincipal) // TODO, probably rename to SystemPrincipal
 {
   { // debug
     nsAutoCString spec;
-    uri->GetSpec(spec);
+    aURI->GetSpec(spec);
     fprintf(stderr, "\nNS_NewChannel2 {\n");
     fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
     fprintf(stderr, "  uri: %s\n", spec.get());
@@ -299,28 +298,20 @@ NS_NewChannel2(nsIChannel            **result,
     }
     fprintf(stderr, "}\n\n");
   }
+
   // resource and chrome loads do not have a principal
   bool resourceMatch = false;
-  NS_ENSURE_SUCCESS(uri->SchemeIs("resource", &resourceMatch), NS_OK);
+  NS_ENSURE_SUCCESS(aURI->SchemeIs("resource", &resourceMatch), NS_OK);
   bool chromeMatch = false;
-  NS_ENSURE_SUCCESS(uri->SchemeIs("chrome", &chromeMatch), NS_OK);
+  NS_ENSURE_SUCCESS(aURI->SchemeIs("chrome", &chromeMatch), NS_OK);
   if (!resourceMatch && !chromeMatch) {
     NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
   }
 
-  // TODO, we should uncomment the next line, but we can't, because we call AsyncOpen2 only if we 
-  // can not query a Node (oterhwise we would call AsyncOpen3), therefore the context is null for those cases.
-  // NS_ASSERTION(aRequestingContext, "NS_NewChannel2 can not create channel with aRequestingContext");
-
-  // TODO: uncomment, the following assertion will make sure that every call site specicies a contenType
-  // NS_ASSERTION(aType != nsIContentPolicy::TYPE_OTHER,
-  //              "Can not create channel with contentType TYPE_OTHER");
-
-
-  nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
-  (*result)->SetContentPolicyType(aType);
-  (*result)->SetRequestingContext(aRequestingContext);
-  (*result)->SetRequestingPrincipal(aRequestingPrincipal);
+  nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
+  (*outResult)->SetContentPolicyType(aType);
+  (*outResult)->SetRequestingContext(nullptr);
+  (*outResult)->SetRequestingPrincipal(aRequestingPrincipal);
   return rv;
 }
 

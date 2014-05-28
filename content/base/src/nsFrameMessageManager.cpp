@@ -1493,8 +1493,7 @@ nsFrameScriptExecutor::TryCacheLoadAndCompileScript(const nsAString& aURL,
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      mPrincipal,
-                      nullptr); // requestingContext
+                      mPrincipal);
   NS_ENSURE_SUCCESS(rv, /*void*/);
   if (!channel) {
     return;
