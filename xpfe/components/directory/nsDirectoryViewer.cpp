@@ -53,6 +53,9 @@
 #include "mozilla/Preferences.h"
 #include "nsCxPusher.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 
 static const int FORMAT_XUL = 3;
@@ -944,13 +947,32 @@ nsHTTPIndex::FireTimer(nsITimer* aTimer, void* aClosure)
           nsCOMPtr<nsIURI>	url;
           
           rv = NS_NewURI(getter_AddRefs(url), uri.get());
+
+          nsCOMPtr<nsIPrincipal> systemPrincipal;
+          rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+            GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+          NS_ENSURE_SUCCESS(rv, /* void */ );
+
           nsCOMPtr<nsIChannel>	channel;
           if (NS_SUCCEEDED(rv) && (url)) {
-            rv = NS_NewChannel(getter_AddRefs(channel), url, nullptr, nullptr);
+            rv = NS_NewChannel2(getter_AddRefs(channel),
+                                url,
+                                nullptr, // ioService
+                                nullptr, // loadgroup
+                                nullptr, // callbacks
+                                nsIRequest::LOAD_NORMAL,
+                                nullptr, // channelPolicy
+                                nsIContentPolicy::TYPE_OTHER,
+                                systemPrincipal,
+                                nullptr); // requestingContext
+            NS_ENSURE_SUCCESS(rv, /* void */);
           }
           if (NS_SUCCEEDED(rv) && (channel)) {
             channel->SetNotificationCallbacks(httpIndex);
-            rv = channel->AsyncOpen(httpIndex, aSource);
+            rv = channel->AsyncOpen2(httpIndex, aSource);
+            if (NS_FAILED(rv)) {
+              return;
+            }
           }
         }
   }
@@ -1297,20 +1319,36 @@ nsDirectoryViewerFactory::CreateInstance(const char *aCommand,
     nsCOMPtr<nsIURI> uri;
     rv = NS_NewURI(getter_AddRefs(uri), "chrome://communicator/content/directory/directory.xul");
     if (NS_FAILED(rv)) return rv;
-    
+
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewChannel(getter_AddRefs(channel), uri, nullptr, aLoadGroup);
-    if (NS_FAILED(rv)) return rv;
-    
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        nullptr, // ioService
+                        aLoadGroup,
+                        nullptr, // callbacks,
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
+    NS_ENSURE_SUCCESS(rv, rv);
+
     nsCOMPtr<nsIStreamListener> listener;
     rv = factory->CreateInstance(aCommand, channel, aLoadGroup, "application/vnd.mozilla.xul+xml",
                                  aContainer, aExtraInfo, getter_AddRefs(listener),
                                  aDocViewerResult);
     if (NS_FAILED(rv)) return rv;
 
-    rv = channel->AsyncOpen(listener, nullptr);
-    if (NS_FAILED(rv)) return rv;
-    
+    rv = channel->AsyncOpen2(listener, nullptr);
+    if (NS_FAILED(rv)) {
+      return rv;
+    }
+
     // Create an HTTPIndex object so that we can stuff it into the script context
     nsCOMPtr<nsIURI> baseuri;
     rv = aChannel->GetURI(getter_AddRefs(baseuri));
