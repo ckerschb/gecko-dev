@@ -1354,7 +1354,7 @@ bool imgLoader::ValidateRequestWithNewChannel(imgRequest *request,
 
     rv = newChannel->AsyncOpen2(listener, nullptr);
     if (NS_FAILED(rv)) {
-      return NS_ERROR_CONTENT_BLOCKED;
+      return false;
     }
 
     if (NS_SUCCEEDED(rv))
