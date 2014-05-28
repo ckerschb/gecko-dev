@@ -30,6 +30,9 @@
 #include "nsINode.h"
 #include "nsIDocument.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 
 #if defined(PR_LOGGING)
@@ -186,11 +189,23 @@ nsPrefetchNode::OpenChannel()
         return NS_ERROR_FAILURE;
     }
     nsCOMPtr<nsILoadGroup> loadGroup = source->OwnerDoc()->GetDocumentLoadGroup();
-    nsresult rv = NS_NewChannel(getter_AddRefs(mChannel),
-                                mURI,
-                                nullptr, loadGroup, this,
-                                nsIRequest::LOAD_BACKGROUND |
-                                nsICachingChannel::LOAD_ONLY_IF_MODIFIED);
+
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    nsresult rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                        mURI,
+                        nullptr, //ioService
+                        loadGroup,
+                        this,
+                        nsIRequest::LOAD_BACKGROUND |
+                        nsICachingChannel::LOAD_ONLY_IF_MODIFIED,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal,
+                        nullptr); // requestingContext
     NS_ENSURE_SUCCESS(rv, rv);
 
     // configure HTTP specific stuff
@@ -204,9 +219,10 @@ nsPrefetchNode::OpenChannel()
             false);
     }
 
-    rv = mChannel->AsyncOpen(this, nullptr);
-    NS_ENSURE_SUCCESS(rv, rv);
-
+    rv = mChannel->AsyncOpen2(this, nullptr);
+    if (NS_FAILED(rv)) {
+      return rv;
+    }
     return NS_OK;
 }
 
