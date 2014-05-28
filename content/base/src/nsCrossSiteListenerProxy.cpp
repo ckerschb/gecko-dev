@@ -1063,7 +1063,7 @@ nsCORSPreflightListener::OnStartRequest(nsIRequest *aRequest,
     // Everything worked, try to cache and then fire off the actual request.
     AddResultToCache(aRequest);
 
-    rv = mOuterChannel->AsyncOpen(mOuterListener, mOuterContext);
+    rv = mOuterChannel->AsyncOpen2(mOuterListener, mOuterContext);
   }
 
   if (NS_FAILED(rv)) {
@@ -1148,7 +1148,7 @@ NS_StartCORSPreflight(nsIChannel* aRequestChannel,
 
   if (entry && entry->CheckRequest(method, aUnsafeHeaders)) {
     // We have a cached preflight result, just start the original channel
-    return aRequestChannel->AsyncOpen(aListener, nullptr);
+    return aRequestChannel->AsyncOpen2(aListener, nullptr);
   }
 
   // Either it wasn't cached or the cached result has expired. Build a
@@ -1163,8 +1163,16 @@ NS_StartCORSPreflight(nsIChannel* aRequestChannel,
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIChannel> preflightChannel;
-  rv = NS_NewChannel(getter_AddRefs(preflightChannel), uri, nullptr,
-                     loadGroup, nullptr, loadFlags);
+  rv = NS_NewChannel2(getter_AddRefs(preflightChannel),
+                      uri,
+                      nullptr, // ioService
+                      loadGroup,
+                      nullptr, // callbacks
+                      loadFlags,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      aPrincipal,
+                      nullptr); // requestingContext
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIHttpChannel> preHttp = do_QueryInterface(preflightChannel);
@@ -1188,7 +1196,7 @@ NS_StartCORSPreflight(nsIChannel* aRequestChannel,
   preflightListener = corsListener;
 
   // Start preflight
-  rv = preflightChannel->AsyncOpen(preflightListener, nullptr);
+  rv = preflightChannel->AsyncOpen2(preflightListener, nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
   
   // Return newly created preflight channel
