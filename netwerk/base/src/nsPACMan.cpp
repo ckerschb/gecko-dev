@@ -404,7 +404,7 @@ nsPACMan::StartLoading()
       if (channel) {
         channel->SetLoadFlags(nsIRequest::LOAD_BYPASS_CACHE);
         channel->SetNotificationCallbacks(this);
-        if (NS_SUCCEEDED(channel->AsyncOpen(mLoader, nullptr)))
+        if (NS_SUCCEEDED(channel->AsyncOpen2(mLoader, nullptr)))
           return;
       }
     }

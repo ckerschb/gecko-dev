@@ -178,7 +178,7 @@ nsURIChecker::AsyncCheck(nsIRequestObserver *aObserver,
     mChannel->SetNotificationCallbacks(this);
     
     // and start the request:
-    nsresult rv = mChannel->AsyncOpen(this, nullptr);
+    nsresult rv = mChannel->AsyncOpen2(this, nullptr);
     if (NS_FAILED(rv))
         mChannel = nullptr;
     else {
