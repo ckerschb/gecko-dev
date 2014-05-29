@@ -503,6 +503,8 @@ static nsresult NewImageChannel(nsIChannel **aResult,
                         requestingNode);
   }
   else {
+    // TODO: in that case aLodingPrincipal must be the systemPrincipal
+    // put assertion in NewChannel2
     rv = NS_NewChannel2(aResult,
                         aURI,
                         nullptr, // cached IOService

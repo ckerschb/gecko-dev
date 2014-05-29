@@ -1726,6 +1726,9 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_XMLHTTPREQUEST);
   }
+  // TODO: GetOwner does not work, because GetOwner returns nsPIDOMWindow
+  // nsCOMPtr<nsINode> requestingNode = GetOwner();
+  // using the doc instead, which is what NS_CheckContentLoadPolicy does.
   if (doc) {
     rv = NS_NewChannel3(getter_AddRefs(mChannel),
                         uri,
@@ -1738,6 +1741,9 @@ nsXMLHttpRequest::Open(const nsACString& inMethod, const nsACString& url,
                         doc);
   }
   else {
+    // this mPrincipal must be the systemPrincipal
+    // TODO, assert that mPrincipal is the SystemPrincipal
+    // we are going to do that assertion in NewChannel2
     rv = NS_NewChannel2(getter_AddRefs(mChannel),
                         uri,
                         nullptr,  // ioService

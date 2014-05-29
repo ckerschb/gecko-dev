@@ -143,6 +143,8 @@ ChannelFromScriptURL(nsIPrincipal* principal,
                         parentDoc);
   }
   else {
+    // TODO: make sure that principal is the SystemPrincipal in those cases
+    // put an assertion into NewChannel2
     rv = NS_NewChannel2(getter_AddRefs(channel),
                         uri,
                         ios,
