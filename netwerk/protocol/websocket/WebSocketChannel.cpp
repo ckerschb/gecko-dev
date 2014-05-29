@@ -1151,7 +1151,7 @@ WebSocketChannel::BeginOpen()
   }
 #endif
 
-  rv = localChannel->AsyncOpen(this, mHttpChannel);
+  rv = localChannel->AsyncOpen2(this, mHttpChannel);
   if (NS_FAILED(rv)) {
     LOG(("WebSocketChannel::BeginOpen: cannot async open\n"));
     AbortSession(NS_ERROR_CONNECTION_REFUSED);
