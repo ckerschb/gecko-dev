@@ -588,7 +588,7 @@ nsJSChannel::Open(nsIInputStream **aResult)
                                            mOriginalInnerWindow);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    return mStreamChannel->Open(aResult);
+    return mStreamChannel->Open2(aResult);
 }
 
 NS_IMETHODIMP
@@ -807,7 +807,7 @@ nsJSChannel::EvaluateScript()
         return;
     }
     
-    mStatus = mStreamChannel->AsyncOpen(this, mContext);
+    mStatus = mStreamChannel->AsyncOpen2(this, mContext);
     if (NS_SUCCEEDED(mStatus)) {
         // mStreamChannel will call OnStartRequest and OnStopRequest on
         // us, so we'll be sure to call them on our listener.

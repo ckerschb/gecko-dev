@@ -775,7 +775,7 @@ PendingLookup::SendRemoteQueryInternal()
   rv = channel->SetNotificationCallbacks(loadContext);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  rv = channel->AsyncOpen(this, nullptr);
+  rv = channel->AsyncOpen2(this, nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
 
   return NS_OK;

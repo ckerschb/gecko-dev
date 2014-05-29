@@ -428,7 +428,7 @@ nsOfflineCacheUpdateItem::OpenChannel(nsOfflineCacheUpdate *aUpdate)
                                       false);
     }
 
-    rv = mChannel->AsyncOpen(this, nullptr);
+    rv = mChannel->AsyncOpen2(this, nullptr);
     NS_ENSURE_SUCCESS(rv, rv);
 
     mUpdate = aUpdate;
