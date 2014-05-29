@@ -26,6 +26,9 @@ template<class T> class nsReadingIterator;
 #include "nsNetUtil.h"
 #include "TestHarness.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 #ifndef MOZILLA_INTERNAL_API
 #undef nsString_h___
 #undef nsAString_h___
@@ -94,8 +97,22 @@ nsresult runTest(uint32_t aExpectedPolicyCount, // this should be 0 for policies
 
   // we also init the csp with a dummyChannel, which is unused
   // for the parser tests but surpresses assertions in SetRequestContext.
+
+  // nsCOMPtr<nsIPrincipal> systemPrincipal;
+  // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+  // GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  // NS_ENSURE_SUCCESS(rv, rv);
+
   nsCOMPtr<nsIChannel> dummyChannel;
-  rv = NS_NewChannel(getter_AddRefs(dummyChannel), selfURI);
+  rv = NS_NewChannel2(getter_AddRefs(dummyChannel),
+                      selfURI,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nsIRequest::LOAD_NORMAL,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
 
   // create a CSP object
