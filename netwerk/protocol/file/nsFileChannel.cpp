@@ -20,6 +20,9 @@
 #include "nsIMIMEService.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 //-----------------------------------------------------------------------------
 
 class nsFileCopyEvent : public nsRunnable {
@@ -325,12 +328,25 @@ nsFileChannel::OpenContentStream(bool async, nsIInputStream **result,
   rv = NS_GetFileProtocolHandler(getter_AddRefs(fileHandler));
   if (NS_FAILED(rv))
     return rv;
-    
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   nsCOMPtr<nsIURI> newURI;
   rv = fileHandler->ReadURLFile(file, getter_AddRefs(newURI));
   if (NS_SUCCEEDED(rv)) {
     nsCOMPtr<nsIChannel> newChannel;
-    rv = NS_NewChannel(getter_AddRefs(newChannel), newURI);
+    rv = NS_NewChannel2(getter_AddRefs(newChannel),
+                        newURI,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // callbacks
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
     if (NS_FAILED(rv))
       return rv;
 
