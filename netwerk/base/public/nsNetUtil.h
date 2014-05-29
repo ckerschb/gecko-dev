@@ -86,6 +86,10 @@
 #include "nsIContentPolicy.h"
 #include "nsINode.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+// #include "../../../caps/include/nsScriptSecurityManager.h"
+#include "../../../caps/include/nsSystemPrincipal.h"
+
 #include <limits>
 
 #ifdef MOZILLA_INTERNAL_API
@@ -461,9 +465,20 @@ NS_OpenURI(nsIInputStream       **result,
            nsIChannel           **channelOut = nullptr)
 {
     nsresult rv;
+    // TODO: Probably we need to update callsites to hand in a principal/node
+    // for now, we are using the systemPrincipal, so we pass assertions!
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewChannel(getter_AddRefs(channel), uri, ioService,
-                       loadGroup, callbacks, loadFlags);
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        ioService,
+                        loadGroup,
+                        callbacks,
+                        loadFlags,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
     if (NS_SUCCEEDED(rv)) {
         nsIInputStream *stream;
         rv = channel->Open(&stream);
