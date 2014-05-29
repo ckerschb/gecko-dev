@@ -12,6 +12,7 @@
 #include "nsTHashtable.h"
 #include "nsHashKeys.h"
 #include "nsRefPtrHashtable.h"
+#include "nsInterfaceHashtable.h"
 
 // Local Includes
 // Helper Classes
@@ -37,7 +38,8 @@
 #include "nsSize.h"
 #include "mozFlushType.h"
 #include "prclist.h"
-#include "nsIDOMStorageEvent.h"
+#include "mozilla/dom/StorageEvent.h"
+#include "mozilla/dom/StorageEventBinding.h"
 #include "nsFrameMessageManager.h"
 #include "mozilla/LinkedList.h"
 #include "mozilla/TimeStamp.h"
@@ -338,6 +340,7 @@ public:
 
   // public methods
   nsPIDOMWindow* GetPrivateParent();
+
   // callback for close event
   void ReallyCloseWindow();
 
@@ -544,7 +547,7 @@ public:
     return static_cast<nsGlobalWindow *>(top.get());
   }
 
-  already_AddRefed<nsIDOMWindow> GetChildWindow(const nsAString& aName);
+  nsPIDOMWindow* GetChildWindow(const nsAString& aName);
 
   // These return true if we've reached the state in this top level window
   // where we ask the user if further dialogs should be blocked.
@@ -1005,6 +1008,8 @@ public:
   void NotifyDefaultButtonLoaded(mozilla::dom::Element& aDefaultButton,
                                  mozilla::ErrorResult& aError);
   nsIMessageBroadcaster* GetMessageManager(mozilla::ErrorResult& aError);
+  nsIMessageBroadcaster* GetGroupMessageManager(const nsAString& aGroup,
+                                                mozilla::ErrorResult& aError);
   void BeginWindowMove(mozilla::dom::Event& aMouseDownEvent,
                        mozilla::dom::Element* aPanel,
                        mozilla::ErrorResult& aError);
@@ -1336,8 +1341,9 @@ protected:
 
   inline int32_t DOMMinTimeoutValue() const;
 
-  nsresult CloneStorageEvent(const nsAString& aType,
-                             nsCOMPtr<nsIDOMStorageEvent>& aEvent);
+  already_AddRefed<mozilla::dom::StorageEvent>
+  CloneStorageEvent(const nsAString& aType,
+                    const nsRefPtr<mozilla::dom::StorageEvent>& aEvent);
 
   // Outer windows only.
   nsDOMWindowList* GetWindowList();
@@ -1522,7 +1528,7 @@ protected:
   // These member variables are used on both inner and the outer windows.
   nsCOMPtr<nsIPrincipal> mDocumentPrincipal;
 
-  typedef nsCOMArray<nsIDOMStorageEvent> nsDOMStorageEventArray;
+  typedef nsTArray<nsRefPtr<mozilla::dom::StorageEvent>> nsDOMStorageEventArray;
   nsDOMStorageEventArray mPendingStorageEvents;
 
   uint32_t mTimeoutsSuspendDepth;
@@ -1619,16 +1625,32 @@ public:
   NS_DECL_NSIDOMCHROMEWINDOW
 
   nsGlobalChromeWindow(nsGlobalWindow *aOuterWindow)
-    : nsGlobalWindow(aOuterWindow)
+    : nsGlobalWindow(aOuterWindow),
+      mGroupMessageManagers(1)
   {
     mIsChrome = true;
     mCleanMessageManager = true;
+  }
+
+  static PLDHashOperator
+  DisconnectGroupMessageManager(const nsAString& aKey,
+                                nsIMessageBroadcaster* aMM,
+                                void* aUserArg)
+  {
+    if (aMM) {
+      static_cast<nsFrameMessageManager*>(aMM)->Disconnect();
+    }
+    return PL_DHASH_NEXT;
   }
 
   ~nsGlobalChromeWindow()
   {
     NS_ABORT_IF_FALSE(mCleanMessageManager,
                       "chrome windows may always disconnect the msg manager");
+
+    mGroupMessageManagers.EnumerateRead(DisconnectGroupMessageManager, nullptr);
+    mGroupMessageManagers.Clear();
+
     if (mMessageManager) {
       static_cast<nsFrameMessageManager *>(
         mMessageManager.get())->Disconnect();
@@ -1650,10 +1672,12 @@ public:
   using nsGlobalWindow::Restore;
   using nsGlobalWindow::NotifyDefaultButtonLoaded;
   using nsGlobalWindow::GetMessageManager;
+  using nsGlobalWindow::GetGroupMessageManager;
   using nsGlobalWindow::BeginWindowMove;
 
   nsCOMPtr<nsIBrowserDOMWindow> mBrowserDOMWindow;
   nsCOMPtr<nsIMessageBroadcaster> mMessageManager;
+  nsInterfaceHashtable<nsStringHashKey, nsIMessageBroadcaster> mGroupMessageManagers;
 };
 
 /*
