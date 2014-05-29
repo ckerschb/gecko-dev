@@ -35,6 +35,8 @@
 #include "mozilla/WindowsVersion.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
 
 using namespace mozilla;
 using namespace mozilla::widget;
@@ -60,14 +62,22 @@ nsDataObj::CStream::~CStream()
 // helper - initializes the stream
 nsresult nsDataObj::CStream::Init(nsIURI *pSourceURI)
 {
-  nsresult rv;
-  rv = NS_NewChannel(getter_AddRefs(mChannel), pSourceURI,
-                     nullptr, nullptr, nullptr,
-                     nsIRequest::LOAD_FROM_CACHE);
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  nsresult rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
   NS_ENSURE_SUCCESS(rv, rv);
-  rv = mChannel->AsyncOpen(this, nullptr);
+
+  rv = NS_NewChannel2(getter_AddRefs(mChannel),
+                      pSourceURI,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      nsIRequest::LOAD_FROM_CACHE,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
-  return NS_OK;
+  return mChannel->AsyncOpen2(this, nullptr);
 }
 
 //-----------------------------------------------------------------------------
