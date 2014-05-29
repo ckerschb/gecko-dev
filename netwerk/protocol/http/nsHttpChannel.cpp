@@ -1733,7 +1733,7 @@ nsHttpChannel::OpenRedirectChannel(nsresult rv)
     }
 
     // open new channel
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv)) {
         return rv;
     }
@@ -1795,7 +1795,7 @@ nsHttpChannel::ContinueDoReplaceWithProxy(nsresult rv)
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
     // open new channel
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -2464,7 +2464,7 @@ nsHttpChannel::ContinueProcessFallback(nsresult rv)
     // Make sure to do this _after_ calling OnChannelRedirect
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -4260,7 +4260,7 @@ nsHttpChannel::ContinueProcessRedirection(nsresult rv)
     // should really be handled by the event sink implementation.
 
     // begin loading the new channel
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
 
     if (NS_FAILED(rv))
         return rv;
