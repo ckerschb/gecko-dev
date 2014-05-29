@@ -425,7 +425,7 @@ NS_IMETHODIMP nsZipWriter::AddEntryChannel(const nsACString & aZipEntry,
         return NS_ERROR_FILE_ALREADY_EXISTS;
 
     nsCOMPtr<nsIInputStream> inputStream;
-    nsresult rv = aChannel->Open(getter_AddRefs(inputStream));
+    nsresult rv = aChannel->Open2(getter_AddRefs(inputStream));
     NS_ENSURE_SUCCESS(rv, rv);
 
     rv = AddEntryStream(aZipEntry, aModTime, aCompression, inputStream,
@@ -1014,7 +1014,7 @@ inline nsresult nsZipWriter::BeginProcessingAddition(nsZipQueueItem* aItem,
             NS_ENSURE_SUCCESS(rv, rv);
         }
         else {
-            rv = aItem->mChannel->AsyncOpen(stream, nullptr);
+            rv = aItem->mChannel->AsyncOpen2(stream, nullptr);
             NS_ENSURE_SUCCESS(rv, rv);
         }
 

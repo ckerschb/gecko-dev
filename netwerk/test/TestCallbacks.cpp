@@ -268,5 +268,5 @@ nsresult StartLoad(const char *aURISpec) {
 
     // kick off the load
     nsCOMPtr<nsIRequest> request;
-    return channel->AsyncOpen(static_cast<nsIStreamListener*>(consumer), contextSup);
+    return channel->AsyncOpen2(static_cast<nsIStreamListener*>(consumer), contextSup);
 }
