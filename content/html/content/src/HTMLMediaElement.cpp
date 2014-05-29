@@ -1203,7 +1203,10 @@ nsresult HTMLMediaElement::LoadResource()
   }
 
   rv = channel->AsyncOpen2(listener, nullptr);
-  NS_ENSURE_SUCCESS(rv, rv);
+  if (NS_FAILED(rv)) {
+    // TODO: consistent return error for AsyncOpen2 failures.
+    return NS_ERROR_FAILURE;
+  }
 
   // Else the channel must be open and starting to download. If it encounters
   // a non-catastrophic failure, it will set a new task to continue loading
