@@ -639,7 +639,7 @@ nsresult ChannelMediaResource::OpenChannel(nsIStreamListener** aStreamListener)
     rv = SetupChannelHeaders();
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = mChannel->AsyncOpen(listener, nullptr);
+    rv = mChannel->AsyncOpen2(listener, nullptr);
     NS_ENSURE_SUCCESS(rv, rv);
     // Tell the media element that we are fetching data from a channel.
     element->DownloadResumed(true);
@@ -931,12 +931,15 @@ ChannelMediaResource::RecreateChannel()
   nsCOMPtr<nsILoadGroup> loadGroup = element->GetDocumentLoadGroup();
   NS_ENSURE_TRUE(loadGroup, NS_ERROR_NULL_POINTER);
 
-  nsresult rv = NS_NewChannel(getter_AddRefs(mChannel),
-                              mURI,
-                              nullptr,
-                              loadGroup,
-                              nullptr,
-                              loadFlags);
+  nsresult rv = NS_NewChannel3(getter_AddRefs(mChannel),
+                               mURI,
+                               nullptr, // ioService
+                               loadGroup,
+                               nullptr, // callbacks
+                               loadFlags,
+                               nullptr, // channelpolicy
+                               nsIContentPolicy::TYPE_OTHER,
+                               element);
 
   // We have cached the Content-Type, which should not change. Give a hint to
   // the channel to avoid a sniffing failure, which would be expected because we
@@ -1369,7 +1372,7 @@ nsresult FileMediaResource::Open(nsIStreamListener** aStreamListener)
                                      nsIScriptSecurityManager::STANDARD);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = mChannel->Open(getter_AddRefs(mInput));
+    rv = mChannel->Open2(getter_AddRefs(mInput));
   }
   NS_ENSURE_SUCCESS(rv, rv);
 
