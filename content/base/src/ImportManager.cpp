@@ -193,25 +193,25 @@ ImportLoader::Open()
   nsCOMPtr<nsIDocument> master = mImportParent->MasterDocument();
   nsCOMPtr<nsIScriptObjectPrincipal> sop = do_QueryInterface(master);
   nsCOMPtr<nsIPrincipal> principal = sop->GetPrincipal();
-  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-  nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_SCRIPT,
-                                          mURI,
-                                          principal,
-                                          mImportParent,
-                                          NS_LITERAL_CSTRING("text/html"),
-                                          /* extra = */ nullptr,
-                                          &shouldLoad,
-                                          nsContentUtils::GetContentPolicy(),
-                                          nsContentUtils::GetSecurityManager());
-  if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-    NS_WARN_IF_FALSE(NS_CP_ACCEPTED(shouldLoad), "ImportLoader rejected by CSP");
-    return;
-  }
+  // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+  // nsresult rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_SCRIPT,
+  //                                         mURI,
+  //                                         principal,
+  //                                         mImportParent,
+  //                                         NS_LITERAL_CSTRING("text/html"),
+  //                                         /* extra = */ nullptr,
+  //                                         &shouldLoad,
+  //                                         nsContentUtils::GetContentPolicy(),
+  //                                         nsContentUtils::GetSecurityManager());
+  // if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+  //   NS_WARN_IF_FALSE(NS_CP_ACCEPTED(shouldLoad), "ImportLoader rejected by CSP");
+  //   return;
+  // }
 
   nsCOMPtr<nsILoadGroup> loadGroup = mImportParent->GetDocumentLoadGroup();
   nsCOMPtr<nsIChannelPolicy> channelPolicy;
   nsCOMPtr<nsIContentSecurityPolicy> csp;
-  rv = principal->GetCsp(getter_AddRefs(csp));
+  nsresult rv = principal->GetCsp(getter_AddRefs(csp));
   NS_ENSURE_SUCCESS_VOID(rv);
 
   if (csp) {
@@ -219,16 +219,22 @@ ImportLoader::Open()
     channelPolicy->SetContentSecurityPolicy(csp);
     channelPolicy->SetLoadType(nsIContentPolicy::TYPE_SUBDOCUMENT);
   }
-  rv = NS_NewChannel(getter_AddRefs(mChannel),
-                     mURI,
-                     /* ioService = */ nullptr,
-                     loadGroup,
-                     /* callbacks = */ nullptr,
-                     nsIRequest::LOAD_BACKGROUND,
-                     channelPolicy);
+  rv = NS_NewChannel3(getter_AddRefs(mChannel),
+                      mURI,
+                      /* ioService = */ nullptr,
+                      loadGroup,
+                      /* callbacks = */ nullptr,
+                      nsIRequest::LOAD_BACKGROUND,
+                      channelPolicy,
+                      nsIContentPolicy::TYPE_SCRIPT,
+                      mImportParent);
   NS_ENSURE_SUCCESS_VOID(rv);
 
-  mChannel->AsyncOpen(this, nullptr);
+  rv = mChannel->AsyncOpen2(this, nullptr);
+  if (NS_FAILED(rv)) {
+    NS_WARNING("ImportLoader rejected by CSP");
+    return;
+  }
   BlockScripts();
   ae.Pass();
 }
