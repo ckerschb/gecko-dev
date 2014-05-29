@@ -697,7 +697,7 @@ nsPluginStreamListenerPeer::RequestRead(NPByteRange* rangeList)
   if (NS_FAILED(rv))
     return rv;
 
-  rv = channel->AsyncOpen(converter, container);
+  rv = channel->AsyncOpen2(converter, container);
   if (NS_SUCCEEDED(rv))
     TrackRequest(channel);
   return rv;
