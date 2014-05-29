@@ -203,7 +203,7 @@ nsViewSourceChannel::Open(nsIInputStream **_retval)
 {
     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);
 
-    nsresult rv = mChannel->Open(_retval);
+    nsresult rv = mChannel->Open2(_retval);
     if (NS_SUCCEEDED(rv)) {
         mOpened = true;
     }
@@ -236,7 +236,7 @@ nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
         loadGroup->AddRequest(static_cast<nsIViewSourceChannel*>
                                          (this), nullptr);
     
-    nsresult rv = mChannel->AsyncOpen(this, ctxt);
+    nsresult rv = mChannel->AsyncOpen2(this, ctxt);
 
     if (NS_FAILED(rv) && loadGroup)
         loadGroup->RemoveRequest(static_cast<nsIViewSourceChannel*>
