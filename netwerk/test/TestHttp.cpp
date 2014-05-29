@@ -181,7 +181,7 @@ int main(int argc, char **argv)
                             systemPrincipal);
         RETURN_IF_FAILED(rv, "NS_OpenURI");
 
-        rv = chan->AsyncOpen(listener, nullptr);
+        rv = chan->AsyncOpen2(listener, nullptr);
         RETURN_IF_FAILED(rv, "AsyncOpen");
 
         while (gKeepRunning)

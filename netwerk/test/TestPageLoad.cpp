@@ -18,6 +18,9 @@
 #include "nsIComponentRegistrar.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 namespace TestPageLoad {
 
 int getStrLine(const char *src, char *str, int ind, int max);
@@ -296,11 +299,25 @@ nsresult auxLoad(char *uriBuf)
     }
     printf("\n");
     uriList.AppendObject(uri);
-    rv = NS_NewChannel(getter_AddRefs(chan), uri, nullptr, nullptr, callbacks);
+
+    // nsCOMPtr<nsIPrincipal> systemPrincipal;
+    // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    // NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewChannel2(getter_AddRefs(chan),
+                        uri,
+                        nullptr,
+                        nullptr,
+                        callbacks,
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        nullptr);
     RETURN_IF_FAILED(rv, rv, "NS_NewChannel");
 
     gKeepRunning++;
-    rv = chan->AsyncOpen(listener, myBool);
+    rv = chan->AsyncOpen2(listener, myBool);
     RETURN_IF_FAILED(rv, rv, "AsyncOpen");
 
     return NS_OK;
@@ -340,14 +357,27 @@ int main(int argc, char **argv)
         rv = NS_NewURI(getter_AddRefs(baseURI), argv[1]);
         RETURN_IF_FAILED(rv, -1, "NS_NewURI");
 
-        rv = NS_NewChannel(getter_AddRefs(chan), baseURI, nullptr, nullptr, callbacks);
+        // nsCOMPtr<nsIPrincipal> systemPrincipal;
+        // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+        //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+        // NS_ENSURE_SUCCESS(rv, -1);
+
+        rv = NS_NewChannel2(getter_AddRefs(chan),
+                            baseURI,
+                            nullptr,
+                            nullptr,
+                            callbacks,
+                            nsIRequest::LOAD_NORMAL,
+                            nullptr, // channelPolicy
+                            nsIContentPolicy::TYPE_OTHER,
+                            nullptr);
         RETURN_IF_FAILED(rv, -1, "NS_OpenURI");
         gKeepRunning++;
 
         //TIMER STARTED-----------------------
         printf("Starting clock ... \n");
         start = PR_Now();
-        rv = chan->AsyncOpen(listener, nullptr);
+        rv = chan->AsyncOpen2(listener, nullptr);
         RETURN_IF_FAILED(rv, -1, "AsyncOpen");
 
         PumpEvents();

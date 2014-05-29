@@ -58,6 +58,9 @@
 #include "nsNetUtil.h"
 #include "prlog.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 
 namespace TestProtocols {
@@ -623,10 +626,21 @@ nsresult StartLoadingURL(const char* aUrlString)
         }
         NS_ADDREF(callbacks);
 
+        // nsCOMPtr<nsIPrincipal> systemPrincipal;
+        // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+        //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+        // NS_ENSURE_SUCCESS(rv, rv);
+
         // Async reading thru the calls of the event sink interface
-        rv = NS_NewChannel(getter_AddRefs(pChannel), pURL, pService,
-                           nullptr,     // loadGroup
-                           callbacks); // notificationCallbacks
+        rv = NS_NewChannel2(getter_AddRefs(pChannel),
+                            pURL,
+                            pService,
+                            nullptr,     // loadGroup
+                            callbacks, // notificationCallbacks
+                            nsIRequest::LOAD_NORMAL,
+                            nullptr, // channelPolicy
+                            nsIContentPolicy::TYPE_OTHER,
+                            nullptr);
         NS_RELEASE(callbacks);
         if (NS_FAILED(rv)) {
             LOG(("ERROR: NS_OpenURI failed for %s [rv=%x]\n", aUrlString, rv));
@@ -689,7 +703,7 @@ nsresult StartLoadingURL(const char* aUrlString)
             LOG(("* resuming at %llu bytes, with entity id |%s|\n", gStartAt, id.get()));
             res->ResumeAt(gStartAt, id);
         }
-        rv = pChannel->AsyncOpen(listener,  // IStreamListener consumer
+        rv = pChannel->AsyncOpen2(listener,  // IStreamListener consumer
                                  info);
 
         if (NS_SUCCEEDED(rv)) {

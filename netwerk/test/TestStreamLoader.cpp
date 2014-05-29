@@ -5,6 +5,9 @@
 #include "prlog.h"
 #include "mozilla/Attributes.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 #if defined(PR_LOGGING)
 //
 // set NSPR_LOG_MODULES=Test:5
@@ -63,8 +66,21 @@ int main(int argc, char **argv)
     if (NS_FAILED(rv))
       return -1;
 
+    // nsCOMPtr<nsIPrincipal> systemPrincipal;
+    // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    // NS_ENSURE_SUCCESS(rv, rv);
+
     nsCOMPtr<nsIChannel> chan;
-    rv = NS_NewChannel(getter_AddRefs(chan), uri);
+    rv = NS_NewChannel2(getter_AddRefs(chan),
+                       uri,
+                       nullptr,
+                       nullptr,
+                       nullptr,
+                       nsIRequest::LOAD_NORMAL,
+                       nullptr, // channelPolicy
+                       nsIContentPolicy::TYPE_OTHER,
+                       nullptr);
     if (NS_FAILED(rv))
       return -1;
 
@@ -77,7 +93,7 @@ int main(int argc, char **argv)
     if (NS_FAILED(rv))
       return -1;
 
-    rv = chan->AsyncOpen(loader, nullptr);
+    rv = chan->AsyncOpen2(loader, nullptr);
     if (NS_FAILED(rv))
       return -1;
 
