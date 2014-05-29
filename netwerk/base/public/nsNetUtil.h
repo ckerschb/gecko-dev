@@ -316,22 +316,22 @@ NS_NewChannel2(nsIChannel**           outResult,
 }
 
 inline nsresult
-NS_NewChannel3(nsIChannel            **result,
-               nsIURI                *uri,
-               nsIIOService          *ioService = nullptr,    // pass in nsIIOService to optimize callers
-               nsILoadGroup          *loadGroup = nullptr,
-               nsIInterfaceRequestor *callbacks = nullptr,
-               uint32_t              loadFlags = nsIRequest::LOAD_NORMAL,
-               nsIChannelPolicy      *channelPolicy = nullptr,
-               nsContentPolicyType   aType = nsIContentPolicy::TYPE_OTHER,
-               nsINode               *aRequestingNode = nullptr)
+NS_NewChannel3(nsIChannel**           outResult,
+               nsIURI*                aURI,
+               nsIIOService*          aIoService,    // pass in nsIIOService to optimize callers
+               nsILoadGroup*          aLoadGroup,
+               nsIInterfaceRequestor* aCallbacks,
+               uint32_t               aLoadFlags,
+               nsIChannelPolicy*      aChannelPolicy,
+               nsContentPolicyType    aType,
+               nsINode*               aRequestingNode)
 {
   { // debug
     nsAutoCString spec;
-    uri->GetSpec(spec);
+    aURI->GetSpec(spec);
     fprintf(stderr, "\nNS_NewChannel3 {\n");
     fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
-    fprintf(stderr, "  uri: %s\n", spec.get());
+    fprintf(stderr, "  aURI: %s\n", spec.get());
     if (aRequestingNode) {
       nsCOMPtr<nsIPrincipal> nodePrincipal = aRequestingNode->NodePrincipal();
       if (nodePrincipal) {
@@ -348,13 +348,13 @@ NS_NewChannel3(nsIChannel            **result,
   }
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
 
-  nsresult rv = NS_NewChannel(result, uri, ioService, loadGroup, callbacks, loadFlags, channelPolicy);
+  nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
   NS_ENSURE_SUCCESS(rv, rv);
-  (*result)->SetContentPolicyType(aType);
+  (*outResult)->SetContentPolicyType(aType);
   // we also need to set the requestingContext here because CSP queries it first!!!
-  (*result)->SetRequestingContext(aRequestingNode);
+  (*outResult)->SetRequestingContext(aRequestingNode);
   // Get the principal from the node and set it on the channel.
-  (*result)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
+  (*outResult)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
   return rv;
 }
 
