@@ -481,7 +481,7 @@ NS_OpenURI(nsIInputStream       **result,
                         systemPrincipal);
     if (NS_SUCCEEDED(rv)) {
         nsIInputStream *stream;
-        rv = channel->Open(&stream);
+        rv = channel->Open2(&stream);
         if (NS_SUCCEEDED(rv)) {
             *result = stream;
             if (channelOut) {
@@ -503,11 +503,21 @@ NS_OpenURI(nsIStreamListener     *listener,
            uint32_t               loadFlags = nsIRequest::LOAD_NORMAL)
 {
     nsresult rv;
+    // TODO: Probably we need to update callsites to hand in a principal/node
+    // for now, we are using the systemPrincipal, so we pass assertions!
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewChannel(getter_AddRefs(channel), uri, ioService,
-                       loadGroup, callbacks, loadFlags);
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        ioService,
+                        loadGroup,
+                        callbacks,
+                        loadFlags,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
     if (NS_SUCCEEDED(rv))
-        rv = channel->AsyncOpen(listener, context);
+        rv = channel->AsyncOpen2(listener, context);
     return rv;
 }
 
@@ -845,20 +855,26 @@ NS_NewStreamLoader(nsIStreamLoader        **result,
                    nsIURI                  *referrer  = nullptr)
 {
     nsresult rv;
+    // TODO: Probably we need to update callsites to hand in a principal/node
+    // for now, we are using the systemPrincipal, so we pass assertions!
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewChannel(getter_AddRefs(channel),
-                       uri,
-                       nullptr,
-                       loadGroup,
-                       callbacks,
-                       loadFlags);
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        nullptr,
+                        loadGroup,
+                        callbacks,
+                        loadFlags,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
     if (NS_SUCCEEDED(rv)) {
         nsCOMPtr<nsIHttpChannel> httpChannel(do_QueryInterface(channel));
         if (httpChannel)
             httpChannel->SetReferrer(referrer);
         rv = NS_NewStreamLoader(result, observer);
         if (NS_SUCCEEDED(rv))
-          rv = channel->AsyncOpen(*result, context);
+          rv = channel->AsyncOpen2(*result, context);
     }
     return rv;
 }
@@ -911,7 +927,7 @@ NS_ImplementChannelOpen(nsIChannel      *channel,
     nsresult rv = NS_NewSyncStreamListener(getter_AddRefs(listener),
                                            getter_AddRefs(stream));
     if (NS_SUCCEEDED(rv)) {
-        rv = channel->AsyncOpen(listener, nullptr);
+        rv = channel->AsyncOpen2(listener, nullptr);
         if (NS_SUCCEEDED(rv)) {
             uint64_t n;
             // block until the initial response is received or an error occurs.
