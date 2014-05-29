@@ -235,11 +235,6 @@ public:
 
   virtual void MakeCurrent(MakeCurrentFlags aFlags = 0) MOZ_OVERRIDE;
 
-  virtual void SetTargetContext(gfx::DrawTarget* aTarget) MOZ_OVERRIDE
-  {
-    mTarget = aTarget;
-  }
-
   virtual void PrepareViewport(const gfx::IntSize& aSize,
                                const gfx::Matrix& aWorldTransform) MOZ_OVERRIDE;
 
@@ -278,11 +273,6 @@ private:
   {
     return gfx::ToIntSize(mWidgetSize);
   }
-
-  /**
-   * Context target, nullptr when drawing directly to our swap chain.
-   */
-  RefPtr<gfx::DrawTarget> mTarget;
 
   /** Widget associated with this compositor */
   nsIWidget *mWidget;
@@ -362,17 +352,24 @@ private:
                             GLuint aSourceFrameBuffer,
                             GLuint *aFBO, GLuint *aTexture);
 
-  GLintptr QuadVBOVertexOffset() { return 0; }
-  GLintptr QuadVBOTexCoordOffset() { return sizeof(float)*4*2; }
-
   void BindQuadVBO();
   void QuadVBOVerticesAttrib(GLuint aAttribIndex);
   void QuadVBOTexCoordsAttrib(GLuint aAttribIndex);
+  void BindAndDrawQuads(ShaderProgramOGL *aProg,
+                        int aQuads,
+                        const gfx::Rect* aLayerRect,
+                        const gfx::Rect* aTextureRect);
   void BindAndDrawQuad(ShaderProgramOGL *aProg,
-                       const gfx::Rect& aRect);
+                       const gfx::Rect& aLayerRect,
+                       const gfx::Rect& aTextureRect = gfx::Rect(0.0f, 0.0f, 1.0f, 1.0f)) {
+    gfx::Rect layerRects[4];
+    gfx::Rect textureRects[4];
+    layerRects[0] = aLayerRect;
+    textureRects[0] = aTextureRect;
+    BindAndDrawQuads(aProg, 1, layerRects, textureRects);
+  }
   void BindAndDrawQuadWithTextureRect(ShaderProgramOGL *aProg,
                                       const gfx::Rect& aRect,
-                                      const gfx3DMatrix& aTextureTransform,
                                       const gfx::Rect& aTexCoordRect,
                                       TextureSource *aTexture);
 
@@ -382,7 +379,7 @@ private:
    * Copies the content of our backbuffer to the set transaction target.
    * Does not restore the target FBO, so only call from EndFrame.
    */
-  void CopyToTarget(gfx::DrawTarget* aTarget, const gfx::Matrix& aWorldMatrix);
+  void CopyToTarget(gfx::DrawTarget* aTarget, const nsIntPoint& aTopLeft, const gfx::Matrix& aWorldMatrix);
 
   /**
    * Implements the flipping of the y-axis to convert from layers/compositor
