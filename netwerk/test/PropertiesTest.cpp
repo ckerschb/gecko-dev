@@ -46,7 +46,7 @@ main(int argc, char* argv[])
   ret = service->NewChannel(NS_LITERAL_CSTRING(TEST_URL), nullptr, nullptr, &channel);
   if (NS_FAILED(ret)) return 1;
 
-  ret = channel->Open(&in);
+  ret = channel->Open2(&in);
   if (NS_FAILED(ret)) return 1;
 
   nsIPersistentProperties* props;

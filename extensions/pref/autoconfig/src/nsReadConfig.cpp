@@ -274,7 +274,7 @@ nsresult nsReadConfig::openAndEvaluateJSFile(const char *aFileName, int32_t obsc
         if (NS_FAILED(rv))
             return rv;
 
-        rv = channel->Open(getter_AddRefs(inStr));
+        rv = channel->Open2(getter_AddRefs(inStr));
         if (NS_FAILED(rv)) 
             return rv;
     }

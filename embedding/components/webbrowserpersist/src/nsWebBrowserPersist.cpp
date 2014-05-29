@@ -1333,7 +1333,7 @@ nsresult nsWebBrowserPersist::SaveChannelInternal(
     nsCOMPtr<nsIFileURL> fu(do_QueryInterface(aFile));
     if (fc && !fu) {
         nsCOMPtr<nsIInputStream> fileInputStream, bufferedInputStream;
-        nsresult rv = aChannel->Open(getter_AddRefs(fileInputStream));
+        nsresult rv = aChannel->Open2(getter_AddRefs(fileInputStream));
         NS_ENSURE_SUCCESS(rv, rv);
         rv = NS_NewBufferedInputStream(getter_AddRefs(bufferedInputStream),
                                        fileInputStream, BUFFERED_OUTPUT_SIZE);
