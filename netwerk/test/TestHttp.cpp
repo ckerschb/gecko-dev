@@ -7,6 +7,9 @@
 #include "nsIProgressEventSink.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 #define RETURN_IF_FAILED(rv, step) \
     PR_BEGIN_MACRO \
     if (NS_FAILED(rv)) { \
@@ -162,7 +165,20 @@ int main(int argc, char **argv)
         rv = NS_NewURI(getter_AddRefs(uri), argv[1]);
         RETURN_IF_FAILED(rv, "NS_NewURI");
 
-        rv = NS_NewChannel(getter_AddRefs(chan), uri, nullptr, nullptr, callbacks);
+        nsCOMPtr<nsIPrincipal> systemPrincipal;
+        rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+          GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+        NS_ENSURE_SUCCESS(rv, rv);
+
+        rv = NS_NewChannel2(getter_AddRefs(chan),
+                            uri,
+                            nullptr,
+                            nullptr,
+                            callbacks
+                            nsIRequest::LOAD_NORMAL,
+                            nullptr, // channelPolicy
+                            nsIContentPolicy::TYPE_OTHER,
+                            systemPrincipal);
         RETURN_IF_FAILED(rv, "NS_OpenURI");
 
         rv = chan->AsyncOpen(listener, nullptr);
