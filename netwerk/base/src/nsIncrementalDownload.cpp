@@ -23,6 +23,9 @@
 #include "prprf.h"
 #include <algorithm>
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 // Default values used to initialize a nsIncrementalDownload object.
 #define DEFAULT_CHUNK_SIZE (4096 * 16)  // bytes
 #define DEFAULT_INTERVAL    60          // seconds
@@ -257,11 +260,22 @@ nsIncrementalDownload::ProcessTimeout()
     return NS_OK;
   }
 
+   nsCOMPtr<nsIPrincipal> systemPrincipal;
+   nsresult rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+     GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+   NS_ENSURE_SUCCESS(rv, rv);
+
   // Fetch next chunk
-  
   nsCOMPtr<nsIChannel> channel;
-  nsresult rv = NS_NewChannel(getter_AddRefs(channel), mFinalURI, nullptr,
-                              nullptr, this, mLoadFlags);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      mFinalURI,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      this,
+                      mLoadFlags,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal);
   if (NS_FAILED(rv))
     return rv;
 
@@ -298,7 +312,7 @@ nsIncrementalDownload::ProcessTimeout()
     }
   }
 
-  rv = channel->AsyncOpen(this, nullptr);
+  rv = channel->AsyncOpen2(this, nullptr);
   if (NS_FAILED(rv))
     return rv;
 
