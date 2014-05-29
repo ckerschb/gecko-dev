@@ -153,7 +153,7 @@ main(int argc, char* argv[])
         }
         NS_ADDREF(listener);
 
-        channel->AsyncOpen(listener, nullptr);
+        channel->AsyncOpen2(listener, nullptr);
 
         PumpEvents();
     } // this scopes the nsCOMPtrs

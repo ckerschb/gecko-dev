@@ -61,7 +61,7 @@ TestOpenInputStream(const char* url)
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIInputStream> in;
-    rv = channel->Open(getter_AddRefs(in));
+    rv = channel->Open2(getter_AddRefs(in));
     if (NS_FAILED(rv)) {
         fprintf(stdout, "failed to OpenInputStream for %s\n", url);
         return NS_OK;
@@ -192,7 +192,7 @@ TestAsyncRead(const char* url)
     nsCOMPtr<nsIStreamListener> listener = new Listener();
     if (listener == nullptr)
         return NS_ERROR_OUT_OF_MEMORY;
-    rv = channel->AsyncOpen(nullptr, listener);
+    rv = channel->AsyncOpen2(nullptr, listener);
     if (NS_FAILED(rv)) return rv;
 
     while (!gDone) {
