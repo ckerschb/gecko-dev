@@ -38,6 +38,9 @@
 #include "nsString.h"
 #include "prlog.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla;
 
 #if defined(PR_LOGGING)
@@ -719,8 +722,21 @@ nsCSPContext::SendReports(nsISupports* aBlockedContentSource,
       continue; // don't return yet, there may be more URIs
     }
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
     // try to create a new channel for every report-uri
-    rv = NS_NewChannel(getter_AddRefs(reportChannel), reportURI);
+    rv = NS_NewChannel2(getter_AddRefs(reportChannel),
+                        reportURI,
+                        nullptr,
+                        nullptr,
+                        nullptr,
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
     if (NS_FAILED(rv)) {
       CSPCONTEXTLOG(("Could not create new channel for report URI %s",
                      reportURIs[r].get()));
