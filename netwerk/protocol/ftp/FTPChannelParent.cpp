@@ -155,7 +155,7 @@ FTPChannelParent::DoAsyncOpen(const URIParams& aURI,
   if (NS_FAILED(rv))
     return SendFailedAsyncOpen(rv);
 
-  rv = mChannel->AsyncOpen(this, nullptr);
+  rv = mChannel->AsyncOpen2(this, nullptr);
   if (NS_FAILED(rv))
     return SendFailedAsyncOpen(rv);
   
