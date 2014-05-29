@@ -1437,8 +1437,15 @@ already_AddRefed<MediaResource> FileMediaResource::CloneData(MediaDecoder* aDeco
   NS_ENSURE_TRUE(loadGroup, nullptr);
 
   nsCOMPtr<nsIChannel> channel;
-  nsresult rv =
-    NS_NewChannel(getter_AddRefs(channel), mURI, nullptr, loadGroup, nullptr, 0);
+  nsresult rv = NS_NewChannel3(getter_AddRefs(channel),
+                               mURI,
+                               nullptr,
+                               loadGroup,
+                               nullptr,
+                               0, // loadFlags
+                               nullptr, // channelPolicy
+                               nsIContentPolicy::TYPE_OTHER, // type media?
+                               element);
   if (NS_FAILED(rv))
     return nullptr;
 
