@@ -270,6 +270,86 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
   return kContentTypes[static_cast<uint32_t>(aType)];
 }
 
+
+/* Jonas initially proposed the following 2-APIs:
+ *
+ * 1) Using a Principal
+ *
+ * mozilla::net::NewChannel(
+ *    nsIURI* uri,                    // required
+ *    nsIPrincipal* loadingPrincipal, // required
+ *    nsILoadGroup* loadgroup,        // optional for now (should be required for non-system-principal)
+ *    uint32_t loadFlags,             // required
+ *    eLoadType loadType,             // required (image/stylesheet/xhr/beacon/etc)
+ *    uint32_t securityFlags,         // required (same-origin-only, cors-with-credentials,
+ *                                                 cors-without-credentials, cross-origin,
+ *                                                 allow javascript:, allow chrome:,
+ *                                                 allow-inherit-principal, suppress prompts)
+ *    nsIChannel** result);
+ *
+ *
+ * 2) Using a loadingNode (Useful for DOM code. Principal, loadgroup and referrer is grabbed from loadingNode0
+ *
+ * nsresult
+ * mozilla::net::NewChannel(
+ *    nsIURI* uri,                   // required
+ *    nsINode* loadingNode,          // required (for API-based loads this is the document)
+ *    uint32_t loadFlags,            // required
+ *    eLoadType loadType,            // required
+ *    uint32_t securityFlags,        // required
+ *    nsIChannel** result);
+ *
+ * ********************************************************************************
+ *
+ * In the end we should have 2-APIs for creating a new Channel:
+ *
+ * 1) Using the *SYSTEMPRINCIPAL*:
+ *
+ * inline nsresult
+ * NS_NewChannel(nsIURI*              aURI,
+ *               nsIPrincipal*        aSystemPrincipal,
+ *               uint32_t             aSecurityFlags,
+ *               nsContentPolicyType  aContentPolicyType,
+ *               uint32_t             aLoadFlags,
+ *               nsIChannel**         outChannel);
+ *
+ *
+ * 2) Using the requestingNode
+ *
+ * inline nsresult
+ * NS_NewChannel(nsIURI*              aURI,
+ *               nsINode*             aRequestingNode,
+ *               uint32_t             aSecurityFlags,
+ *               nsContentPolicyType  aContentPolicyType,
+ *               uint32_t             aLoadFlags,
+ *               nsIChannel**         outChannel);
+ *
+ *
+ * The big todos for the Interface:
+ *     * add      uint32_t               aSecurityFlags
+ *     * delete   nsIIOService*          aIoService // can we even remove that???
+ *     * delete   nsILoadGroup*          aLoadGroup (should be null if we use systemPrincipal, otherwise
+ *                                                   we can get it from the aRequestingNode)
+ *     * delete   nsIInterfaceRequestor* aCallbacks
+ *     * delete   nsIChannelPolicy*      aChannelPolicy
+ *
+ *
+ * Important from a security perspective is, that the following things are frozen past construction,
+ * so we can reason about security at any point throughout the lifetime of a channel:
+ *     * aURI
+ *     * aSystemPrincipal (aRequestingNode)
+ *     * aSecurityFlags
+ *     * aContentPolicyType
+ *     * aLoadFlags
+ *
+ *
+ *  Additional information about arguments:
+ *    * aContentPolicyType: http://mxr.mozilla.org/mozilla-central/source/content/base/public/nsIContentPolicy.idl#50
+ *    * aLoadFlags:         http://mxr.mozilla.org/mozilla-central/source/netwerk/base/public/nsIRequest.idl#112
+ *    * aSecurityFlags:     please find them in nsIChannel.idl
+ *
+ */
+
 inline nsresult
 NS_NewChannel2(nsIChannel**           outResult,
                nsIURI*                aURI,
@@ -304,9 +384,15 @@ NS_NewChannel2(nsIChannel**           outResult,
   NS_ENSURE_SUCCESS(aURI->SchemeIs("resource", &resourceMatch), NS_OK);
   bool chromeMatch = false;
   NS_ENSURE_SUCCESS(aURI->SchemeIs("chrome", &chromeMatch), NS_OK);
+
+  // TODO: we should make sure that all channels are created using the systemPrincipal
+  // we want an assertion here!!!
   if (!resourceMatch && !chromeMatch) {
     NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
   }
+
+  // TODO: Is it likely that all channels created using this interface should have a nsContentPolicyType of TYPE_OTHER?
+  // maybe we can assert that as well - we need to investigate that!
 
   nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
   (*outResult)->SetContentPolicyType(aType);
@@ -347,6 +433,9 @@ NS_NewChannel3(nsIChannel**           outResult,
     fprintf(stderr, "}\n\n");
   }
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
+
+  // TODO: Propably those channels should never be created using the nsContentPolicyType of TYPE_OTHER
+  // maybe we can assert that here, that would be great - needs investigation!
 
   nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
   NS_ENSURE_SUCCESS(rv, rv);

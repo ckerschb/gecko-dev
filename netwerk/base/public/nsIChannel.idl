@@ -327,4 +327,59 @@ interface nsIChannel : nsIRequest
      * @deprecated Use contentDisposition/contentDispositionFilename instead.
      */
     readonly attribute ACString contentDispositionHeader;
+
+
+    /**************************************************************************
+     * Listed below are the various security flags  which may be or'd together.
+     * Exactly one of the first four *has* to be set. Otherwise channel creation
+     * asserts and fails.
+     */
+
+     const unsigned long SAME_ORIGIN_ONLY = 0x01;
+
+     const unsigned long CORS_WITH_CREDENTIALS = 0x02;
+
+     const unsigned long CORS_WITHOUT_CREDENTIALS = 0x03;
+
+     const unsigned long CROSS_ORIGIN = 0x04;
+
+    /**
+     * If ALLOW_SCRIPT is not set, any attempt at loading a protocol which
+     * has URI_OPENING_EXECUTES_SCRIPT set fails.
+     */
+
+     const unsigned long ALLOW_SCRIPT = 0x08;
+
+   /**
+     * If ALLOW_CRHOME is not set, and the loading principal isn't the system principal,
+     * any attempt at loading chrome: fails.
+     */
+
+     const unsigned long ALLOW_CRHOME = 0x10;
+
+   /**
+     * If ALLOW_INHERIT_PRINCIPAL is not set, any attempt at loading from a protocol
+     * which sets URI_INHERITS_SECURITY_CONTEXT will make the load be considered a
+     * cross-origin load, and if the load is still allowed to go through, the resulting
+     * channel principal will be a null principal (or should the load fail?).
+     * This seems to be needed at least for about:blank loads, where simply looking at
+     * loadType+loading principal+original wouldn't be enough.
+     */
+
+     const unsigned long ALLOW_INHERIT_PRINCIPAL = 0x20;
+
+   /**
+     * If SUPPRESS_PROMPTS is set, any situation which would normally bring up a
+     * security dialog, such as http authentication or client-side-certs(?),
+     * causes the load to fail instead.
+     */
+
+     const unsigned long SUPPRESS_PROMPTS = 0x40;
+
+   /**
+     * If LOAD_IN_SANDBOX is set, the resulting channel principal will be a null principal
+     * (is that correct? Or are things more complicated?)
+     */
+
+     const unsigned long LOAD_IN_SANDBOX = 0x80;
 };
