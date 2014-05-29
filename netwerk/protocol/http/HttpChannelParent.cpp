@@ -26,6 +26,9 @@
 #include "mozilla/ipc/URIUtils.h"
 #include "SerializedLoadContext.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 using namespace mozilla::dom;
 using namespace mozilla::ipc;
 
@@ -185,8 +188,24 @@ HttpChannelParent::DoAsyncOpen(  const URIParams&           aURI,
   if (NS_FAILED(rv))
     return SendFailedAsyncOpen(rv);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  if (NS_FAILED(rv)) {
+    return SendFailedAsyncOpen(rv);
+  }
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), uri, ios, nullptr, nullptr, loadFlags);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                      uri,
+                      ios,
+                      nullptr, // loadGroup
+                      nullptr, // callbacks
+                      loadFlags,
+                      nullptr, // channelPolicy
+                      nsIContentPolicy::TYPE_OTHER,
+                      systemPrincipal);
+
   if (NS_FAILED(rv))
     return SendFailedAsyncOpen(rv);
 
@@ -291,7 +310,7 @@ HttpChannelParent::DoAsyncOpen(  const URIParams&           aURI,
     }
   }
 
-  rv = mChannel->AsyncOpen(mParentListener, nullptr);
+  rv = mChannel->AsyncOpen2(mParentListener, nullptr);
   if (NS_FAILED(rv))
     return SendFailedAsyncOpen(rv);
 
