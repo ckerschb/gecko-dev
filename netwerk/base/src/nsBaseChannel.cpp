@@ -141,7 +141,7 @@ nsBaseChannel::ContinueRedirect()
   // with the redirect.
 
   if (mOpenRedirectChannel) {
-    nsresult rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    nsresult rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv))
       return rv;
   }
@@ -605,7 +605,7 @@ nsBaseChannel::Open(nsIInputStream **result)
       rv = Redirect(chan, nsIChannelEventSink::REDIRECT_INTERNAL, false);
       if (NS_FAILED(rv))
           return rv;
-      rv = chan->Open(result);
+      rv = chan->Open2(result);
   } else if (rv == NS_ERROR_NOT_IMPLEMENTED)
     return NS_ImplementChannelOpen(this, result);
 
@@ -620,6 +620,8 @@ nsBaseChannel::Open(nsIInputStream **result)
 NS_IMETHODIMP
 nsBaseChannel::Open2(nsIInputStream **result)
 {
+  // Do we even have to call ContentPolicies here?
+  // because we call chan->Open2 in nsBaseChannel::Open
   fprintf(stderr, "\n\nnsBaseChannel::Open2 {\n");
   fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
 
