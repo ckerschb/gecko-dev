@@ -50,6 +50,9 @@
 #include "nsTextStore.h"
 #endif // #ifdef NS_ENABLE_TSF
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 #ifdef PR_LOGGING
 PRLogModuleInfo* gWindowsLog = nullptr;
 #endif
@@ -708,9 +711,23 @@ nsresult AsyncFaviconDataReady::OnFaviconDataNotAvailable(void)
   if (NS_FAILED(rv)) {
     return rv;
   }
- 
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal;
+  rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+    GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+  NS_ENSURE_SUCCESS(rv, rv);
+
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel(getter_AddRefs(channel), mozIconURI);
+  rv = NS_NewChannel2(getter_AddRefs(channel),
+                     mozIconURI,
+                     nullptr, // ioService
+                     nullptr, // loadGroup
+                     nullptr, // callbacks
+                     nsIRequest::LOAD_NORMAL,
+                     nullptr, // channelPolicy
+                     nsIContentPolicy::TYPE_OTHER,
+                     systemPrincipal);
+
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIDownloadObserver> downloadObserver = new myDownloadObserver;
@@ -718,8 +735,7 @@ nsresult AsyncFaviconDataReady::OnFaviconDataNotAvailable(void)
   rv = NS_NewDownloader(getter_AddRefs(listener), downloadObserver, icoFile);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  channel->AsyncOpen(listener, nullptr);
-  return NS_OK;
+  return = channel->AsyncOpen2(listener, nullptr);
 }
 
 NS_IMETHODIMP
