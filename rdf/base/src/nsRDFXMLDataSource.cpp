@@ -97,6 +97,9 @@
 
 #include "rdfIDataSource.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../../caps/include/nsScriptSecurityManager.h"
+
 //----------------------------------------------------------------------
 //
 // RDFXMLDataSourceImpl
@@ -473,20 +476,32 @@ RDFXMLDataSourceImpl::GetInterface(const nsIID& aIID, void** aSink)
 nsresult
 RDFXMLDataSourceImpl::BlockingParse(nsIURI* aURL, nsIStreamListener* aConsumer)
 {
-    nsresult rv;
-
     // XXX I really hate the way that we're spoon-feeding this stuff
     // to the parser: it seems like this is something that netlib
     // should be able to do by itself.
-    
+
+   nsCOMPtr<nsIPrincipal> systemPrincipal;
+   nsresult rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+     GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+   NS_ENSURE_SUCCESS(rv, rv);
+
     nsCOMPtr<nsIChannel> channel;
     nsCOMPtr<nsIRequest> request;
 
     // Null LoadGroup ?
-    rv = NS_NewChannel(getter_AddRefs(channel), aURL, nullptr);
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        aURL,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // callbacks
+                        nsIRequest::LOAD_FROM_CACHE,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_OTHER,
+                        systemPrincipal);
+
     if (NS_FAILED(rv)) return rv;
     nsCOMPtr<nsIInputStream> in;
-    rv = channel->Open(getter_AddRefs(in));
+    rv = channel->Open2(getter_AddRefs(in));
 
     // Report success if the file doesn't exist, but propagate other errors.
     if (rv == NS_ERROR_FILE_NOT_FOUND) return NS_OK;
