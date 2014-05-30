@@ -4569,7 +4569,7 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
 
     nsresult rv = NS_CheckContentLoadPolicy(mContentPolicyType,
                                             mURI,
-                                            principal,
+                                            mRequestingPrincipal,
                                             mRequestingContext,
                                             EmptyCString(),    //mime guess
                                             nullptr,           //extra
