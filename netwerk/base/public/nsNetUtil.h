@@ -208,6 +208,12 @@ NS_NewChannel(nsIChannel           **result,
     nsresult rv;
     nsCOMPtr<nsIIOService> grip;
     rv = net_EnsureIOService(&ioService, grip);
+
+    // When deleting ioService as an argument, we could use:
+    // nsCOMPtr<nsIOService> ios = do_GetIOService();
+    // and use ios instead of ioService;
+    // TODO: what would be the advantage, disadvantage?
+
     if (ioService) {
         nsCOMPtr<nsIChannel> chan;
         rv = ioService->NewChannelFromURI(uri, getter_AddRefs(chan));
@@ -335,7 +341,7 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
  *
  * The big todos for the Interface:
  *     * add      uint32_t               aSecurityFlags
- *     * delete   nsIIOService*          aIoService // can we even remove that???
+ *     * delete   nsIIOService*          aIoService
  *     * delete   nsILoadGroup*          aLoadGroup (should be null if we use systemPrincipal, otherwise
  *                                                   we can get it from the aRequestingNode)
  *     * delete   nsIInterfaceRequestor* aCallbacks
