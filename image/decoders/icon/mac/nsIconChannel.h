@@ -50,6 +50,8 @@ protected:
   
   nsresult ExtractIconInfoFromUrl(nsIFile ** aLocalFile, uint32_t * aDesiredImageSize,
                            nsACString &aContentType, nsACString &aFileExtension);
+
+  bool mUsesNewAPI;
 };
 
 #endif /* nsIconChannel_h___ */
