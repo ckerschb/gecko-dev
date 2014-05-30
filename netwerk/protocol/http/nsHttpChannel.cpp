@@ -615,7 +615,7 @@ nsHttpChannel::RetrieveSSLOptions()
     if (!IsHTTPS() || mPrivateBrowsing)
         return;
 
-    nsIPrincipal *principal = GetPrincipal();
+    nsIPrincipal *principal = GetPrincipal(true);
     if (!principal)
         return;
 
@@ -1174,7 +1174,7 @@ nsHttpChannel::ProcessSSLInformation()
 
     int16_t kea = ssl->GetKEAUsed();
 
-    nsIPrincipal *principal = GetPrincipal();
+    nsIPrincipal *principal = GetPrincipal(true);
     if (!principal)
         return;
 
@@ -3013,6 +3013,7 @@ nsHttpChannel::OnCacheEntryCheck(nsICacheEntry* entry, nsIApplicationCache* appC
             if (mDidReval) {
                 // Make the request unconditional again.
                 mRequestHead.ClearHeader(nsHttp::If_Modified_Since);
+                mRequestHead.ClearHeader(nsHttp::If_None_Match);
                 mRequestHead.ClearHeader(nsHttp::ETag);
                 mDidReval = false;
             }
@@ -4237,7 +4238,8 @@ nsHttpChannel::ContinueProcessRedirection(nsresult rv)
 {
     AutoRedirectVetoNotifier notifier(this);
 
-    LOG(("ContinueProcessRedirection [rv=%x]\n", rv));
+    LOG(("nsHttpChannel::ContinueProcessRedirection [rv=%x,this=%p]\n", rv,
+         this));
     if (NS_FAILED(rv))
         return rv;
 
@@ -6246,30 +6248,6 @@ nsHttpChannel::UpdateAggregateCallbacks()
                                            getter_AddRefs(callbacks));
     mTransaction->SetSecurityCallbacks(callbacks);
 }
-
-nsIPrincipal *
-nsHttpChannel::GetPrincipal()
-{
-    if (mPrincipal)
-        return mPrincipal;
-
-    nsIScriptSecurityManager *securityManager =
-        nsContentUtils::GetSecurityManager();
-
-    if (!securityManager)
-        return nullptr;
-
-    securityManager->GetChannelPrincipal(this, getter_AddRefs(mPrincipal));
-    if (!mPrincipal)
-        return nullptr;
-
-    // principals with unknown app ids do not work with the permission manager
-    if (mPrincipal->GetUnknownAppId())
-        mPrincipal = nullptr;
-
-    return mPrincipal;
-}
-
 
 NS_IMETHODIMP
 nsHttpChannel::SetLoadGroup(nsILoadGroup *aLoadGroup)
