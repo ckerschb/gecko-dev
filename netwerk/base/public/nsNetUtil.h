@@ -199,8 +199,12 @@ NS_NewChannel(nsIChannel           **result,
               nsILoadGroup          *loadGroup = nullptr,
               nsIInterfaceRequestor *callbacks = nullptr,
               uint32_t               loadFlags = nsIRequest::LOAD_NORMAL,
-              nsIChannelPolicy      *channelPolicy = nullptr)
+              nsIChannelPolicy      *channelPolicy = nullptr,
+              bool                  aUsesNewAPI = false)
 {
+
+    NS_ASSERTION(aUsesNewAPI, "Channel created through deprecated API");
+
     nsresult rv;
     nsCOMPtr<nsIIOService> grip;
     rv = net_EnsureIOService(&ioService, grip);
@@ -398,7 +402,14 @@ NS_NewChannel2(nsIChannel**           outResult,
   // TODO: Is it likely that all channels created using this interface should have a nsContentPolicyType of TYPE_OTHER?
   // maybe we can assert that as well - we need to investigate that!
 
-  nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
+  nsresult rv = NS_NewChannel(outResult,
+                              aURI,
+                              aIoService,
+                              aLoadGroup,
+                              aCallbacks,
+                              aLoadFlags,
+                              aChannelPolicy,
+                              true); // aUsesNewAPI
   (*outResult)->SetContentPolicyType(aType);
   (*outResult)->SetRequestingContext(nullptr);
   (*outResult)->SetRequestingPrincipal(aRequestingPrincipal);
@@ -441,7 +452,14 @@ NS_NewChannel3(nsIChannel**           outResult,
   // TODO: Propably those channels should never be created using the nsContentPolicyType of TYPE_OTHER
   // maybe we can assert that here, that would be great - needs investigation!
 
-  nsresult rv = NS_NewChannel(outResult, aURI, aIoService, aLoadGroup, aCallbacks, aLoadFlags, aChannelPolicy);
+  nsresult rv = NS_NewChannel(outResult,
+                              aURI,
+                              aIoService,
+                              aLoadGroup,
+                              aCallbacks,
+                              aLoadFlags,
+                              aChannelPolicy,
+                              true); // aUsesNewAPI
   NS_ENSURE_SUCCESS(rv, rv);
   (*outResult)->SetContentPolicyType(aType);
   // we also need to set the requestingContext here because CSP queries it first!!!
