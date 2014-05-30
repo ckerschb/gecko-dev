@@ -37,6 +37,7 @@ private:
   nsCOMPtr<nsIStreamListener> mListener;
   nsCOMPtr<nsILoadGroup>      mLoadGroup;
   nsLoadFlags                 mLoadFlags;
+  bool                        mUsesNewAPI;
 };
 
 NS_IMPL_ISUPPORTS(DummyChannel, nsIRequest, nsIChannel, nsIJARChannel)
@@ -44,6 +45,7 @@ NS_IMPL_ISUPPORTS(DummyChannel, nsIRequest, nsIChannel, nsIJARChannel)
 DummyChannel::DummyChannel() : mPending(false)
                              , mSuspendCount(0)
                              , mLoadFlags(LOAD_NORMAL)
+                             , mUsesNewAPI(false)
 {
 }
 
@@ -95,6 +97,7 @@ NS_IMETHODIMP DummyChannel::Open2(nsIInputStream**)
 
 NS_IMETHODIMP DummyChannel::AsyncOpen(nsIStreamListener* aListener, nsISupports* aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   mListener = aListener;
   mListenerContext = aContext;
   mPending = true;
@@ -112,7 +115,7 @@ NS_IMETHODIMP DummyChannel::AsyncOpen(nsIStreamListener* aListener, nsISupports*
 
 NS_IMETHODIMP DummyChannel::AsyncOpen2(nsIStreamListener* aListener, nsISupports* aContext)
 {
-  fprintf(stderr, "\n\nDummyChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(aListener, aContext);
 }
 
@@ -316,7 +319,8 @@ NS_IMETHODIMP DummyChannel::GetContentDispositionHeader(nsACString&)
   * app:// protocol implementation.
   */
 
-AppProtocolHandler::AppProtocolHandler() {
+AppProtocolHandler::AppProtocolHandler()
+{
 }
 
 AppProtocolHandler::~AppProtocolHandler() {

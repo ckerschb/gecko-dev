@@ -61,6 +61,7 @@ nsBaseChannel::nsBaseChannel()
   , mContentDispositionHint(UINT32_MAX)
   , mContentLength(-1)
   , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
+  , mUsesNewAPI(false)
 {
   mContentType.AssignLiteral(UNKNOWN_CONTENT_TYPE);
 }
@@ -594,6 +595,7 @@ nsBaseChannel::SetContentLength(int64_t aContentLength)
 NS_IMETHODIMP
 nsBaseChannel::Open(nsIInputStream **result)
 {
+  NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
   NS_ENSURE_TRUE(mURI, NS_ERROR_NOT_INITIALIZED);
   NS_ENSURE_TRUE(!mPump, NS_ERROR_IN_PROGRESS);
   NS_ENSURE_TRUE(!mWasOpened, NS_ERROR_IN_PROGRESS);
@@ -685,12 +687,14 @@ nsBaseChannel::Open2(nsIInputStream **result)
   }
 
   fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
+  mUsesNewAPI = true;
   return Open(result);
 }
 
 NS_IMETHODIMP
 nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   NS_ENSURE_TRUE(mURI, NS_ERROR_NOT_INITIALIZED);
   NS_ENSURE_TRUE(!mPump, NS_ERROR_IN_PROGRESS);
   NS_ENSURE_TRUE(!mWasOpened, NS_ERROR_ALREADY_OPENED);
@@ -806,6 +810,7 @@ nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
   fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
 
     // Do other security checks
+  mUsesNewAPI = true;
   return AsyncOpen(listener, ctxt);
 }
 

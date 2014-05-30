@@ -45,7 +45,8 @@ public:
     // nsViewSourceChannel methods:
     nsViewSourceChannel()
         : mIsDocument(false)
-        , mOpened(false) {}
+        , mOpened(false)
+        , mUsesNewAPI(false) {}
 
     NS_HIDDEN_(nsresult) Init(nsIURI* uri);
 
@@ -66,6 +67,7 @@ protected:
     bool                        mIsDocument; // keeps track of the LOAD_DOCUMENT_URI flag
     bool                        mOpened;
     bool                        mIsSrcdocChannel;
+    bool                        mUsesNewAPI;
 };
 
 #endif /* nsViewSourceChannel_h___ */

@@ -60,6 +60,7 @@ public:
   void ReleaseIPDLReference();
 
   NS_IMETHOD AsyncOpen(nsIStreamListener* listener, nsISupports* aContext);
+  NS_IMETHOD AsyncOpen2(nsIStreamListener* listener, nsISupports* aContext);
 
   // Note that we handle this ourselves, overriding the nsBaseChannel
   // default behavior, in order to be e10s-friendly.
@@ -132,6 +133,7 @@ private:
   // Set if SendSuspend is called. Determines if SendResume is needed when
   // diverting callbacks to parent.
   bool mSuspendSent;
+  bool mUsesNewAPI;
 };
 
 inline bool

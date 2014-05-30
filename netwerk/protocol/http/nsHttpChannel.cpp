@@ -229,6 +229,7 @@ nsHttpChannel::nsHttpChannel()
     , mHasAutoRedirectVetoNotifier(0)
     , mDidReval(false)
     , mForcePending(false)
+    , mUsesNewAPI(false)
 {
     LOG(("Creating nsHttpChannel [this=%p]\n", this));
     mChannelCreationTime = PR_Now();
@@ -4451,6 +4452,8 @@ nsHttpChannel::GetSecurityInfo(nsISupports **securityInfo)
 NS_IMETHODIMP
 nsHttpChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *context)
 {
+    NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
     MOZ_EVENT_TRACER_WAIT(this, "net::http::channel");
 
     LOG(("nsHttpChannel::AsyncOpen [this=%p]\n", this));
@@ -4586,6 +4589,7 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
     fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
 
     // Do other security checks
+    mUsesNewAPI = true;
     rv = AsyncOpen(listener, context);
     return rv;
 

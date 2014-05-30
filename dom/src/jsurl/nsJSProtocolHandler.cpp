@@ -427,6 +427,7 @@ protected:
     bool                    mIsAsync;
     bool                    mIsActive;
     bool                    mOpenedStreamChannel;
+    bool                    mUsesNewAPI; /* so we can assert in AsyncOpen */
 };
 
 nsJSChannel::nsJSChannel() :
@@ -437,7 +438,8 @@ nsJSChannel::nsJSChannel() :
     mExecutionPolicy(EXECUTE_IN_SANDBOX),
     mIsAsync(true),
     mIsActive(false),
-    mOpenedStreamChannel(false)
+    mOpenedStreamChannel(false),
+    mUsesNewAPI(false)
 {
 }
 
@@ -583,6 +585,7 @@ nsJSChannel::GetURI(nsIURI * *aURI)
 NS_IMETHODIMP
 nsJSChannel::Open(nsIInputStream **aResult)
 {
+    NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
     nsresult rv = mIOThunk->EvaluateScript(mStreamChannel, mPopupState,
                                            mExecutionPolicy,
                                            mOriginalInnerWindow);
@@ -594,12 +597,15 @@ nsJSChannel::Open(nsIInputStream **aResult)
 NS_IMETHODIMP
 nsJSChannel::Open2(nsIInputStream **aResult)
 {
+    mUsesNewAPI = true;
     return Open(aResult);
 }
 
 NS_IMETHODIMP
 nsJSChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 {
+    NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
     NS_ENSURE_ARG(aListener);
 
     // First make sure that we have a usable inner window; we'll want to make
@@ -711,7 +717,7 @@ nsJSChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 NS_IMETHODIMP
 nsJSChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
 {
-  fprintf(stderr, "\n\nnsJSChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(aListener, aContext);
 }
 

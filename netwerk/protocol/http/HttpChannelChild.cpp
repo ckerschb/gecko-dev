@@ -48,6 +48,7 @@ HttpChannelChild::HttpChannelChild()
   , mDivertingToParent(false)
   , mFlushedForDiversion(false)
   , mSuspendSent(false)
+  , mUsesNewAPI(false)
 {
   LOG(("Creating HttpChannelChild @%x\n", this));
 
@@ -1139,6 +1140,8 @@ HttpChannelChild::GetSecurityInfo(nsISupports **aSecurityInfo)
 NS_IMETHODIMP
 HttpChannelChild::AsyncOpen(nsIStreamListener *listener, nsISupports *aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
   LOG(("HttpChannelChild::AsyncOpen [this=%p uri=%s]\n", this, mSpec.get()));
 
   if (mCanceled)
@@ -1290,7 +1293,7 @@ HttpChannelChild::AsyncOpen(nsIStreamListener *listener, nsISupports *aContext)
 NS_IMETHODIMP
 HttpChannelChild::AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext)
 {
-  fprintf(stderr, "\n\nHttpChannelChild::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(listener, aContext);
 }
 

@@ -51,6 +51,7 @@ private:
     nsresult mStatus;
     nsLoadFlags mLoadFlags;
     bool mWasOpened;
+    bool mUsesNewAPI;
     
     nsCOMPtr<nsIInterfaceRequestor> mCallbacks;
     nsCOMPtr<nsILoadGroup> mLoadGroup;
@@ -66,7 +67,8 @@ NS_INTERFACE_MAP_BEGIN(nsExtProtocolChannel)
 NS_INTERFACE_MAP_END_THREADSAFE
 
 nsExtProtocolChannel::nsExtProtocolChannel() : mStatus(NS_OK), 
-                                               mWasOpened(false)
+                                               mWasOpened(false),
+                                               mUsesNewAPI(false)
 {
 }
 
@@ -168,16 +170,19 @@ finish:
 
 NS_IMETHODIMP nsExtProtocolChannel::Open(nsIInputStream **_retval)
 {
+  NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
   return OpenURL();
 }
 
 NS_IMETHODIMP nsExtProtocolChannel::Open2(nsIInputStream **_retval)
 {
+  mUsesNewAPI = true;
   return Open(_retval);
 }
 
 NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   NS_ENSURE_ARG_POINTER(listener);
   NS_ENSURE_TRUE(!mWasOpened, NS_ERROR_ALREADY_OPENED);
 
@@ -188,7 +193,7 @@ NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen(nsIStreamListener *listener, nsISu
 
 NS_IMETHODIMP nsExtProtocolChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
 {
-  fprintf(stderr, "\n\nnsExtProtocolChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(listener, ctxt);
 }
 

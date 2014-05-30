@@ -167,12 +167,14 @@ NS_IMETHODIMP nsIconChannel::GetURI(nsIURI* *aURI)
 NS_IMETHODIMP
 nsIconChannel::Open(nsIInputStream **_retval)
 {
+  NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
   return MakeInputStream(_retval, false);
 }
 
 NS_IMETHODIMP
 nsIconChannel::Open2(nsIInputStream **_retval)
 {
+  mUsesNewAPI = true;
   return Open(_retval);
 }
 
@@ -202,6 +204,7 @@ nsresult nsIconChannel::ExtractIconInfoFromUrl(nsIFile ** aLocalFile, uint32_t *
 
 NS_IMETHODIMP nsIconChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   nsCOMPtr<nsIInputStream> inStream;
   nsresult rv = MakeInputStream(getter_AddRefs(inStream), true);
   if (NS_FAILED(rv))
@@ -225,7 +228,7 @@ NS_IMETHODIMP nsIconChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports
 
 NS_IMETHODIMP nsIconChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
 {
-  fprintf(stderr, "\n\nnsIconChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(aListener, ctxt);
 }
 

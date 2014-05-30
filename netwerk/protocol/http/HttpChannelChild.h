@@ -160,6 +160,8 @@ private:
   // diverting callbacks to parent.
   bool mSuspendSent;
 
+  bool mUsesNewAPI;
+
   // true after successful AsyncOpen until OnStopRequest completes.
   bool RemoteChannelExists() { return mIPCOpen && !mKeptAlive; }
 

@@ -199,6 +199,7 @@ nsJARChannel::nsJARChannel()
     , mIsPending(false)
     , mIsUnsafe(true)
     , mOpeningRemote(false)
+    , mUsesNewAPI(false)
 {
 #if defined(PR_LOGGING)
     if (!gJarProtocolLog)
@@ -751,6 +752,7 @@ nsJARChannel::SetContentLength(int64_t aContentLength)
 NS_IMETHODIMP
 nsJARChannel::Open(nsIInputStream **stream)
 {
+    NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
     LOG(("nsJARChannel::Open [this=%x]\n", this));
 
     NS_ENSURE_TRUE(!mOpened, NS_ERROR_IN_PROGRESS);
@@ -784,12 +786,14 @@ nsJARChannel::Open(nsIInputStream **stream)
 NS_IMETHODIMP
 nsJARChannel::Open2(nsIInputStream **stream)
 {
+    mUsesNewAPI = true;
     return Open(stream);
 }
 
 NS_IMETHODIMP
 nsJARChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 {
+    NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
     LOG(("nsJARChannel::AsyncOpen [this=%x]\n", this));
 
     NS_ENSURE_ARG_POINTER(listener);
@@ -846,7 +850,7 @@ nsJARChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 NS_IMETHODIMP
 nsJARChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
 {
-  fprintf(stderr, "\n\nnsJARChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(listener, ctx);
 }
 

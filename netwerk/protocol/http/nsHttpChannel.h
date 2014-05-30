@@ -426,6 +426,7 @@ private: // cache telemetry
 
 private:
     bool mForcePending;
+    bool mUsesNewAPI;
 };
 
 } } // namespace mozilla::net

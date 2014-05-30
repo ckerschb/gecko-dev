@@ -37,6 +37,7 @@ FTPChannelChild::FTPChannelChild(nsIURI* uri)
 , mDivertingToParent(false)
 , mFlushedForDiversion(false)
 , mSuspendSent(false)
+, mUsesNewAPI(false)
 {
   LOG(("Creating FTPChannelChild @%x\n", this));
   // grab a reference to the handler to ensure that it doesn't go away.
@@ -142,6 +143,7 @@ FTPChannelChild::GetUploadStream(nsIInputStream** stream)
 NS_IMETHODIMP
 FTPChannelChild::AsyncOpen(::nsIStreamListener* listener, nsISupports* aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   LOG(("FTPChannelChild::AsyncOpen [this=%p]\n", this));
 
   NS_ENSURE_TRUE((gNeckoChild), NS_ERROR_FAILURE);
@@ -204,11 +206,12 @@ FTPChannelChild::AsyncOpen(::nsIStreamListener* listener, nsISupports* aContext)
   return rv;
 }
 
-/*NS_IMETHODIMP
+NS_IMETHODIMP
 FTPChannelChild::AsyncOpen2(::nsIStreamListener* listener, nsISupports* aContext)
 {
+  mUsesNewAPI = true;
   return AsyncOpen(listener, aContext);
-}*/
+}
 
 NS_IMETHODIMP
 FTPChannelChild::IsPending(bool* result)

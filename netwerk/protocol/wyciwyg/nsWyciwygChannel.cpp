@@ -99,7 +99,8 @@ nsWyciwygChannel::nsWyciwygChannel()
     mContentLength(-1),
     mLoadFlags(LOAD_NORMAL),
     mAppId(NECKO_NO_APP_ID),
-    mInBrowser(false)
+    mInBrowser(false),
+    mUsesNewAPI(false)
 {
 }
 
@@ -442,6 +443,8 @@ nsWyciwygChannel::Open2(nsIInputStream ** aReturn)
 NS_IMETHODIMP
 nsWyciwygChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
   LOG(("nsWyciwygChannel::AsyncOpen [this=%p]\n", this));
   MOZ_ASSERT(mMode == NONE, "nsWyciwygChannel already open");
 
@@ -478,7 +481,7 @@ nsWyciwygChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctx)
 NS_IMETHODIMP
 nsWyciwygChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctx)
 {
-  fprintf(stderr, "\n\nnsWyciwygChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(listener, ctx);
 }
 

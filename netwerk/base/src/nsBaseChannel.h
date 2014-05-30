@@ -287,6 +287,7 @@ protected:
   nsContentPolicyType                 mContentPolicyType;
   nsCOMPtr<nsISupports>               mRequestingContext;
   nsCOMPtr<nsIPrincipal>              mRequestingPrincipal;
+  bool                                mUsesNewAPI;
 
   friend class mozilla::net::PrivateBrowsingChannel<nsBaseChannel>;
 };

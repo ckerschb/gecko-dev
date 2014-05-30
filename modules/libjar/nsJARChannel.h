@@ -89,6 +89,7 @@ private:
     nsCOMPtr<nsIURI>                mJarBaseURI;
     nsCString                       mJarEntry;
     nsCString                       mInnerJarEntry;
+    bool                            mUsesNewAPI;
 };
 
 #endif // nsJARChannel_h__

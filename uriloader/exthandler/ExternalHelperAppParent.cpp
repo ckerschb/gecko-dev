@@ -290,8 +290,7 @@ NS_IMETHODIMP
 ExternalHelperAppParent::AsyncOpen2(nsIStreamListener *aListener,
                                    nsISupports *aContext)
 {
-  fprintf(stderr, "\n\nExternalHelperAppParent::AsyncOpen2 REVAMP_ERROR\n\n");
-  return AsyncOpen(aListener, aContext);
+  return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP

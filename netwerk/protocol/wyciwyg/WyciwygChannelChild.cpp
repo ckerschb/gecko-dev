@@ -41,6 +41,7 @@ WyciwygChannelChild::WyciwygChannelChild()
   , mState(WCC_NEW)
   , mIPCOpen(false)
   , mSentAppData(false)
+  , mUsesNewAPI(false)
 {
   LOG(("Creating WyciwygChannelChild @%x\n", this));
   mEventQ = new ChannelEventQueue(NS_ISUPPORTS_CAST(nsIWyciwygChannel*, this));
@@ -625,6 +626,8 @@ GetTabChild(nsIChannel* aChannel)
 NS_IMETHODIMP
 WyciwygChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
   LOG(("WyciwygChannelChild::AsyncOpen [this=%p]\n", this));
 
   // The only places creating wyciwyg: channels should be
@@ -662,7 +665,7 @@ WyciwygChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aConte
 NS_IMETHODIMP
 WyciwygChannelChild::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
 {
-  fprintf(stderr, "\n\nWyciwygChannelChild::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(aListener, aContext);
 }
 //-----------------------------------------------------------------------------

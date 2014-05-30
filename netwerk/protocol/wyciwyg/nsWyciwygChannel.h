@@ -105,6 +105,7 @@ protected:
     nsCOMPtr<nsIEventTarget>            mCacheIOTarget;
 
     nsCOMPtr<nsISupports>               mSecurityInfo;
+    bool                                mUsesNewAPI;
 };
 
 #endif /* nsWyciwygChannel_h___ */

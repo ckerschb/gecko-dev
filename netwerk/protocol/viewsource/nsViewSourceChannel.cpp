@@ -220,6 +220,8 @@ nsViewSourceChannel::Open2(nsIInputStream **_retval)
 NS_IMETHODIMP
 nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
 {
+    NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+
     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);
 
     mListener = aListener;
@@ -253,7 +255,7 @@ nsViewSourceChannel::AsyncOpen(nsIStreamListener *aListener, nsISupports *ctxt)
 NS_IMETHODIMP
 nsViewSourceChannel::AsyncOpen2(nsIStreamListener *aListener, nsISupports *ctxt)
 {
-  fprintf(stderr, "\n\nnsViewSourceChannel::AsyncOpen2 REVAMP_ERROR\n\n");
+  mUsesNewAPI = true;
   return AsyncOpen(aListener, ctxt);
 }
 
