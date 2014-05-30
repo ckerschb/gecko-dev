@@ -4516,7 +4516,7 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
     fprintf(stderr, "\n\nnsHttpChannel::AsyncOpen2 {\n");
     fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
 
-    nsIPrincipal *principal = GetPrincipal();
+    nsIPrincipal *principal = GetPrincipal(true);
     if (!principal) {
       fprintf(stderr, "  NO PRINCIPAL - return ERROR\n}\n");
       return NS_ERROR_FAILURE;
