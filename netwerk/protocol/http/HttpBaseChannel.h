@@ -375,6 +375,7 @@ protected:
   TimingStruct                      mTransactionTimings;
 
   nsCOMPtr<nsIPrincipal> mPrincipal;
+  bool mUsesNewAPI;
 };
 
 // Share some code while working around C++'s absurd inability to handle casting

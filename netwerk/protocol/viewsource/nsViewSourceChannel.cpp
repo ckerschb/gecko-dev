@@ -201,6 +201,7 @@ nsViewSourceChannel::GetURI(nsIURI* *aURI)
 NS_IMETHODIMP
 nsViewSourceChannel::Open(nsIInputStream **_retval)
 {
+    NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
     NS_ENSURE_TRUE(mChannel, NS_ERROR_FAILURE);
 
     nsresult rv = mChannel->Open2(_retval);
@@ -214,6 +215,7 @@ nsViewSourceChannel::Open(nsIInputStream **_retval)
 NS_IMETHODIMP
 nsViewSourceChannel::Open2(nsIInputStream **_retval)
 {
+    mUsesNewAPI = true;
     return Open(_retval);
 }
 

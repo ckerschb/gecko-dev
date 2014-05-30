@@ -69,6 +69,7 @@ HttpBaseChannel::HttpBaseChannel()
   , mHttpHandler(gHttpHandler)
   , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
   , mRedirectCount(0)
+  , mUsesNewAPI(false)
 {
   LOG(("Creating HttpBaseChannel @%x\n", this));
 
@@ -511,6 +512,7 @@ HttpBaseChannel::SetContentLength(int64_t value)
 NS_IMETHODIMP
 HttpBaseChannel::Open(nsIInputStream **aResult)
 {
+  NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
   NS_ENSURE_TRUE(!mWasOpened, NS_ERROR_IN_PROGRESS);
   return NS_ImplementChannelOpen(this, aResult);
 }
@@ -518,6 +520,7 @@ HttpBaseChannel::Open(nsIInputStream **aResult)
 NS_IMETHODIMP
 HttpBaseChannel::Open2(nsIInputStream **aResult)
 {
+  mUsesNewAPI = true;
   return Open(aResult);
 }
 
