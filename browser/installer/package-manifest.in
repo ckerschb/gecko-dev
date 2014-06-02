@@ -118,6 +118,10 @@
 @BINPATH@/@DLL_PREFIX@replace_jemalloc@DLL_SUFFIX@
 #endif
 #endif
+#ifdef MOZ_GTK3
+@BINPATH@/@DLL_PREFIX@mozgtk@DLL_SUFFIX@
+@BINPATH@/@DLL_PREFIX@mozgtk2@DLL_SUFFIX@
+#endif
 
 [browser]
 ; [Base Browser Files]
@@ -853,7 +857,7 @@ bin/libfreebl_32int64_3.so
 #endif
 
 @BINPATH@/components/DataStore.manifest
-@BINPATH@/components/DataStoreImpl.js
+@BINPATH@/components/DataStoreService.js
 @BINPATH@/components/dom_datastore.xpt
 
 
