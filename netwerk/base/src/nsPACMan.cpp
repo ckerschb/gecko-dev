@@ -404,7 +404,8 @@ nsPACMan::StartLoading()
       if (channel) {
         channel->SetLoadFlags(nsIRequest::LOAD_BYPASS_CACHE);
         channel->SetNotificationCallbacks(this);
-        if (NS_SUCCEEDED(channel->AsyncOpen2(mLoader, nullptr)))
+        // TODO: update to AsyncOpen2 once new API is in place
+        if (NS_SUCCEEDED(channel->AsyncOpen(mLoader, nullptr)))
           return;
       }
     }

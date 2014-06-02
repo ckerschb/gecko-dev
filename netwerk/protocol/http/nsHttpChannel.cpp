@@ -1734,7 +1734,8 @@ nsHttpChannel::OpenRedirectChannel(nsresult rv)
     }
 
     // open new channel
-    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
+    // TODO: we should call AsyncOpen2 once the new API is in place
+    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
     if (NS_FAILED(rv)) {
         return rv;
     }
@@ -1796,7 +1797,8 @@ nsHttpChannel::ContinueDoReplaceWithProxy(nsresult rv)
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
     // open new channel
-    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
+    // TODO: we should call AsyncOpen2 here once the new API is in place
+    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -2465,7 +2467,8 @@ nsHttpChannel::ContinueProcessFallback(nsresult rv)
     // Make sure to do this _after_ calling OnChannelRedirect
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
-    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
+    // TODO: we should call AsyncOpen2 here once the new API is in place
+    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -4263,7 +4266,8 @@ nsHttpChannel::ContinueProcessRedirection(nsresult rv)
     // should really be handled by the event sink implementation.
 
     // begin loading the new channel
-    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
+    // TODO: call AsyncOpen2 once the new API is in place
+    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
 
     if (NS_FAILED(rv))
         return rv;
@@ -4516,82 +4520,29 @@ nsHttpChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *context)
 nsresult
 nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
 {
-    fprintf(stderr, "\n\nnsHttpChannel::AsyncOpen2 {\n");
-    fprintf(stderr, "  contentType: %s\n", contentTypeToString(mContentPolicyType));
+  fprintf(stderr, "\n\nnsHttpChannel::AsyncOpen2\n");
 
-    nsIPrincipal *principal = GetPrincipal(true);
-    if (!principal) {
-      fprintf(stderr, "  NO PRINCIPAL - return ERROR\n}\n");
-      return NS_ERROR_FAILURE;
-    }
+  nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
+                                           mURI,
+                                           mRequestingPrincipal,
+                                           mRequestingContext);
+  if (NS_FAILED(rv)) {
+      return rv;
+  }
 
-    nsAutoCString uri;
-    mURI->GetSpec(uri);
-    fprintf(stderr, "  channelURI (mURI): %s\n", uri.get());
+  // Do other security checks
+  // if we are dealing with scripts, we have to perform the following additonal check
+  // if (mContentPolicyType == nsIContentPolicy::TYPE_SCRIPT) {
+  //   fprintf(stderr, "  CheckLoadURIWithPrincipal\n");
+  //   nsresult rv = nsContentUtils::GetSecurityManager()->
+  //     CheckLoadURIWithPrincipal(principal, mURI,
+  //                               nsIScriptSecurityManager::ALLOW_CHROME);
+  //   NS_ENSURE_SUCCESS(rv, rv);
+  // }
 
-    // print the context
-    nsCOMPtr<nsINode> node = do_QueryInterface(mRequestingContext);
-    if (node) {
-      nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
-      if (nodePrincipal) {
-        nsCOMPtr<nsIURI> nodeURI;
-        nodePrincipal->GetURI(getter_AddRefs(nodeURI));
-        if (nodeURI) {
-          nsAutoCString nodeSpec;
-          nodeURI->GetSpec(nodeSpec);
-          fprintf(stderr, "  nodePrincpal (mRequestingContext): %s\n", nodeSpec.get());
-        }
-      }
-    }
-
-    // print the principal
-    nsCOMPtr<nsIURI> requestingLocation;
-    principal->GetURI(getter_AddRefs(requestingLocation));
-    if (requestingLocation) {
-      nsAutoCString spec;
-      requestingLocation->GetSpec(spec);
-      fprintf(stderr, "  Principal (mPrincipal): %s\n", spec.get());
-    }
-
-    nsCOMPtr<nsIExpandedPrincipal> expanded = do_QueryInterface(principal);
-    if (expanded) {
-      fprintf(stderr, "  Principal (mPrincipal) is nsIExpandedPrincipal\n");
-    }
-
-    // if we are dealing with scripts, we have to perform the following additonal check
-    if (mContentPolicyType == nsIContentPolicy::TYPE_SCRIPT) {
-      fprintf(stderr, "  CheckLoadURIWithPrincipal\n");
-      nsresult rv = nsContentUtils::GetSecurityManager()->
-        CheckLoadURIWithPrincipal(principal, mURI,
-                                  nsIScriptSecurityManager::ALLOW_CHROME);
-      NS_ENSURE_SUCCESS(rv, rv);
-    }
-
-    //Call content policies to see if this load is allowed
-    int16_t shouldLoad = nsIContentPolicy::ACCEPT;
-
-    nsresult rv = NS_CheckContentLoadPolicy(mContentPolicyType,
-                                            mURI,
-                                            mRequestingPrincipal,
-                                            mRequestingContext,
-                                            EmptyCString(),    //mime guess
-                                            nullptr,           //extra
-                                            &shouldLoad);
-    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
-      if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
-        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED)\n}\n");
-        return NS_ERROR_CONTENT_BLOCKED;
-      }
-      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT)\n}\n");
-      return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
-    }
-
-    fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
-
-    // Do other security checks
-    mUsesNewAPI = true;
-    rv = AsyncOpen(listener, context);
-    return rv;
+  mUsesNewAPI = true;
+  rv = AsyncOpen(listener, context);
+  return rv;
 
     //TANVI's notes - How do we figure out the context
     /*In docshell we do:

@@ -393,17 +393,7 @@ NS_NewChannel2(nsIChannel**           outResult,
     fprintf(stderr, "}\n\n");
   }
 
-  // resource and chrome loads do not have a principal
-  bool resourceMatch = false;
-  NS_ENSURE_SUCCESS(aURI->SchemeIs("resource", &resourceMatch), NS_OK);
-  bool chromeMatch = false;
-  NS_ENSURE_SUCCESS(aURI->SchemeIs("chrome", &chromeMatch), NS_OK);
-
-  // TODO: we should make sure that all channels are created using the systemPrincipal
-  // we want an assertion here!!!
-  if (!resourceMatch && !chromeMatch) {
-    NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
-  }
+  NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
 
   // TODO: Is it likely that all channels created using this interface should have a nsContentPolicyType of TYPE_OTHER?
   // maybe we can assert that as well - we need to investigate that!

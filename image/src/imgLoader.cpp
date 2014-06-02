@@ -38,6 +38,9 @@
 #include "Image.h"
 #include "DiscardTracker.h"
 
+// TODO: what is the proper way to include nsScriptSecurityManager
+#include "../../caps/include/nsScriptSecurityManager.h"
+
 // we want to explore making the document own the load group
 // so we can associate the document URI with the load group.
 // until this point, we have an evil hack:
@@ -593,6 +596,8 @@ static nsresult NewImageChannel(nsIChannel **aResult,
 
   // TODO: Verify that we can not query the node here.
   nsCOMPtr<nsINode> requestingNode = do_QueryInterface(aContext);
+  // TODO: We should simplify the following structure, but for now
+  // I want to be explicit what we are doing!
   if (requestingNode) {
     rv = NS_NewChannel3(aResult,
                         aURI,
@@ -604,7 +609,7 @@ static nsresult NewImageChannel(nsIChannel **aResult,
                         nsIContentPolicy::TYPE_IMAGE,
                         requestingNode);
   }
-  else {
+  else if (aLoadingPrincipal) {
     // TODO: in that case aLodingPrincipal must be the systemPrincipal
     // put assertion in NewChannel2
     rv = NS_NewChannel2(aResult,
@@ -616,6 +621,25 @@ static nsresult NewImageChannel(nsIChannel **aResult,
                         aPolicy,
                         nsIContentPolicy::TYPE_IMAGE,
                         aLoadingPrincipal);
+  }
+  else {
+    // TODO: we do not have a principal but we need to load an image, e.g. for:
+    //   * resource:
+    //   * chrome:
+    nsCOMPtr<nsIPrincipal> systemPrincipal;
+    rv = nsScriptSecurityManager::GetScriptSecurityManager()->
+      GetSystemPrincipal(getter_AddRefs(systemPrincipal));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewChannel2(aResult,
+                        aURI,
+                        nullptr, // cached IOService
+                        nullptr, // loadgroup
+                        callbacks,
+                        aLoadFlags,
+                        aPolicy,
+                        nsIContentPolicy::TYPE_IMAGE,
+                        systemPrincipal);
   }
 
   if (NS_FAILED(rv))

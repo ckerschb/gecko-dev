@@ -218,6 +218,74 @@ NS_CheckContentLoadPolicy(uint32_t          contentType,
 }
 
 /**
+ * TODO: helper function that checks NS_CheckContentLoadPolicy
+ * and prints debug info
+ */
+inline nsresult
+NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
+                           nsIURI*         aContentLocation,
+                           nsIPrincipal*   aRequestingPrincipal,
+                           nsISupports*    aRequestingContext)
+{
+  NS_ASSERTION(aContentLocation, "Can not perform check without a aContentLocation");
+  NS_ASSERTION(aRequestingPrincipal, "Can not perform checkout with aRequestingPrincipal");
+
+  fprintf(stderr, "NS_CheckContentPolicy2 {\n");
+  fprintf(stderr, "  aContentPolicyType: %s\n", NS_CP_ContentTypeName(aContentPolicyType));
+
+  // print aContentLocation
+  nsAutoCString uri;
+  aContentLocation->GetSpec(uri);
+  fprintf(stderr, "  aContentLocation: %s\n", uri.get());
+
+  // print aRequestingPrincipal
+  nsCOMPtr<nsIURI> requestingPrincipalURI;
+  aRequestingPrincipal->GetURI(getter_AddRefs(requestingPrincipalURI));
+  if (requestingPrincipalURI) {
+    nsAutoCString spec;
+    requestingPrincipalURI->GetSpec(spec);
+    fprintf(stderr, "  aRequestingPrincipal: %s\n", spec.get());
+  }
+
+  // print aRequestingContext
+  nsCOMPtr<nsINode> node = do_QueryInterface(aRequestingContext);
+  if (node) {
+    nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
+    if (nodePrincipal) {
+      nsCOMPtr<nsIURI> nodeURI;
+      nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+      if (nodeURI) {
+        nsAutoCString nodeSpec;
+        nodeURI->GetSpec(nodeSpec);
+        fprintf(stderr, "  aRequestingContext: %s\n", nodeSpec.get());
+      }
+    }
+  }
+
+  //Call content policies to see if this load is allowed
+  int16_t shouldLoad = nsIContentPolicy::ACCEPT;
+
+  nsresult rv = NS_CheckContentLoadPolicy(aContentPolicyType,
+                                          aContentLocation,
+                                          aRequestingPrincipal,
+                                          aRequestingContext,
+                                          EmptyCString(),    //mime guess
+                                          nullptr,           //extra
+                                          &shouldLoad);
+
+  if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+    if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
+      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED)\n}\n");
+      return NS_ERROR_CONTENT_BLOCKED;
+    }
+    fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT)\n}\n");
+    return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+  }
+
+  fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
+  return NS_OK;
+}
+/**
  * Alias for calling ShouldProcess on the content policy service.  Parameters
  * are the same as nsIContentPolicy::shouldLoad, except for the originPrincipal
  * parameter, which should be non-null if possible, and the last two
