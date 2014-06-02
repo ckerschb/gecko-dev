@@ -23,6 +23,7 @@
 #include "gfxTypes.h"
 #include "gfxContext.h"
 #include "gfxFontMissingGlyphs.h"
+#include "gfxGraphiteShaper.h"
 #include "gfxHarfBuzzShaper.h"
 #include "gfxUserFontSet.h"
 #include "gfxPlatformFontList.h"
@@ -43,6 +44,8 @@
 #include "gfxSVGGlyphs.h"
 #include "gfxMathTable.h"
 #include "gfx2DGlue.h"
+
+#include "GreekCasing.h"
 
 #if defined(XP_MACOSX)
 #include "nsCocoaFeatures.h"
@@ -2790,7 +2793,9 @@ struct GlyphBuffer {
                 FlushStroke(aCR, aContextPaint, aGlobalMatrix);
             }
             if (int(aDrawMode) & int(DrawMode::GLYPH_FILL)) {
-                PROFILER_LABEL("GlyphBuffer", "cairo_show_glyphs");
+                PROFILER_LABEL("GlyphBuffer", "Flush::cairo_show_glyphs",
+                    js::ProfileEntry::Category::GRAPHICS);
+
                 nsRefPtr<gfxPattern> pattern;
                 if (aContextPaint &&
                     !!(pattern = aContextPaint->GetFillPattern(aGlobalMatrix))) {
@@ -3940,8 +3945,7 @@ gfxFont::ShapeText(gfxContext    *aContext,
                    uint32_t       aOffset,
                    uint32_t       aLength,
                    int32_t        aScript,
-                   gfxShapedText *aShapedText,
-                   bool           aPreferPlatformShaping)
+                   gfxShapedText *aShapedText)
 {
     nsDependentCSubstring ascii((const char*)aText, aLength);
     nsAutoString utf16;
@@ -3950,7 +3954,7 @@ gfxFont::ShapeText(gfxContext    *aContext,
         return false;
     }
     return ShapeText(aContext, utf16.BeginReading(), aOffset, aLength,
-                     aScript, aShapedText, aPreferPlatformShaping);
+                     aScript, aShapedText);
 }
 
 bool
@@ -3959,32 +3963,29 @@ gfxFont::ShapeText(gfxContext      *aContext,
                    uint32_t         aOffset,
                    uint32_t         aLength,
                    int32_t          aScript,
-                   gfxShapedText   *aShapedText,
-                   bool             aPreferPlatformShaping)
+                   gfxShapedText   *aShapedText)
 {
     bool ok = false;
 
-    if (mGraphiteShaper && gfxPlatform::GetPlatform()->UseGraphiteShaping()) {
-        ok = mGraphiteShaper->ShapeText(aContext, aText, aOffset, aLength,
-                                        aScript, aShapedText);
-    }
-
-    if (!ok && mHarfBuzzShaper && !aPreferPlatformShaping) {
-        if (gfxPlatform::GetPlatform()->UseHarfBuzzForScript(aScript)) {
-            ok = mHarfBuzzShaper->ShapeText(aContext, aText, aOffset, aLength,
+    if (FontCanSupportGraphite()) {
+        if (gfxPlatform::GetPlatform()->UseGraphiteShaping()) {
+            if (!mGraphiteShaper) {
+                mGraphiteShaper = new gfxGraphiteShaper(this);
+            }
+            ok = mGraphiteShaper->ShapeText(aContext, aText, aOffset, aLength,
                                             aScript, aShapedText);
         }
     }
 
     if (!ok) {
-        if (!mPlatformShaper) {
-            CreatePlatformShaper();
+        if (!mHarfBuzzShaper) {
+            mHarfBuzzShaper = new gfxHarfBuzzShaper(this);
         }
-        if (mPlatformShaper) {
-            ok = mPlatformShaper->ShapeText(aContext, aText, aOffset, aLength,
-                                            aScript, aShapedText);
-        }
+        ok = mHarfBuzzShaper->ShapeText(aContext, aText, aOffset, aLength,
+                                        aScript, aShapedText);
     }
+
+    NS_WARN_IF_FALSE(ok, "shaper failed, expect scrambled or missing text");
 
     PostShapingFixup(aContext, aText, aOffset, aLength, aShapedText);
 
@@ -5709,8 +5710,8 @@ gfxFont::InitFakeSmallCapsRun(gfxContext     *aContext,
                     // capitals where the accent is to be removed (bug 307039).
                     // These are handled by using the full-size font with the
                     // uppercasing transform.
-                    GreekCasing::State state;
-                    ch2 = GreekCasing::UpperCase(ch, state);
+                    mozilla::GreekCasing::State state;
+                    ch2 = mozilla::GreekCasing::UpperCase(ch, state);
                     if (ch != ch2) {
                         chCase = kSpecialUpper;
                     }
