@@ -4456,7 +4456,12 @@ nsHttpChannel::GetSecurityInfo(nsISupports **securityInfo)
 NS_IMETHODIMP
 nsHttpChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *context)
 {
-    NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+    // Since not all channels are created setting a principal we use a warning
+    // for now, which should turn in the following assertion soon:
+    // NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
+    if (!mUsesNewAPI) {
+      NS_WARNING("AsyncOpen call did no go through new API");
+    }
 
     MOZ_EVENT_TRACER_WAIT(this, "net::http::channel");
 
