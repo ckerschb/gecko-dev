@@ -269,8 +269,16 @@ nsresult nsReadConfig::openAndEvaluateJSFile(const char *aFileName, int32_t obsc
         if (NS_FAILED(rv))
             return rv;
 
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
         nsCOMPtr<nsIChannel> channel;
-        rv = ioService->NewChannelFromURI(uri, getter_AddRefs(channel));
+        rv = ioService->NewChannelFromURI2(uri,
+                                           systemPrincipal,
+                                           nullptr, // requestingNode
+                                           0,       // securityFlags
+                                           nsIContentPolicy::TYPE_OTHER,
+                                           0,       // loadFlags
+                                           getter_AddRefs(channel));
         if (NS_FAILED(rv))
             return rv;
 

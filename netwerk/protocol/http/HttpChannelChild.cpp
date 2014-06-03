@@ -810,8 +810,16 @@ HttpChannelChild::Redirect1Begin(const uint32_t& newChannelId,
 
   nsCOMPtr<nsIURI> uri = DeserializeURI(newUri);
 
+ nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   nsCOMPtr<nsIChannel> newChannel;
-  rv = ioService->NewChannelFromURI(uri, getter_AddRefs(newChannel));
+  rv = ioService->NewChannelFromURI2(uri,
+                                     systemPrincipal,
+                                     nullptr, // requestingNode
+                                     0,       // securityFlags
+                                     nsIContentPolicy::TYPE_OTHER,
+                                     0,       // loadFlags
+                                     getter_AddRefs(newChannel));
   if (NS_FAILED(rv)) {
     // Veto redirect.  nsHttpChannel decides to cancel or continue.
     OnRedirectVerifyCallback(rv);

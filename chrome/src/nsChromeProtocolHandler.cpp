@@ -149,8 +149,15 @@ nsChromeProtocolHandler::NewChannel(nsIURI* aURI,
 
     nsCOMPtr<nsIIOService> ioServ(do_GetIOService(&rv));
     NS_ENSURE_SUCCESS(rv, rv);
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
-    rv = ioServ->NewChannelFromURI(resolvedURI, getter_AddRefs(result));
+    rv = ioServ->NewChannelFromURI2(resolvedURI,
+                                    systemPrincipal,
+                                    nullptr, // requestingNode
+                                    0,       // securityFlags
+                                    nsIContentPolicy::TYPE_OTHER,
+                                    0,       // loadFlags
+                                    getter_AddRefs(result));
     if (NS_FAILED(rv)) return rv;
 
 #ifdef DEBUG

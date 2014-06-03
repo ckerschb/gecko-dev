@@ -554,9 +554,16 @@ SendPing(void *closure, nsIContent *content, nsIURI *uri, nsIIOService *ios)
   }
 
   nsIDocument *doc = content->OwnerDoc();
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
   nsCOMPtr<nsIChannel> chan;
-  ios->NewChannelFromURI(uri, getter_AddRefs(chan));
+  ios->NewChannelFromURI2(uri,
+                          systemPrincipal,
+                          nullptr, // requestingNode
+                          0,       // securityFlags
+                          nsIContentPolicy::TYPE_OTHER,
+                          0,       // loadFlags
+                          getter_AddRefs(chan));
   if (!chan)
     return;
 

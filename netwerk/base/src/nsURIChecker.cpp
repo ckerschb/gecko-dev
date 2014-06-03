@@ -138,8 +138,15 @@ nsURIChecker::Init(nsIURI *aURI)
     nsresult rv;
     nsCOMPtr<nsIIOService> ios = do_GetIOService(&rv);
     if (NS_FAILED(rv)) return rv;
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
-    rv = ios->NewChannelFromURI(aURI, getter_AddRefs(mChannel));
+    rv = ios->NewChannelFromURI2(aURI,
+                                 systemPrincipal,
+                                 nullptr, // requestingNode
+                                 0,       // securityFlags
+                                 nsIContentPolicy::TYPE_OTHER,
+                                 0,       // loadFlags
+                                 getter_AddRefs(mChannel));
     if (NS_FAILED(rv)) return rv;
 
     if (mAllowHead) {

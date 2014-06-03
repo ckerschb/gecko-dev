@@ -355,7 +355,14 @@ class MOZ_STACK_CLASS ComponentLoaderInfo {
     nsIChannel* ScriptChannel() { MOZ_ASSERT(mScriptChannel); return mScriptChannel; }
     nsresult EnsureScriptChannel() {
         BEGIN_ENSURE(ScriptChannel, IOService, URI);
-        return mIOService->NewChannelFromURI(mURI, getter_AddRefs(mScriptChannel));
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+        return mIOService->NewChannelFromURI2(mURI,
+                                              systemPrincipal,
+                                              nullptr, // requestingNode
+                                              0,       // securityFlags
+                                              nsIContentPolicy::TYPE_OTHER,
+                                              0,       // loadFlags
+                                              getter_AddRefs(mScriptChannel));
     }
 
     nsIURI* ResolvedURI() { MOZ_ASSERT(mResolvedURI); return mResolvedURI; }

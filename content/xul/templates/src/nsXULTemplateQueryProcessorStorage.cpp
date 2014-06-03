@@ -216,7 +216,15 @@ nsXULTemplateQueryProcessorStorage::GetDatasource(nsIArray* aDataSources,
             do_GetService("@mozilla.org/network/io-service;1", &rv);
         NS_ENSURE_SUCCESS(rv, rv);
 
-        rv = ioservice->NewChannelFromURI(uri, getter_AddRefs(channel));
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
+        rv = ioservice->NewChannelFromURI2(uri,
+                                           systemPrincipal,
+                                           nullptr, // requestingNode
+                                           0,       // securityFlags
+                                           nsIContentPolicy::TYPE_OTHER,
+                                           0,       // loadFlags
+                                           getter_AddRefs(channel));
         NS_ENSURE_SUCCESS(rv, rv);
 
         nsCOMPtr<nsIFileChannel> fileChannel = do_QueryInterface(channel, &rv);

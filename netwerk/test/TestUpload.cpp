@@ -135,10 +135,18 @@ main(int argc, char* argv[])
         rv = NS_NewURI(getter_AddRefs(uri), uriSpec);
         if (NS_FAILED(rv)) return -1;
 
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
         nsCOMPtr<nsIChannel> channel;
-        rv = ioService->NewChannelFromURI(uri, getter_AddRefs(channel));
+        rv = ioService->NewChannelFromURI2(uri,
+                                           systemPrincipal,
+                                           nullptr, // requestingNode
+                                           0,       // securityFlags
+                                           nsIContentPolicy::TYPE_OTHER,
+                                           0,       // loadFlags
+                                           getter_AddRefs(channel));
         if (NS_FAILED(rv)) return -1;
-	
+
         // QI and set the upload stream
         nsCOMPtr<nsIUploadChannel> uploadChannel(do_QueryInterface(channel));
         uploadChannel->SetUploadStream(uploadStream, EmptyCString(), -1);

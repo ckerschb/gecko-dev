@@ -257,9 +257,17 @@ nsresult StartLoad(const char *aURISpec) {
     rv = NS_NewURI(getter_AddRefs(uri), aURISpec);
     if (NS_FAILED(rv)) return rv;
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
     // create a channel
     nsCOMPtr<nsIChannel> channel;
-    rv = serv->NewChannelFromURI(uri, getter_AddRefs(channel));
+    rv = serv->NewChannelFromURI2(uri,
+                                  systemPrincipal,
+                                  nullptr, // requestingNode
+                                  0,       // securityFlags
+                                  nsIContentPolicy::TYPE_OTHER,
+                                  0,       // loadFlags
+                                  getter_AddRefs(channel));
     if (NS_FAILED(rv)) return rv;
 
     Consumer *consumer = new Consumer;

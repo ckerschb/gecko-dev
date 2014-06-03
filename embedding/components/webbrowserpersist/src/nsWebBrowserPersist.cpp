@@ -3631,7 +3631,15 @@ nsWebBrowserPersist::CreateChannelFromURI(nsIURI *aURI, nsIChannel **aChannel)
     ioserv = do_GetIOService(&rv);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = ioserv->NewChannelFromURI(aURI, aChannel);
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
+    rv = ioserv->NewChannelFromURI2(aURI,
+                                    systemPrincipal,
+                                    nullptr, // requestingNode
+                                    0,       // securityFlags
+                                    nsIContentPolicy::TYPE_OTHER,
+                                    0,       // loadFlags
+                                    aChannel);
     NS_ENSURE_SUCCESS(rv, rv);
     NS_ENSURE_ARG_POINTER(*aChannel);
 
