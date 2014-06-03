@@ -674,6 +674,7 @@ nsIOService::NewChannelFromURIWithProxyFlags2(nsIURI *aURI,
     else {
         rv = handler->NewChannel2(aURI,
                                   aRequestingPrincipal,
+                                  nullptr,
                                   aSecurityFlags,
                                   aContentPolicyType,
                                   aLoadFlags,

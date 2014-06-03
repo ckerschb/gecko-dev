@@ -1075,6 +1075,7 @@ nsGIOProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
 NS_IMETHODIMP
 nsGIOProtocolHandler::NewChannel2(nsIURI* aURI,
                                   nsIPrincipal* aRequestingPrincipal,
+                                  nsINode* aRequestingNode,
                                   uint32_t aSecurityFlags,
                                   nsContentPolicyType aContentPolicyType,
                                   uint32_t aLoadFlags,
@@ -1084,7 +1085,7 @@ nsGIOProtocolHandler::NewChannel2(nsIURI* aURI,
   nsresult rv = NewChannel(aURI, outChannel);
   NS_ENSURE_SUCCESS(rv, rv);
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(nullptr);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return NS_OK;
 }

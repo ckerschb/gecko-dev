@@ -228,6 +228,7 @@ nsJARProtocolHandler::NewChannel(nsIURI *uri, nsIChannel **result)
 NS_IMETHODIMP
 nsJARProtocolHandler::NewChannel2(nsIURI* aURI,
                                   nsIPrincipal* aRequestingPrincipal,
+                                  nsINode* aRequestingNode,
                                   uint32_t aSecurityFlags,
                                   nsContentPolicyType aContentPolicyType,
                                   uint32_t aLoadFlags,
@@ -237,6 +238,7 @@ nsJARProtocolHandler::NewChannel2(nsIURI* aURI,
   nsresult rv = NewChannel(aURI, outChannel);
   NS_ENSURE_SUCCESS(rv, rv);
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  // TODO: we need to set aRequestingNode here
   (*outChannel)->SetRequestingContext(nullptr);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return NS_OK;

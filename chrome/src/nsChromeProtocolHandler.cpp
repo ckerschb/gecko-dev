@@ -24,6 +24,7 @@
 #include "nsIStandardURL.h"
 #include "nsNetUtil.h"
 #include "nsString.h"
+#include "nsINode.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -210,6 +211,7 @@ nsChromeProtocolHandler::NewChannel(nsIURI* aURI,
 NS_IMETHODIMP
 nsChromeProtocolHandler::NewChannel2(nsIURI* aURI,
                                      nsIPrincipal* aRequestingPrincipal,
+                                     nsINode* aRequestingNode,
                                      uint32_t aSecurityFlags,
                                      nsContentPolicyType aContentPolicyType,
                                      uint32_t aLoadFlags,
@@ -219,7 +221,7 @@ nsChromeProtocolHandler::NewChannel2(nsIURI* aURI,
   nsresult rv = NewChannel(aURI, outChannel);
   NS_ENSURE_SUCCESS(rv, rv);
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(nullptr);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return NS_OK;
 }
