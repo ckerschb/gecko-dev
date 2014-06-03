@@ -394,14 +394,9 @@ nsPACMan::StartLoading()
       // NOTE: This results in GetProxyForURI being called
       if (pacURI) {
         pacURI->GetSpec(mNormalPACURISpec);
-        ios->NewChannelFromURI(pacURI, getter_AddRefs(channel));
-        // Since we aren't calling NS_NewChannel and using iOService directly,
-        // we need to set the content policy type and principal on the channel
-        channel->SetContentPolicyType(nsIContentPolicy::TYPE_OTHER);
-
         // Get systemPrincipal
         nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
-        channel->SetRequestingPrincipal(systemPrincipal);
+        ios->NewChannelFromURI2(pacURI, systemPrincipal, nullptr, 0, nsIContentPolicy::TYPE_OTHER, 0, getter_AddRefs(channel));
       }
       else {
         LOG(("nsPACMan::StartLoading Failed pacspec uri conversion %s\n",
