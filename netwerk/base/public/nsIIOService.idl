@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "nsISupports.idl"
+#include "nsIContentPolicy.idl"
 
 interface nsIProtocolHandler;
 interface nsIChannel;
@@ -70,12 +71,26 @@ interface nsIIOService : nsISupports
      */
     nsIChannel newChannelFromURI(in nsIURI aURI);
 
+    nsIChannel newChannelFromURI2(in nsIURI aURI,
+                                  in nsIPrincipal aRequestingPrincipal,
+                                  in unsigned long aSecurityFlags,
+                                  in nsContentPolicyType aContentPolicyType,
+                                  in unsigned long aLoadFlags);
+
     /**
      * Equivalent to newChannelFromURI(newURI(...))
      */
     nsIChannel newChannel(in AUTF8String aSpec,
                           in string aOriginCharset,
                           in nsIURI aBaseURI);
+
+    nsIChannel newChannel2(in AUTF8String aSpec,
+                           in string aOriginCharset,
+                           in nsIURI aBaseURI,
+                           in nsIPrincipal aRequestingPrincipal,
+                           in unsigned long aSecurityFlags,
+                           in nsContentPolicyType aContentPolicyType,
+                           in unsigned long aLoadFlags);
 
     /**
      * Returns true if networking is in "offline" mode. When in offline mode, 

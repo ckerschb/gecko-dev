@@ -40,4 +40,12 @@ interface nsIIOService2 : nsIIOService
   nsIChannel newChannelFromURIWithProxyFlags(in nsIURI aURI,
                                              in nsIURI aProxyURI,
                                              in unsigned long aProxyFlags);
+
+  nsIChannel newChannelFromURIWithProxyFlags2(in nsIURI aURI,
+                                              in nsIURI aProxyURI,
+                                              in unsigned long aProxyFlags,
+                                              in nsIPrincipal aRequestingPrincipal,
+                                              in unsigned long aSecurityFlags,
+                                              in nsContentPolicyType aContentPolicyType,
+                                              in unsigned long aLoadFlags);
 };

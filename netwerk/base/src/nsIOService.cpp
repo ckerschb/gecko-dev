@@ -559,7 +559,27 @@ nsIOService::NewFileURI(nsIFile *file, nsIURI **result)
 NS_IMETHODIMP
 nsIOService::NewChannelFromURI(nsIURI *aURI, nsIChannel **result)
 {
+    // TODO, the following warning should turn into into an ASSERTION at some point
+    NS_WARNING("Deprecated, you should use NewChannelFromURI2");
     return NewChannelFromURIWithProxyFlags(aURI, nullptr, 0, result);
+}
+
+NS_IMETHODIMP
+nsIOService::NewChannelFromURI2(nsIURI* aURI,
+                                nsIPrincipal* aRequestingPrincipal,
+                                uint32_t aSecurityFlags,
+                                nsContentPolicyType aContentPolicyType,
+                                uint32_t aLoadFlags,
+                                nsIChannel** outChannel)
+{
+    return NewChannelFromURIWithProxyFlags2(aURI,
+                                            nullptr, // aProxyURI
+                                            0,       // aProxyFlags
+                                            aRequestingPrincipal,
+                                            aSecurityFlags,
+                                            aContentPolicyType,
+                                            aLoadFlags,
+                                            outChannel);
 }
 
 NS_IMETHODIMP
@@ -568,6 +588,8 @@ nsIOService::NewChannelFromURIWithProxyFlags(nsIURI *aURI,
                                              uint32_t aProxyFlags,
                                              nsIChannel **result)
 {
+    // TODO, the following warning should turn into into an ASSERTION at some point
+    NS_WARNING("Deprecated, you should use NewChannelFromURIWithProxyFlags2");
     nsresult rv;
     NS_ENSURE_ARG_POINTER(aURI);
 
@@ -618,14 +640,106 @@ nsIOService::NewChannelFromURIWithProxyFlags(nsIURI *aURI,
 }
 
 NS_IMETHODIMP
+nsIOService::NewChannelFromURIWithProxyFlags2(nsIURI *aURI,
+                                              nsIURI *aProxyURI,
+                                              uint32_t aProxyFlags,
+                                              nsIPrincipal* aRequestingPrincipal,
+                                              uint32_t aSecurityFlags,
+                                              nsContentPolicyType aContentPolicyType,
+                                              uint32_t aLoadFlags,
+                                              nsIChannel** outChannel)
+{
+    nsresult rv;
+    NS_ENSURE_ARG_POINTER(aURI);
+
+    nsAutoCString scheme;
+    rv = aURI->GetScheme(scheme);
+    if (NS_FAILED(rv))
+        return rv;
+
+    nsCOMPtr<nsIProtocolHandler> handler;
+    rv = GetProtocolHandler(scheme.get(), getter_AddRefs(handler));
+    if (NS_FAILED(rv))
+        return rv;
+
+    uint32_t protoFlags;
+    rv = handler->GetProtocolFlags(&protoFlags);
+    if (NS_FAILED(rv))
+        return rv;
+
+    nsCOMPtr<nsIProxiedProtocolHandler> pph = do_QueryInterface(handler);
+    if (pph) {
+        rv = pph->NewProxiedChannel(aURI, nullptr, aProxyFlags, aProxyURI, outChannel);
+    }
+    else {
+        rv = handler->NewChannel2(aURI,
+                                  aRequestingPrincipal,
+                                  aSecurityFlags,
+                                  aContentPolicyType,
+                                  aLoadFlags,
+                                  outChannel);
+    }
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    // Some extensions override the http protocol handler and provide their own
+    // implementation. The channels returned from that implementation doesn't
+    // seem to always implement the nsIUploadChannel2 interface, presumably
+    // because it's a new interface.
+    // Eventually we should remove this and simply require that http channels
+    // implement the new interface.
+    // See bug 529041
+    if (!gHasWarnedUploadChannel2 && scheme.EqualsLiteral("http")) {
+        nsCOMPtr<nsIUploadChannel2> uploadChannel2 = do_QueryInterface(*outChannel);
+        if (!uploadChannel2) {
+            nsCOMPtr<nsIConsoleService> consoleService =
+                do_GetService(NS_CONSOLESERVICE_CONTRACTID);
+            if (consoleService) {
+                consoleService->LogStringMessage(NS_LITERAL_STRING(
+                    "Http channel implementation doesn't support nsIUploadChannel2. An extension has supplied a non-functional http protocol handler. This will break behavior and in future releases not work at all."
+                                                                   ).get());
+            }
+            gHasWarnedUploadChannel2 = true;
+        }
+    }
+
+    return NS_OK;
+
+}
+
+NS_IMETHODIMP
 nsIOService::NewChannel(const nsACString &aSpec, const char *aCharset, nsIURI *aBaseURI, nsIChannel **result)
 {
+    // TODO, the following warning should turn into into an ASSERTION at some point
+    NS_WARNING("Deprecated, you should use NewChannel2");
     nsresult rv;
     nsCOMPtr<nsIURI> uri;
     rv = NewURI(aSpec, aCharset, aBaseURI, getter_AddRefs(uri));
     if (NS_FAILED(rv)) return rv;
 
     return NewChannelFromURI(uri, result);
+}
+
+NS_IMETHODIMP
+nsIOService::NewChannel2(const nsACString &aSpec,
+                         const char *aCharset,
+                         nsIURI *aBaseURI,
+                         nsIPrincipal* aRequestingPrincipal,
+                         uint32_t aSecurityFlags,
+                         nsContentPolicyType aContentPolicyType,
+                         uint32_t aLoadFlags,
+                         nsIChannel** outChannel)
+{
+    nsresult rv;
+    nsCOMPtr<nsIURI> uri;
+    rv = NewURI(aSpec, aCharset, aBaseURI, getter_AddRefs(uri));
+    if (NS_FAILED(rv)) return rv;
+
+    return NewChannelFromURI2(uri,
+                              aRequestingPrincipal,
+                              aSecurityFlags,
+                              aContentPolicyType,
+                              aLoadFlags,
+                              outChannel);
 }
 
 bool
