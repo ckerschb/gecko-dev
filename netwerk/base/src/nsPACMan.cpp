@@ -395,6 +395,13 @@ nsPACMan::StartLoading()
       if (pacURI) {
         pacURI->GetSpec(mNormalPACURISpec);
         ios->NewChannelFromURI(pacURI, getter_AddRefs(channel));
+        // Since we aren't calling NS_NewChannel and using iOService directly,
+        // we need to set the content policy type and principal on the channel
+        channel->SetContentPolicyType(nsIContentPolicy::TYPE_OTHER);
+
+        // Get systemPrincipal
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+        channel->SetRequestingPrincipal(systemPrincipal);
       }
       else {
         LOG(("nsPACMan::StartLoading Failed pacspec uri conversion %s\n",
@@ -404,8 +411,7 @@ nsPACMan::StartLoading()
       if (channel) {
         channel->SetLoadFlags(nsIRequest::LOAD_BYPASS_CACHE);
         channel->SetNotificationCallbacks(this);
-        // TODO: update to AsyncOpen2 once new API is in place
-        if (NS_SUCCEEDED(channel->AsyncOpen(mLoader, nullptr)))
+        if (NS_SUCCEEDED(channel->AsyncOpen2(mLoader, nullptr)))
           return;
       }
     }
