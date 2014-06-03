@@ -199,20 +199,14 @@ NS_NewChannel(nsIChannel           **result,
               nsILoadGroup          *loadGroup = nullptr,
               nsIInterfaceRequestor *callbacks = nullptr,
               uint32_t               loadFlags = nsIRequest::LOAD_NORMAL,
-              nsIChannelPolicy      *channelPolicy = nullptr,
-              bool                  aUsesNewAPI = false)
+              nsIChannelPolicy      *channelPolicy = nullptr)
 {
 
-    NS_ASSERTION(aUsesNewAPI, "Channel created through deprecated API");
+    NS_ASSERTION(false, "Channel created through deprecated API");
 
     nsresult rv;
     nsCOMPtr<nsIIOService> grip;
     rv = net_EnsureIOService(&ioService, grip);
-
-    // When deleting ioService as an argument, we could use:
-    // nsCOMPtr<nsIOService> ios = do_GetIOService();
-    // and use ios instead of ioService;
-    // TODO: what would be the advantage, disadvantage?
 
     if (ioService) {
         nsCOMPtr<nsIChannel> chan;
@@ -325,6 +319,7 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
  *               uint32_t             aSecurityFlags,
  *               nsContentPolicyType  aContentPolicyType,
  *               uint32_t             aLoadFlags,
+ *               nsIOService*         aCachedIoService,
  *               nsIChannel**         outChannel);
  *
  *
@@ -336,12 +331,12 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
  *               uint32_t             aSecurityFlags,
  *               nsContentPolicyType  aContentPolicyType,
  *               uint32_t             aLoadFlags,
+ *               nsIOService*         aCachedIoService,
  *               nsIChannel**         outChannel);
  *
  *
  * The big todos for the Interface:
  *     * add      uint32_t               aSecurityFlags
- *     * delete   nsIIOService*          aIoService
  *     * delete   nsILoadGroup*          aLoadGroup (should be null if we use systemPrincipal, otherwise
  *                                                   we can get it from the aRequestingNode)
  *     * delete   nsIInterfaceRequestor* aCallbacks
@@ -363,6 +358,70 @@ inline const char* contentTypeToString(nsContentPolicyType aType) {
  *    * aSecurityFlags:     please find them in nsIChannel.idl
  *
  */
+
+inline nsresult
+NS_NewChannelCommon(nsIChannel**           result,
+                    nsIURI*                uri,
+                    nsIIOService*          ioService,    // pass in nsIIOService to optimize callers
+                    nsILoadGroup*          loadGroup,
+                    nsIInterfaceRequestor* callbacks,
+                    uint32_t               loadFlags,
+                    nsIChannelPolicy*      channelPolicy,
+                    nsIPrincipal*          aRequestingPrincipal,
+                    nsINode*               aRequestingNode,
+                    nsContentPolicyType    aContentPolicyType)
+{
+
+    nsresult rv;
+    nsCOMPtr<nsIIOService> grip;
+    rv = net_EnsureIOService(&ioService, grip);
+
+    // TODO: update the following code to user early returns if
+    // ioService is null, newChannelFromURI fails, etc.
+
+    if (ioService) {
+        nsCOMPtr<nsIChannel> chan;
+        rv = ioService->NewChannelFromURI2(uri,
+                                           aRequestingPrincipal,
+                                           aRequestingNode,
+                                           0, // TODO: securityFlags
+                                           aContentPolicyType,
+                                           loadFlags,
+                                           getter_AddRefs(chan));
+        if (NS_SUCCEEDED(rv)) {
+            if (loadGroup) {
+                rv = chan->SetLoadGroup(loadGroup);
+            }
+            if (callbacks) {
+                nsresult tmp = chan->SetNotificationCallbacks(callbacks);
+                if (NS_FAILED(tmp)) {
+                    rv = tmp;
+                }
+            }
+            if (loadFlags != nsIRequest::LOAD_NORMAL) {
+                // Retain the LOAD_REPLACE load flag if set.
+                nsLoadFlags normalLoadFlags = 0;
+                chan->GetLoadFlags(&normalLoadFlags);
+                nsresult tmp = chan->SetLoadFlags(loadFlags |
+                                                  (normalLoadFlags &
+                                                   nsIChannel::LOAD_REPLACE));
+                if (NS_FAILED(tmp)) {
+                    rv = tmp;
+                }
+            }
+            if (channelPolicy) {
+                nsCOMPtr<nsIWritablePropertyBag2> props = do_QueryInterface(chan);
+                if (props) {
+                    props->SetPropertyAsInterface(NS_CHANNEL_PROP_CHANNEL_POLICY,
+                                                  channelPolicy);
+                }
+            }
+            if (NS_SUCCEEDED(rv))
+                chan.forget(result);
+        }
+    }
+    return rv;
+}
 
 inline nsresult
 NS_NewChannel2(nsIChannel**           outResult,
@@ -398,18 +457,16 @@ NS_NewChannel2(nsIChannel**           outResult,
   // TODO: Is it likely that all channels created using this interface should have a nsContentPolicyType of TYPE_OTHER?
   // maybe we can assert that as well - we need to investigate that!
 
-  nsresult rv = NS_NewChannel(outResult,
-                              aURI,
-                              aIoService,
-                              aLoadGroup,
-                              aCallbacks,
-                              aLoadFlags,
-                              aChannelPolicy,
-                              true); // aUsesNewAPI
-  (*outResult)->SetContentPolicyType(aType);
-  (*outResult)->SetRequestingContext(nullptr);
-  (*outResult)->SetRequestingPrincipal(aRequestingPrincipal);
-  return rv;
+  return NS_NewChannelCommon(outResult,
+                             aURI,
+                             aIoService,
+                             aLoadGroup,
+                             aCallbacks,
+                             aLoadFlags,
+                             aChannelPolicy,
+                             aRequestingPrincipal,
+                             nullptr, // aRequestingNode
+                             aType);
 }
 
 inline nsresult
@@ -448,21 +505,16 @@ NS_NewChannel3(nsIChannel**           outResult,
   // TODO: Propably those channels should never be created using the nsContentPolicyType of TYPE_OTHER
   // maybe we can assert that here, that would be great - needs investigation!
 
-  nsresult rv = NS_NewChannel(outResult,
-                              aURI,
-                              aIoService,
-                              aLoadGroup,
-                              aCallbacks,
-                              aLoadFlags,
-                              aChannelPolicy,
-                              true); // aUsesNewAPI
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outResult)->SetContentPolicyType(aType);
-  // we also need to set the requestingContext here because CSP queries it first!!!
-  (*outResult)->SetRequestingContext(aRequestingNode);
-  // Get the principal from the node and set it on the channel.
-  (*outResult)->SetRequestingPrincipal(aRequestingNode->NodePrincipal());
-  return rv;
+ return NS_NewChannelCommon(outResult,
+                            aURI,
+                            aIoService,
+                            aLoadGroup,
+                            aCallbacks,
+                            aLoadFlags,
+                            aChannelPolicy,
+                            aRequestingNode->NodePrincipal(),
+                            aRequestingNode,
+                            aType);
 }
 
 // Use this function with CAUTION. It creates a stream that blocks when you
