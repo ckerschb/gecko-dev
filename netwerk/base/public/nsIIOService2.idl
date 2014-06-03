@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "nsIIOService.idl"
+interface nsINode;
 
 /**
  * nsIIOService2 extends nsIIOService
@@ -45,6 +46,7 @@ interface nsIIOService2 : nsIIOService
                                               in nsIURI aProxyURI,
                                               in unsigned long aProxyFlags,
                                               in nsIPrincipal aRequestingPrincipal,
+                                              in nsINode aRequestingNode,
                                               in unsigned long aSecurityFlags,
                                               in nsContentPolicyType aContentPolicyType,
                                               in unsigned long aLoadFlags);
