@@ -646,7 +646,7 @@ nsIOService::NewChannelFromURIWithProxyFlags2(nsIURI *aURI,
                                               nsIURI *aProxyURI,
                                               uint32_t aProxyFlags,
                                               nsIPrincipal* aRequestingPrincipal,
-                                              nsINode* aRequestigNode,
+                                              nsINode* aRequestingNode,
                                               uint32_t aSecurityFlags,
                                               nsContentPolicyType aContentPolicyType,
                                               uint32_t aLoadFlags,
@@ -672,12 +672,21 @@ nsIOService::NewChannelFromURIWithProxyFlags2(nsIURI *aURI,
 
     nsCOMPtr<nsIProxiedProtocolHandler> pph = do_QueryInterface(handler);
     if (pph) {
-        rv = pph->NewProxiedChannel(aURI, nullptr, aProxyFlags, aProxyURI, outChannel);
+        rv = pph->NewProxiedChannel2(aURI,
+                                     nullptr,
+                                     aProxyFlags,
+                                     aProxyURI,
+                                     aRequestingPrincipal,
+                                     aRequestingNode,
+                                     aSecurityFlags,
+                                     aContentPolicyType,
+                                     aLoadFlags,
+                                     outChannel);
     }
     else {
         rv = handler->NewChannel2(aURI,
                                   aRequestingPrincipal,
-                                  aRequestigNode,
+                                  aRequestingNode,
                                   aSecurityFlags,
                                   aContentPolicyType,
                                   aLoadFlags,

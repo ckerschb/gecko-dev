@@ -30,5 +30,15 @@ interface nsIProxiedProtocolHandler : nsIProtocolHandler
     nsIChannel newProxiedChannel(in nsIURI uri, in nsIProxyInfo proxyInfo,
                                  in unsigned long proxyResolveFlags,
                                  in nsIURI proxyURI);
+
+    nsIChannel newProxiedChannel2(in nsIURI uri,
+                                  in nsIProxyInfo proxyInfo,
+                                  in unsigned long proxyResolveFlags,
+                                  in nsIURI proxyURI,
+                                  in nsIPrincipal aRequestingPrincipal,
+                                  in nsINode aRequestingNode,
+                                  in unsigned long aSecurityFlags,
+                                  in nsContentPolicyType aContentPolicyType,
+                                  in unsigned long aLoadFlags);
 };
 

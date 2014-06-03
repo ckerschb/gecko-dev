@@ -248,6 +248,27 @@ nsFtpProtocolHandler::NewProxiedChannel(nsIURI* uri, nsIProxyInfo* proxyInfo,
     return rv;
 }
 
+NS_IMETHODIMP
+nsFtpProtocolHandler::NewProxiedChannel2(nsIURI *uri,
+                                         nsIProxyInfo* givenProxyInfo,
+                                         uint32_t proxyResolveFlags,
+                                         nsIURI *proxyURI,
+                                         nsIPrincipal* aRequestingPrincipal,
+                                         nsINode* aRequestingNode,
+                                         uint32_t aSecurityFlags,
+                                         nsContentPolicyType aContentPolicyType,
+                                         uint32_t aLoadFlags,
+                                         nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create proxied channel without aRequestingPrincipal");
+  nsresult rv = NewProxiedChannel(uri, givenProxyInfo, proxyResolveFlags, proxyURI, outChannel);
+  NS_ENSURE_SUCCESS(rv, rv);
+  (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
+  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  return NS_OK;
+}
+
 NS_IMETHODIMP 
 nsFtpProtocolHandler::AllowPort(int32_t port, const char *scheme, bool *_retval)
 {
