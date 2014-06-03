@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "nsISupports.idl"
+#include "nsIContentPolicy.idl"
 
 interface nsIURI;
 interface nsIChannel;
@@ -64,6 +65,12 @@ interface nsIProtocolHandler : nsISupports
      * Constructs a new channel from the given URI for this protocol handler. 
      */
     nsIChannel newChannel(in nsIURI aURI);
+
+    nsIChannel newChannel2(in nsIURI aURI,
+                           in nsIPrincipal aRequestingPrincipal,
+                           in unsigned long aSecurityFlags,
+                           in nsContentPolicyType aContentPolicyType,
+                           in unsigned long aLoadFlags);
 
     /**
      * Allows a protocol to override blacklisted ports.
