@@ -11,6 +11,7 @@
 #include "nsCRT.h"
 #include "nsCOMPtr.h"
 #include "nsIComponentManager.h"
+#include "nsINode.h"
 #include "nsIServiceManager.h"
 #include "nsNetCID.h"
 
@@ -102,8 +103,7 @@ nsIconProtocolHandler::NewChannel2(nsIURI* aURI,
   nsresult rv = NewChannel(aURI, outChannel);
   NS_ENSURE_SUCCESS(rv, rv);
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  // TODO: we need to set aRequestingNode here
-  (*outChannel)->SetRequestingContext(nullptr);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return NS_OK;
 }
