@@ -1734,8 +1734,7 @@ nsHttpChannel::OpenRedirectChannel(nsresult rv)
     }
 
     // open new channel
-    // TODO: we should call AsyncOpen2 once the new API is in place
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv)) {
         return rv;
     }
@@ -1797,8 +1796,7 @@ nsHttpChannel::ContinueDoReplaceWithProxy(nsresult rv)
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
     // open new channel
-    // TODO: we should call AsyncOpen2 here once the new API is in place
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -2467,8 +2465,7 @@ nsHttpChannel::ContinueProcessFallback(nsresult rv)
     // Make sure to do this _after_ calling OnChannelRedirect
     mRedirectChannel->SetOriginalURI(mOriginalURI);
 
-    // TODO: we should call AsyncOpen2 here once the new API is in place
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
     if (NS_FAILED(rv))
         return rv;
 
@@ -4266,8 +4263,7 @@ nsHttpChannel::ContinueProcessRedirection(nsresult rv)
     // should really be handled by the event sink implementation.
 
     // begin loading the new channel
-    // TODO: call AsyncOpen2 once the new API is in place
-    rv = mRedirectChannel->AsyncOpen(mListener, mListenerContext);
+    rv = mRedirectChannel->AsyncOpen2(mListener, mListenerContext);
 
     if (NS_FAILED(rv))
         return rv;
