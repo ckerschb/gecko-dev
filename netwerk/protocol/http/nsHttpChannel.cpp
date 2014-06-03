@@ -68,7 +68,6 @@
 #include "CacheObserver.h"
 #include "mozilla/Telemetry.h"
 
-
 namespace mozilla { namespace net {
 
 namespace {
@@ -1658,7 +1657,15 @@ nsHttpChannel::StartRedirectChannelToURI(nsIURI *upgradedURI, uint32_t flags)
     rv = gHttpHandler->GetIOService(getter_AddRefs(ioService));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = ioService->NewChannelFromURI(upgradedURI, getter_AddRefs(newChannel));
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
+    rv = ioService->NewChannelFromURI2(upgradedURI,
+                                       systemPrincipal,
+                                       nullptr, // requestingNode
+                                       0,       // securityFlags
+                                       nsIContentPolicy::TYPE_OTHER,
+                                       0,       // loadFlags
+                                       getter_AddRefs(newChannel));
     NS_ENSURE_SUCCESS(rv, rv);
 
     rv = SetupReplacementChannel(upgradedURI, newChannel, true);
@@ -1754,9 +1761,19 @@ nsHttpChannel::AsyncDoReplaceWithProxy(nsIProxyInfo* pi)
     LOG(("nsHttpChannel::AsyncDoReplaceWithProxy [this=%p pi=%p]", this, pi));
     nsresult rv;
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
     nsCOMPtr<nsIChannel> newChannel;
-    rv = gHttpHandler->NewProxiedChannel(mURI, pi, mProxyResolveFlags,
-                                         mProxyURI, getter_AddRefs(newChannel));
+    rv = gHttpHandler->NewProxiedChannel2(mURI,
+                                          pi,
+                                          mProxyResolveFlags,
+                                          mProxyURI,
+                                          systemPrincipal,
+                                          nullptr, // requestingNode
+                                          0,       // securityFlags
+                                          nsIContentPolicy::TYPE_OTHER,
+                                          0,       // loadFlags
+                                          getter_AddRefs(newChannel));
     if (NS_FAILED(rv))
         return rv;
 
@@ -2410,9 +2427,17 @@ nsHttpChannel::ProcessFallback(bool *waitingForRedirectCallback)
     // Close the current cache entry.
     CloseCacheEntry(true);
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
     // Create a new channel to load the fallback entry.
     nsRefPtr<nsIChannel> newChannel;
-    rv = gHttpHandler->NewChannel(mURI, getter_AddRefs(newChannel));
+    rv = gHttpHandler->NewChannel2(mURI,
+                                   systemPrincipal,
+                                   nullptr, // requestingNode
+                                   0,       // securityFlags
+                                   nsIContentPolicy::TYPE_OTHER,
+                                   0,       // loadFlags
+                                   getter_AddRefs(newChannel));
     NS_ENSURE_SUCCESS(rv, rv);
 
     rv = SetupReplacementChannel(mURI, newChannel, true);
@@ -4204,8 +4229,16 @@ nsHttpChannel::ContinueProcessRedirectionAfterFallback(nsresult rv)
     rv = gHttpHandler->GetIOService(getter_AddRefs(ioService));
     if (NS_FAILED(rv)) return rv;
 
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
     nsCOMPtr<nsIChannel> newChannel;
-    rv = ioService->NewChannelFromURI(mRedirectURI, getter_AddRefs(newChannel));
+    rv = ioService->NewChannelFromURI2(mRedirectURI,
+                                       systemPrincipal,
+                                       nullptr, // requestingNode
+                                       0,       // securityFlags
+                                       nsIContentPolicy::TYPE_OTHER,
+                                       0,       // loadFlags
+                                       getter_AddRefs(newChannel));
     if (NS_FAILED(rv)) return rv;
 
     rv = SetupReplacementChannel(mRedirectURI, newChannel, !rewriteToGET);
