@@ -130,11 +130,20 @@ AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
   nsCOMPtr<nsIIOService> ioService = do_GetIOService(&rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   for (int i = 0; i < kRedirTotal; i++) {
     if (!strcmp(path.get(), kRedirMap[i].id)) {
       nsCOMPtr<nsIChannel> tempChannel;
-      rv = ioService->NewChannel(nsDependentCString(kRedirMap[i].url),
-                                 nullptr, nullptr, getter_AddRefs(tempChannel));
+      rv = ioService->NewChannel2(nsDependentCString(kRedirMap[i].url),
+                                  nullptr,
+                                  nullptr,
+                                  systemPrincipal,
+                                  nullptr, // requestingNode
+                                  0,       // securityFlags
+                                  nsIContentPolicy::TYPE_OTHER,
+                                  0,       // loadFlags
+                                  getter_AddRefs(tempChannel));
       NS_ENSURE_SUCCESS(rv, rv);
 
       tempChannel->SetOriginalURI(aURI);

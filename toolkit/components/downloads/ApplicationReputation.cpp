@@ -827,8 +827,19 @@ PendingLookup::SendRemoteQueryInternal()
   nsCString serviceUrl;
   NS_ENSURE_SUCCESS(Preferences::GetCString(PREF_SB_APP_REP_URL, &serviceUrl),
                     NS_ERROR_NOT_AVAILABLE);
+
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   nsCOMPtr<nsIIOService> ios = do_GetService(NS_IOSERVICE_CONTRACTID, &rv);
-  rv = ios->NewChannel(serviceUrl, nullptr, nullptr, getter_AddRefs(channel));
+  rv = ios->NewChannel2(serviceUrl,
+                        nullptr,
+                        nullptr,
+                        systemPrincipal,
+                        nullptr, // requestingNode
+                        0,       // securityFlags
+                        nsIContentPolicy::TYPE_OTHER,
+                        0,       // loadFlags
+                        getter_AddRefs(channel));
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIHttpChannel> httpChannel(do_QueryInterface(channel, &rv));

@@ -328,8 +328,16 @@ nsFaviconService::ReplaceFaviconDataFromDataURL(nsIURI* aFaviconURI,
   rv = ioService->GetProtocolHandler("data", getter_AddRefs(protocolHandler));
   NS_ENSURE_SUCCESS(rv, rv);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   nsCOMPtr<nsIChannel> channel;
-  rv = protocolHandler->NewChannel(dataURI, getter_AddRefs(channel));
+  rv = protocolHandler->NewChannel2(dataURI,
+                                    systemPrincipal,
+                                    nullptr, // requestingNode
+                                    0,       // securityFlags
+                                    nsIContentPolicy::TYPE_OTHER,
+                                    0,       // loadFlags
+                                    getter_AddRefs(channel));
   NS_ENSURE_SUCCESS(rv, rv);
 
   // Blocking stream is OK for data URIs.

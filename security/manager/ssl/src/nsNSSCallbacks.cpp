@@ -88,8 +88,18 @@ nsHTTPDownloadEvent::Run()
   nsCOMPtr<nsIIOService> ios = do_GetIOService();
   NS_ENSURE_STATE(ios);
 
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   nsCOMPtr<nsIChannel> chan;
-  ios->NewChannel(mRequestSession->mURL, nullptr, nullptr, getter_AddRefs(chan));
+  ios->NewChannel2(mRequestSession->mURL,
+                   nullptr,
+                   nullptr,
+                   systemPrincipal,
+                   nullptr, // requestingNode
+                   0,       // securityFlags
+                   nsIContentPolicy::TYPE_OTHER,
+                   0,       // loadFlags
+                   getter_AddRefs(chan));
   NS_ENSURE_STATE(chan);
 
   // Security operations scheduled through normal HTTP channels are given
