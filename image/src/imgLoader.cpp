@@ -29,7 +29,7 @@
 #include "nsIFileURL.h"
 #include "nsCRT.h"
 #include "nsIDocument.h"
-#include "nsINetworkSeer.h"
+#include "nsINetworkPredictor.h"
 
 #include "nsIApplicationCache.h"
 #include "nsIApplicationCacheContainer.h"
@@ -1476,8 +1476,8 @@ bool imgLoader::ValidateRequestWithNewChannel(imgRequest *request,
     // Add the proxy without notifying
     hvc->AddProxy(proxy);
 
-    mozilla::net::SeerLearn(aURI, aInitialDocumentURI,
-        nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
+    mozilla::net::PredictorLearn(aURI, aInitialDocumentURI,
+        nsINetworkPredictor::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
 
     rv = newChannel->AsyncOpen2(listener, nullptr);
     if (NS_FAILED(rv)) {
@@ -1980,8 +1980,8 @@ nsresult imgLoader::LoadImage(nsIURI *aURI,
     PR_LOG(GetImgLog(), PR_LOG_DEBUG,
            ("[this=%p] imgLoader::LoadImage -- Calling channel->AsyncOpen()\n", this));
 
-    mozilla::net::SeerLearn(aURI, aInitialDocumentURI,
-        nsINetworkSeer::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
+    mozilla::net::PredictorLearn(aURI, aInitialDocumentURI,
+        nsINetworkPredictor::LEARN_LOAD_SUBRESOURCE, aLoadGroup);
 
     nsresult openRes = newChannel->AsyncOpen2(listener, nullptr);
 

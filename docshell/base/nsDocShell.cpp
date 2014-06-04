@@ -120,7 +120,7 @@
 #include "nsIFaviconService.h"
 #include "mozIAsyncFavicons.h"
 #endif
-#include "nsINetworkSeer.h"
+#include "nsINetworkPredictor.h"
 
 // Editor-related
 #include "nsIEditingSession.h"
@@ -7219,7 +7219,7 @@ nsDocShell::EndPageLoad(nsIWebProgress * aProgress,
         }
     } // if we have a host
     else if (url && NS_SUCCEEDED(aStatus)) {
-        mozilla::net::SeerLearnRedirect(url, aChannel, this);
+        mozilla::net::PredictorLearnRedirect(url, aChannel, this);
     }
 
     return NS_OK;
@@ -9611,8 +9611,9 @@ nsDocShell::InternalLoad(nsIURI * aURI,
     else
       srcdoc = NullString();
 
-    mozilla::net::SeerPredict(aURI, nullptr, nsINetworkSeer::PREDICT_LOAD,
-                              this, nullptr);
+    mozilla::net::PredictorPredict(aURI, nullptr,
+                                   nsINetworkPredictor::PREDICT_LOAD,
+                                   this, nullptr);
 
     nsCOMPtr<nsIRequest> req;
     rv = DoURILoad(aURI, aReferrer,
@@ -12800,8 +12801,9 @@ nsDocShell::OnOverLink(nsIContent* aContent,
   rv = textToSubURI->UnEscapeURIForUI(charset, spec, uStr);    
   NS_ENSURE_SUCCESS(rv, rv);
 
-  mozilla::net::SeerPredict(aURI, mCurrentURI, nsINetworkSeer::PREDICT_LINK,
-                            this, nullptr);
+  mozilla::net::PredictorPredict(aURI, mCurrentURI,
+                                 nsINetworkPredictor::PREDICT_LINK,
+                                 this, nullptr);
 
   if (browserChrome2) {
     nsCOMPtr<nsIDOMElement> element = do_QueryInterface(aContent);
