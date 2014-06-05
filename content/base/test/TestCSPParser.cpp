@@ -424,28 +424,6 @@ nsresult TestPoliciesThatLogWarning() {
       "script-src http://www.selfuri.com" },
     { "script-src 'none' test.com; script-src example.com",
       "script-src http://test.com" },
-    { "script-src http://www.example.com//",
-      "script-src http://www.example.com" },
-    { "script-src http://www.example.com/path-1//",
-      "script-src http://www.example.com" },
-    { "script-src http://www.example.com/path-1//path_2",
-      "script-src http://www.example.com" },
-    { "script-src http://www.example.com:88path-1/",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:88//",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:88//path-1",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:88//path-1",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:88/.js",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:88.js",
-      "script-src http://www.example.com:88" },
-    { "script-src http://www.example.com:*.js",
-      "script-src http://www.example.com:*" },
-    { "script-src http://www.example.com:*.",
-      "script-src http://www.example.com:*" }
   };
 
   uint32_t policyCount = sizeof(policies) / sizeof(PolicyTest);
@@ -478,7 +456,18 @@ nsresult TestBadPolicies() {
     { "img-src *::88", "" },
     { "object-src http://localhost:", "" },
     { "script-src test..com", "" },
-    { "script-src sub1.sub2.example+", "" }
+    { "script-src sub1.sub2.example+", "" },
+    { "script-src http://www.example.com//", "" },
+    { "script-src http://www.example.com/path-1//", "" },
+    { "script-src http://www.example.com/path-1//path_2", "" },
+    { "script-src http://www.example.com:88path-1/", "" },
+    { "script-src http://www.example.com:88//", "" },
+    { "script-src http://www.example.com:88//path-1", "" },
+    { "script-src http://www.example.com:88//path-1", "" },
+    { "script-src http://www.example.com:88/.js", "" },
+    { "script-src http://www.example.com:88.js", "" },
+    { "script-src http://www.example.com:*.js", "" },
+    { "script-src http://www.example.com:*.", "" },
   };
 
   uint32_t policyCount = sizeof(policies) / sizeof(PolicyTest);
