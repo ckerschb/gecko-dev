@@ -23,11 +23,16 @@
       addVisits(typedURI, function() {
         histsvc.markPageAsTyped(typedURI);
 
-        var clickedLinkChannel = ios.newChannelFromURI(clickedLinkURI);
+        var clickedLinkChannel = ios.newChannelFromURI2(clickedLinkURI,
+                                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                                        null,    //requestingNode
+                                                        0,       //securityFlags
+                                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                                        0);      //loadFlags
         clickedLinkChannel.QueryInterface(Ci.nsIHttpChannel).referrer = typedURI;
         var listener = new StreamListener(clickedLinkChannel, checkDB);
         clickedLinkChannel.notificationCallbacks = listener;
-        clickedLinkChannel.asyncOpen(listener, null);
+        clickedLinkChannel.asyncOpen2(listener, null);
       });
 
       SimpleTest.waitForExplicitFinish();

@@ -59,8 +59,12 @@ function runTest() {
   var ios = Components.classes["@mozilla.org/network/io-service;1"].
             getService(Components.interfaces.nsIIOService);
   var uri = ios.newURI("https://redirproxy.example.com/test", "",  null);
-  var channel = ios.newChannelFromURI(uri);
-
+  var channel = ios.newChannelFromURI2(uri,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null,    //requestingNode
+                                       0,       //securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0);      //loadFlags
   /* Previously, necko would allow a 302 as part of a CONNECT response
      if the LOAD_DOCUMENT_URI flag was set and the original document
      URI had not yet been changed. */
@@ -68,7 +72,7 @@ function runTest() {
   channel.loadFlags |= Components.interfaces.nsIChannel.LOAD_DOCUMENT_URI;
   channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
   channel.documentURI = uri;
-  channel.asyncOpen(listener, null);
+  channel.asyncOpen2(listener, null);
 }
 
 SimpleTest.waitForExplicitFinish();
