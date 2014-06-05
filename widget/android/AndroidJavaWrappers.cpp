@@ -489,10 +489,6 @@ AndroidGeckoEvent::Init(JNIEnv *jenv, jobject jobj)
             }
             break;
 
-        case DRAW:
-            ReadRectField(jenv);
-            break;
-
         case SENSOR_EVENT:
              mX = jenv->GetDoubleField(jobj, jXField);
              mY = jenv->GetDoubleField(jobj, jYField);
@@ -1014,4 +1010,31 @@ nsJNIString::nsJNIString(jstring jstr, JNIEnv *jenv)
         Assign(reinterpret_cast<const char16_t*>(jCharPtr), len);
     }
     jni->ReleaseStringChars(jstr, jCharPtr);
+}
+
+nsJNICString::nsJNICString(jstring jstr, JNIEnv *jenv)
+{
+    if (!jstr) {
+        SetIsVoid(true);
+        return;
+    }
+    JNIEnv *jni = jenv;
+    if (!jni) {
+        jni = AndroidBridge::GetJNIEnv();
+    }
+    const char* jCharPtr = jni->GetStringUTFChars(jstr, nullptr);
+
+    if (!jCharPtr) {
+        SetIsVoid(true);
+        return;
+    }
+
+    jsize len = jni->GetStringUTFLength(jstr);
+
+    if (len <= 0) {
+        SetIsVoid(true);
+    } else {
+        Assign(jCharPtr, len);
+    }
+    jni->ReleaseStringUTFChars(jstr, jCharPtr);
 }

@@ -82,7 +82,7 @@
 #endif
 
 #include "nsIDOMGlobalPropertyInitializer.h"
-#include "nsIDataStoreService.h"
+#include "mozilla/dom/DataStoreService.h"
 #include "nsJSUtils.h"
 
 #include "nsScriptNameSpaceManager.h"
@@ -1466,8 +1466,7 @@ Navigator::GetDataStores(nsPIDOMWindow* aWindow,
     return nullptr;
   }
 
-  nsCOMPtr<nsIDataStoreService> service =
-    do_GetService("@mozilla.org/datastore-service;1");
+  nsRefPtr<DataStoreService> service = DataStoreService::GetOrCreate();
   if (!service) {
     aRv.Throw(NS_ERROR_FAILURE);
     return nullptr;
@@ -1498,7 +1497,7 @@ Navigator::GetFeature(const nsAString& aName)
     if (XRE_GetProcessType() == GeckoProcessType_Default) {
       uint32_t memLevel = mozilla::hal::GetTotalSystemMemoryLevel();
       if (memLevel == 0) {
-        p->MaybeReject(NS_LITERAL_STRING("Abnormal"));
+        p->MaybeReject(NS_ERROR_NOT_AVAILABLE);
         return p.forget();
       }
       p->MaybeResolve((int)memLevel);

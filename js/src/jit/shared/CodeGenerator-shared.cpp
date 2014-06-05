@@ -52,7 +52,8 @@ CodeGeneratorShared::CodeGeneratorShared(MIRGenerator *gen, LIRGraph *graph, Mac
     sps_(&GetIonContext()->runtime->spsProfiler(), &lastPC_),
     osrEntryOffset_(0),
     skipArgCheckEntryOffset_(0),
-    frameDepth_(graph->paddedLocalSlotsSize() + graph->argumentsSize())
+    frameDepth_(graph->paddedLocalSlotsSize() + graph->argumentsSize()),
+    frameInitialAdjustment_(0)
 {
     if (!gen->compilingAsmJS())
         masm.setInstrumentation(&sps_);
@@ -72,10 +73,12 @@ CodeGeneratorShared::CodeGeneratorShared(MIRGenerator *gen, LIRGraph *graph, Mac
 #else
         bool forceAlign = false;
 #endif
-        if (gen->performsAsmJSCall() || forceAlign) {
-            unsigned alignmentAtCall = AlignmentMidPrologue + frameDepth_;
-            if (unsigned rem = alignmentAtCall % StackAlignment)
-                frameDepth_ += StackAlignment - rem;
+        if (gen->needsInitialStackAlignment() || forceAlign) {
+            unsigned alignmentAtCall = AlignmentAtAsmJSPrologue + frameDepth_;
+            if (unsigned rem = alignmentAtCall % StackAlignment) {
+                frameInitialAdjustment_ = StackAlignment - rem;
+                frameDepth_ += frameInitialAdjustment_;
+            }
         }
 
         // FrameSizeClass is only used for bailing, which cannot happen in
@@ -465,7 +468,7 @@ class StoreOp
     MacroAssembler &masm;
 
   public:
-    StoreOp(MacroAssembler &masm)
+    explicit StoreOp(MacroAssembler &masm)
       : masm(masm)
     {}
 
@@ -517,14 +520,6 @@ class VerifyOp
         masm.branchDouble(Assembler::DoubleNotEqual, ScratchFloatReg, reg, failure_);
     }
 };
-
-static void
-OsiPointRegisterCheckFailed()
-{
-    // Any live register captured by a safepoint (other than temp registers)
-    // must remain unchanged between the call and the OsiPoint instruction.
-    MOZ_ASSUME_UNREACHABLE("Modified registers between VM call and OsiPoint");
-}
 
 void
 CodeGeneratorShared::verifyOsiPointRegs(LSafepoint *safepoint)
@@ -579,10 +574,11 @@ CodeGeneratorShared::verifyOsiPointRegs(LSafepoint *safepoint)
     // the profiler instrumentation of the callWithABI below to ASSERT, since
     // the script and pc are mismatched.  To avoid this, we simply omit
     // instrumentation for these callWithABIs.
+
+    // Any live register captured by a safepoint (other than temp registers)
+    // must remain unchanged between the call and the OsiPoint instruction.
     masm.bind(&failure);
-    masm.setupUnalignedABICall(0, scratch);
-    masm.callWithABINoProfiling(JS_FUNC_TO_DATA_PTR(void *, OsiPointRegisterCheckFailed));
-    masm.breakpoint();
+    masm.assumeUnreachable("Modified registers between VM call and OsiPoint");
 
     masm.bind(&done);
     masm.pop(scratch);

@@ -47,7 +47,7 @@ const kFailURL = kBaseUrl + kFailPath;
 const kHttpHandlerData = {};
 kHttpHandlerData[kExamplePath] = {"en-US": [{"url":"http://example.com","title":"RemoteSource"}]};
 
-const bodyData = JSON.stringify({ locale: DirectoryLinksProvider.locale });
+const expectedBodyObject = {locale: DirectoryLinksProvider.locale};
 const BinaryInputStream = CC("@mozilla.org/binaryinputstream;1",
                               "nsIBinaryInputStream",
                               "setInputStream");
@@ -60,7 +60,8 @@ function getHttpHandler(path) {
   }
   return function(aRequest, aResponse) {
     let bodyStream = new BinaryInputStream(aRequest.bodyInputStream);
-    do_check_eq(NetUtil.readInputStreamToString(bodyStream, bodyStream.available()), bodyData);
+    let bodyObject = JSON.parse(NetUtil.readInputStreamToString(bodyStream, bodyStream.available()));
+    isIdentical(bodyObject, expectedBodyObject);
 
     aResponse.setStatusLine(null, code);
     aResponse.setHeader("Content-Type", "application/json");
@@ -258,7 +259,7 @@ add_task(function test_linksURL_locale() {
 
   links = yield fetchData();
   do_check_eq(links.length, 1);
-  expected_data = [{url: "http://example.com", title: "US", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1}];
+  expected_data = [{url: "http://example.com", title: "US", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1, directoryIndex: 0}];
   isIdentical(links, expected_data);
 
   yield promiseDirectoryDownloadOnPrefChange("general.useragent.locale", "zh-CN");
@@ -266,8 +267,8 @@ add_task(function test_linksURL_locale() {
   links = yield fetchData();
   do_check_eq(links.length, 2)
   expected_data = [
-    {url: "http://example.net", title: "CN", frecency: DIRECTORY_FRECENCY, lastVisitDate: 2},
-    {url: "http://example.net/2", title: "CN2", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1}
+    {url: "http://example.net", title: "CN", frecency: DIRECTORY_FRECENCY, lastVisitDate: 2, directoryIndex: 0},
+    {url: "http://example.net/2", title: "CN2", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1, directoryIndex: 1}
   ];
   isIdentical(links, expected_data);
 
@@ -279,7 +280,7 @@ add_task(function test_DirectoryLinksProvider__prefObserver_url() {
 
   let links = yield fetchData();
   do_check_eq(links.length, 1);
-  let expectedData =  [{url: "http://example.com", title: "LocalSource", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1}];
+  let expectedData =  [{url: "http://example.com", title: "LocalSource", frecency: DIRECTORY_FRECENCY, lastVisitDate: 1, directoryIndex: 0}];
   isIdentical(links, expectedData);
 
   // tests these 2 things:
@@ -400,6 +401,14 @@ add_task(function test_DirectoryLinksProvider_fetchDirectoryOnShowCount() {
   directoryCount.sponsored = 1;
   yield DirectoryLinksProvider.reportShownCount(directoryCount);
   do_check_true(DirectoryLinksProvider._lastDownloadMS != 0);
+
+  // test that directoryCount object reaches the backend server
+  expectedBodyObject.directoryCount = directoryCount;
+  // set kSourceUrlPref to kExampleURL, causing request to test http server
+  // server handler validates that expectedBodyObject has correct directoryCount
+  yield promiseDirectoryDownloadOnPrefChange(kSourceUrlPref, kExampleURL);
+  // reset expectedBodyObject to its original state
+  delete expectedBodyObject.directoryCount;
 
   yield promiseCleanDirectoryLinksProvider();
 });

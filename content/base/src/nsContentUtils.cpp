@@ -1714,7 +1714,7 @@ nsContentUtils::ThreadsafeIsCallerChrome()
 }
 
 bool
-nsContentUtils::IsCallerXBL()
+nsContentUtils::IsCallerContentXBL()
 {
     JSContext *cx = GetCurrentJSContext();
     if (!cx)
@@ -1724,12 +1724,12 @@ nsContentUtils::IsCallerXBL()
 
     // For remote XUL, we run XBL in the XUL scope. Given that we care about
     // compat and not security for remote XUL, just always claim to be XBL.
-    if (!xpc::AllowXBLScope(c)) {
+    if (!xpc::AllowContentXBLScope(c)) {
       MOZ_ASSERT(nsContentUtils::AllowXULXBLForPrincipal(xpc::GetCompartmentPrincipal(c)));
       return true;
     }
 
-    return xpc::IsXBLScope(c);
+    return xpc::IsContentXBLScope(c);
 }
 
 
@@ -4639,6 +4639,16 @@ nsContentUtils::GetAccelKeyCandidates(nsIDOMKeyEvent* aDOMKeyEvent,
         aCandidates.AppendElement(key);
       }
     }
+
+    // Special case for "Space" key.  With some keyboard layouts, "Space" with
+    // or without Shift key causes non-ASCII space.  For such keyboard layouts,
+    // we should guarantee that the key press works as an ASCII white space key
+    // press.
+    if (nativeKeyEvent->mCodeNameIndex == CODE_NAME_INDEX_Space &&
+        nativeKeyEvent->charCode != static_cast<uint32_t>(' ')) {
+      nsShortcutCandidate spaceKey(static_cast<uint32_t>(' '), false);
+      aCandidates.AppendElement(spaceKey);
+    }
   } else {
     uint32_t charCode;
     aDOMKeyEvent->GetCharCode(&charCode);
@@ -4680,6 +4690,14 @@ nsContentUtils::GetAccessKeyCandidates(WidgetKeyboardEvent* aNativeKeyEvent,
       if (aCandidates.IndexOf(ch[j]) == aCandidates.NoIndex)
         aCandidates.AppendElement(ch[j]);
     }
+  }
+  // Special case for "Space" key.  With some keyboard layouts, "Space" with
+  // or without Shift key causes non-ASCII space.  For such keyboard layouts,
+  // we should guarantee that the key press works as an ASCII white space key
+  // press.
+  if (aNativeKeyEvent->mCodeNameIndex == CODE_NAME_INDEX_Space &&
+      aNativeKeyEvent->charCode != static_cast<uint32_t>(' ')) {
+    aCandidates.AppendElement(static_cast<uint32_t>(' '));
   }
   return;
 }
@@ -5585,7 +5603,7 @@ nsContentTypeParser::GetParameter(const char* aParameterName, nsAString& aResult
 bool
 nsContentUtils::CanAccessNativeAnon()
 {
-  return IsCallerChrome() || IsCallerXBL();
+  return IsCallerChrome() || IsCallerContentXBL();
 }
 
 /* static */ nsresult

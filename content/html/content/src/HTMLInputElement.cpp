@@ -27,7 +27,7 @@
 #include "nsContentCID.h"
 #include "nsIComponentManager.h"
 #include "nsIDOMHTMLFormElement.h"
-#include "nsIDOMProgressEvent.h"
+#include "mozilla/dom/ProgressEvent.h"
 #include "nsGkAtoms.h"
 #include "nsStyleConsts.h"
 #include "nsPresContext.h"
@@ -119,7 +119,7 @@ static NS_DEFINE_CID(kXULControllersCID,  NS_XULCONTROLLERS_CID);
 
 // This must come outside of any namespace, or else it won't overload with the
 // double based version in nsMathUtils.h
-inline NS_HIDDEN_(mozilla::Decimal)
+inline mozilla::Decimal
 NS_floorModulo(mozilla::Decimal x, mozilla::Decimal y)
 {
   return (x - y * (x / y).floor());
@@ -2725,25 +2725,19 @@ HTMLInputElement::DispatchProgressEvent(const nsAString& aType,
 {
   NS_ASSERTION(!aType.IsEmpty(), "missing event type");
 
-  nsCOMPtr<nsIDOMEvent> event;
-  nsresult rv = NS_NewDOMProgressEvent(getter_AddRefs(event), this,
-                                       nullptr, nullptr);
-  if (NS_FAILED(rv)) {
-    return;
-  }
+  ProgressEventInit init;
+  init.mBubbles = false;
+  init.mCancelable = true; // XXXkhuey why?
+  init.mLengthComputable = aLengthComputable;
+  init.mLoaded = aLoaded;
+  init.mTotal = (aTotal == UINT64_MAX) ? 0 : aTotal;
 
-  nsCOMPtr<nsIDOMProgressEvent> progress = do_QueryInterface(event);
-  if (!progress) {
-    return;
-  }
-
-  progress->InitProgressEvent(aType, false, true, aLengthComputable,
-                              aLoaded, (aTotal == UINT64_MAX) ? 0 : aTotal);
-
+  nsRefPtr<ProgressEvent> event =
+    ProgressEvent::Constructor(this, aType, init);
   event->SetTrusted(true);
 
   bool doDefaultAction;
-  rv = DispatchEvent(event, &doDefaultAction);
+  nsresult rv = DispatchEvent(event, &doDefaultAction);
   if (NS_SUCCEEDED(rv) && !doDefaultAction) {
     CancelDirectoryPickerScanIfRunning();
   }
@@ -6788,11 +6782,18 @@ HTMLInputElement::GetValidationMessage(nsAString& aValidationMessage,
     }
     case VALIDITY_STATE_RANGE_OVERFLOW:
     {
+      static const char kNumberOverTemplate[] = "FormValidationNumberRangeOverflow";
+      static const char kDateOverTemplate[] = "FormValidationDateRangeOverflow";
+      static const char kTimeOverTemplate[] = "FormValidationTimeRangeOverflow";
+
+      const char* msgTemplate;
       nsXPIDLString message;
 
       nsAutoString maxStr;
       if (mType == NS_FORM_INPUT_NUMBER ||
           mType == NS_FORM_INPUT_RANGE) {
+        msgTemplate = kNumberOverTemplate;
+
         //We want to show the value as parsed when it's a number
         Decimal maximum = GetMaximum();
         MOZ_ASSERT(!maximum.isNaN());
@@ -6802,25 +6803,34 @@ HTMLInputElement::GetValidationMessage(nsAString& aValidationMessage,
         maxStr.AssignASCII(buf);
         MOZ_ASSERT(ok, "buf not big enough");
       } else if (mType == NS_FORM_INPUT_DATE || mType == NS_FORM_INPUT_TIME) {
+        msgTemplate = mType == NS_FORM_INPUT_DATE ? kDateOverTemplate : kTimeOverTemplate;
         GetAttr(kNameSpaceID_None, nsGkAtoms::max, maxStr);
       } else {
+        msgTemplate = kNumberOverTemplate;
         NS_NOTREACHED("Unexpected input type");
       }
 
       const char16_t* params[] = { maxStr.get() };
       rv = nsContentUtils::FormatLocalizedString(nsContentUtils::eDOM_PROPERTIES,
-                                                 "FormValidationRangeOverflow",
+                                                 msgTemplate,
                                                  params, message);
       aValidationMessage = message;
       break;
     }
     case VALIDITY_STATE_RANGE_UNDERFLOW:
     {
+      static const char kNumberUnderTemplate[] = "FormValidationNumberRangeUnderflow";
+      static const char kDateUnderTemplate[] = "FormValidationDateRangeUnderflow";
+      static const char kTimeUnderTemplate[] = "FormValidationTimeRangeUnderflow";
+
+      const char* msgTemplate;
       nsXPIDLString message;
 
       nsAutoString minStr;
       if (mType == NS_FORM_INPUT_NUMBER ||
           mType == NS_FORM_INPUT_RANGE) {
+        msgTemplate = kNumberUnderTemplate;
+
         Decimal minimum = GetMinimum();
         MOZ_ASSERT(!minimum.isNaN());
 
@@ -6829,14 +6839,16 @@ HTMLInputElement::GetValidationMessage(nsAString& aValidationMessage,
         minStr.AssignASCII(buf);
         MOZ_ASSERT(ok, "buf not big enough");
       } else if (mType == NS_FORM_INPUT_DATE || mType == NS_FORM_INPUT_TIME) {
+        msgTemplate = mType == NS_FORM_INPUT_DATE ? kDateUnderTemplate : kTimeUnderTemplate;
         GetAttr(kNameSpaceID_None, nsGkAtoms::min, minStr);
       } else {
+        msgTemplate = kNumberUnderTemplate;
         NS_NOTREACHED("Unexpected input type");
       }
 
       const char16_t* params[] = { minStr.get() };
       rv = nsContentUtils::FormatLocalizedString(nsContentUtils::eDOM_PROPERTIES,
-                                                 "FormValidationRangeUnderflow",
+                                                 msgTemplate,
                                                  params, message);
       aValidationMessage = message;
       break;
