@@ -62,10 +62,15 @@ function PathHandler(aMeta, aResponse, aChannelEvent, aRedirURL) {
 function run_test() {
   do_test_pending();
 
-  var chan = NetUtil.ioService.newChannelFromURI(uri(PERMA_REDIR_URL));
+  var chan = NetUtil.ioService.newChannelFromURI2(uri(PERMA_REDIR_URL),
+                                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                                  null,    //requestingNode
+                                                  0,       //securityFlags
+                                                  Ci.nsIContentPolicy.TYPE_OTHER,
+                                                  0);      //loadFlags
   var listener = new ChannelListener();
   chan.notificationCallbacks = listener;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
   // The test will continue on onStopRequest.
 }
 

@@ -80,7 +80,12 @@ nsWebHandlerApp.prototype = {
     if (aWindowContext) {
 
       // create a channel from this URI
-      var channel = ioService.newChannelFromURI(uriToSend);
+      var channel = ioService.newChannelFromURI2(uriToSend,
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0);      //loadFlags
       channel.loadFlags = Ci.nsIChannel.LOAD_DOCUMENT_URI;
 
       // load the channel

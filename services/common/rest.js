@@ -288,7 +288,12 @@ RESTRequest.prototype = {
     }
 
     // Create and initialize HTTP channel.
-    let channel = Services.io.newChannelFromURI(this.uri, null, null)
+    let channel = Services.io.newChannelFromURI2(this.uri,
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0)       //loadFlags
                           .QueryInterface(Ci.nsIRequest)
                           .QueryInterface(Ci.nsIHttpChannel);
     this.channel = channel;
@@ -336,10 +341,10 @@ RESTRequest.prototype = {
 
     // Blast off!
     try {
-      channel.asyncOpen(this, null);
+      channel.asyncOpen2(this, null);
     } catch (ex) {
       // asyncOpen can throw in a bunch of cases -- e.g., a forbidden port.
-      this._log.warn("Caught an error in asyncOpen: " + CommonUtils.exceptionStr(ex));
+      this._log.warn("Caught an error in asyncOpen2: " + CommonUtils.exceptionStr(ex));
       CommonUtils.nextTick(onComplete.bind(this, ex));
     }
     this.status = this.SENT;

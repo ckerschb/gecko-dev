@@ -149,7 +149,12 @@ function runChildTestSet(set)
   DownloadListener.onFinished = testFinisher(set[2]);
   sendCommand('\
   let uri = ioservice.newURI("http://localhost:4444' + set[0] + '", null, null);\
-  let channel = ioservice.newChannelFromURI(uri);                              \
+  let channel = ioservice.newChannelFromURI2(uri,
+                                             Services.scriptSecurityManager.getSystemPrincipal(),
+                                             null,    //requestingNode
+                                             0,       //securityFlags
+                                             Ci.nsIContentPolicy.TYPE_OTHER,
+                                             0); \    //loadFlags
   uriloader.openURI(channel, Ci.nsIURILoader.IS_CONTENT_PREFERRED, new WindowContext()); \
   ');
 }

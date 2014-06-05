@@ -74,7 +74,12 @@ InstallerObserver.prototype = {
       resultFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE,
                               0770);
 
-      var channel = ios.newChannelFromURI(uri);
+      var channel = ios.newChannelFromURI2(uri,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,    //requestingNode
+                                           0,       //securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
       this._downloader =
         Components.classes["@mozilla.org/network/downloader;1"].
           createInstance(Components.interfaces.nsIDownloader);
@@ -83,7 +88,7 @@ InstallerObserver.prototype = {
 
       this._fireNotification(DOWNLOAD_STARTED, null);
 
-      channel.asyncOpen(this._downloader, null);
+      channel.asyncOpen2(this._downloader, null);
     }
     catch (e) {
       Components.utils.reportError(e);

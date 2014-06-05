@@ -185,7 +185,12 @@ AboutWeaveLog.prototype = {
   newChannel: function(aURI) {
     let dir = FileUtils.getDir("ProfD", ["weave", "logs"], true);
     let uri = Services.io.newFileURI(dir);
-    let channel = Services.io.newChannelFromURI(uri);
+    let channel = Services.io.newChannelFromURI2(uri,
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0);      //loadFlags
     channel.originalURI = aURI;
 
     // Ensure that the about page has the same privileges as a regular directory

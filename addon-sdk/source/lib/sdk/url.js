@@ -64,7 +64,12 @@ let toFilename = exports.toFilename = function toFilename(url) {
   if (uri.scheme == "resource")
     uri = newURI(resolveResourceURI(uri));
   if (uri.scheme == "chrome") {
-    var channel = ios.newChannelFromURI(uri);
+    var channel = ios.newChannelFromURI2(uri,
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null,    //requestingNode
+                                         0,       //securityFlags
+                                         Ci.nsIContentPolicy.TYPE_OTHER,
+                                         0);      //loadFlags
     try {
       channel = channel.QueryInterface(Ci.nsIFileChannel);
       return channel.file.path;

@@ -58,8 +58,13 @@ function run_test()
             getService(Ci.nsIIOService);
 
   // Test that the default icon has the content type of image/png.
-  let (channel = ios.newChannelFromURI(fs.defaultFavicon)) {
-    channel.asyncOpen(new streamListener("image/png"), null);
+  let (channel = ios.newChannelFromURI2(fs.defaultFavicon,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,   //requestingNode
+                                        0,      //securityFlags
+                                        Ci.nsIContentPolicy.TYPE_OTHER,
+                                        0)) {    //loadFlags
+    channel.asyncOpen2(new streamListener("image/png"), null);
     do_test_pending();
   }
 

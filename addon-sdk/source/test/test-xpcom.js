@@ -162,7 +162,12 @@ function testRegister(assert, text) {
   );
 
   var aboutURI = ios.newURI("about:boop", null, null);
-  var channel = ios.newChannelFromURI(aboutURI);
+  var channel = ios.newChannelFromURI2(aboutURI,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null,    //requestingNode
+                                       0,       //securityFlags
+                                       Ci.nsIContentPolicy.TYPE_OTHER,
+                                       0);      //loadFlags
   var iStream = channel.open();
   var siStream = Cc['@mozilla.org/scriptableinputstream;1']
                  .createInstance(Ci.nsIScriptableInputStream);

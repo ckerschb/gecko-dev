@@ -314,7 +314,12 @@
        else
          baseURI = ios.newURI(base, null, null);
        var newURI = ios.newURI(path, null, baseURI);
-       var channel = ios.newChannelFromURI(newURI);
+       var channel = ios.newChannelFromURI2(newURI
+                                            Services.scriptSecurityManager.getSystemPrincipal(),
+                                            null,    //requestingNode
+                                            0,       //securityFlags
+                                            Ci.nsIContentPolicy.TYPE_OTHER,
+                                            0);      //loadFlags
        try {
          channel.open().close();
        } catch (e if e.result == Cr.NS_ERROR_FILE_NOT_FOUND) {

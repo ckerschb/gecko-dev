@@ -620,8 +620,13 @@ function loadMemoryReportsFromFile(aFilename, aFn)
     }, null);
 
     let file = new nsFile(aFilename);
-    let fileChan = Services.io.newChannelFromURI(Services.io.newFileURI(file));
-    fileChan.asyncOpen(converter, null);
+    let fileChan = Services.io.newChannelFromURI2(Services.io.newFileURI(file),
+                                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                                  null,    //requestingNode
+                                                  0,       //securityFlags
+                                                  Ci.nsIContentPolicy.TYPE_OTHER,
+                                                  0);      //loadFlags
+    fileChan.asyncOpen2(converter, null);
 
   } catch (ex) {
     handleException(ex);

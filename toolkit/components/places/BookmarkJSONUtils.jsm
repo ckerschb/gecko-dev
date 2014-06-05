@@ -220,12 +220,17 @@ BookmarkImporter.prototype = {
     };
 
     try {
-      let channel = Services.io.newChannelFromURI(NetUtil.newURI(aSpec));
+      let channel = Services.io.newChannelFromURI2(NetUtil.newURI(aSpec),
+                                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                                   null,    //requestingNode
+                                                   0,       //securityFlags
+                                                   Ci.nsIContentPolicy.TYPE_OTHER,
+                                                   0);      //loadFlags
       let streamLoader = Cc["@mozilla.org/network/stream-loader;1"].
                          createInstance(Ci.nsIStreamLoader);
 
       streamLoader.init(streamObserver);
-      channel.asyncOpen(streamLoader, channel);
+      channel.asyncOpen2(streamLoader, channel);
     } catch (ex) {
       deferred.reject(ex);
     }

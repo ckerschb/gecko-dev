@@ -240,7 +240,12 @@ HashCompleterRequest.prototype = {
     let loadFlags = Ci.nsIChannel.INHIBIT_CACHING |
                     Ci.nsIChannel.LOAD_BYPASS_CACHE;
 
-    let channel = Services.io.newChannelFromURI(this._uri);
+    let channel = Services.io.newChannelFromURI2(this._uri,
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0);      //loadFlags
     channel.loadFlags = loadFlags;
 
     this._channel = channel;
@@ -248,7 +253,7 @@ HashCompleterRequest.prototype = {
     let body = this.buildRequest();
     this.addRequestBody(body);
 
-    channel.asyncOpen(this, null);
+    channel.asyncOpen2(this, null);
   },
 
   // Returns a string for the request body based on the contents of

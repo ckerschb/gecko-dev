@@ -1724,7 +1724,12 @@ this.XPIProvider = {
 
         let chan;
         try {
-          chan = Services.io.newChannelFromURI(aURI);
+          chan = Services.io.newChannelFromURI2(aURI,
+                                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                                null,    //requestingNode
+                                                0,       //securityFlags
+                                                Ci.nsIContentPolicy.TYPE_OTHER,
+                                                0);      //loadFlags
         }
         catch (ex) {
           return null;

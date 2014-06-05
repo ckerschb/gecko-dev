@@ -1155,7 +1155,12 @@ function openURL(aURL)
       }
     }
 
-    var channel = Services.io.newChannelFromURI(uri);
+    var channel = Services.io.newChannelFromURI2(uri,
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0);      //loadFlags
     var uriLoader = Components.classes["@mozilla.org/uriloader;1"]
                               .getService(Components.interfaces.nsIURILoader);
     uriLoader.openURI(channel,

@@ -4,7 +4,12 @@ function run_test() {
                       
   var dataFile = do_get_file("data/bug121341.properties");
 
-  var channel = ios.newChannelFromURI(ios.newFileURI(dataFile, null, null));
+  var channel = ios.newChannelFromURI2(ios.newFileURI(dataFile, null, null),
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null,    //requestingNode
+                                       0,       //securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0);      //loadFlags
   var inp = channel.open();
 
   var properties = Components.classes["@mozilla.org/persistent-properties;1"].
@@ -48,7 +53,12 @@ function run_test() {
 
   dataFile = do_get_file("data/bug121341-2.properties");
 
-  channel = ios.newChannelFromURI(ios.newFileURI(dataFile, null, null));
+  channel = ios.newChannelFromURI2(ios.newFileURI(dataFile, null, null),
+                                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                                  null,    //requestingNode
+                                                  0,       //securityFlags
+                                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                                  0);      //loadFlags
   inp = channel.open();
 
   var properties2 = Components.classes["@mozilla.org/persistent-properties;1"].
