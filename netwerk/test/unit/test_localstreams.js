@@ -68,7 +68,13 @@ function stream_from_channel(file) {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
   var uri = ios.newFileURI(file);
-  return ios.newChannelFromURI(uri).open();
+  return ios.newChannelFromURI2(uri,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null, //requestingNode
+                               0,       //securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0      //loadFlags
+                              ).open();
 }
 
 function run_test() {

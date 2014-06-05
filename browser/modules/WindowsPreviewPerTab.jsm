@@ -74,7 +74,12 @@ XPCOMUtils.defineLazyServiceGetter(this, "faviconSvc",
 
 // nsIURI -> imgIContainer
 function _imageFromURI(uri, privateMode, callback) {
-  let channel = ioSvc.newChannelFromURI(uri);
+  let channel = ioSvc.newChannelFromURI2(uri,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null, //requestingNode
+                                        0,       //securityFlags
+                                        Ci.nsIContentPolicy.TYPE_OTHER,
+                                        0);      //loadFlags
   try {
     channel.QueryInterface(Ci.nsIPrivateBrowsingChannel);
     channel.setPrivate(privateMode);

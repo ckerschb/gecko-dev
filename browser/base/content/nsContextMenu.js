@@ -1215,7 +1215,12 @@ nsContextMenu.prototype = {
     // set up a channel to do the saving
     var ioService = Cc["@mozilla.org/network/io-service;1"].
                     getService(Ci.nsIIOService);
-    var channel = ioService.newChannelFromURI(makeURI(linkURL));
+    var channel = ioService.newChannelFromURI2(makeURI(linkURL)
+                                              Services.scriptSecurityManager.getSystemPrincipal(),
+                                              null, //requestingNode
+                                              0,       //securityFlags
+                                              Ci.nsIContentPolicy.TYPE_OTHER,
+                                              0);      //loadFlags
     if (channel instanceof Ci.nsIPrivateBrowsingChannel) {
       let docIsPrivate = PrivateBrowsingUtils.isWindowPrivate(doc.defaultView);
       channel.setPrivate(docIsPrivate);
@@ -1246,7 +1251,7 @@ nsContextMenu.prototype = {
                            timer.TYPE_ONE_SHOT);
 
     // kick off the channel with our proxy object as the listener
-    channel.asyncOpen(new saveAsListener(), null);
+    channel.asyncOpen2(new saveAsListener(), null);
   },
 
   // Save URL of clicked-on link.

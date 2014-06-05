@@ -44,7 +44,12 @@ function downloadHTTP(spec)
 {
     var ioService = getIOService();
     var uri = ioService.newURI(spec, null, null);
-    var channel = ioService.newChannelFromURI(uri);
+    var channel = ioService.newChannelFromURI2(uri,
+                                              Services.scriptSecurityManager.getSystemPrincipal(),
+                                              null, //requestingNode
+                                              0,       //securityFlags
+                                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                              0);      //loadFlags
     var input = wrapInputStream(channel.open());
     var data = input.read(input.available());
     input.close();

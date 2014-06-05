@@ -16,7 +16,13 @@ function loadContentFile(aFile, aCharset) {
     var file = do_get_file(aFile);
     var ios = Components.classes['@mozilla.org/network/io-service;1']
             .getService(Components.interfaces.nsIIOService);
-    var chann = ios.newChannelFromURI ( ios.newFileURI (file) );
+    var chann = ios.newChannelFromURI2 ( ios.newFileURI (file),
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null, //requestingNode
+                                        0,       //securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0 );      //loadFlags
+
     chann.contentCharset = aCharset;
 
     /*var inputStream = Components.classes["@mozilla.org/scriptableinputstream;1"]

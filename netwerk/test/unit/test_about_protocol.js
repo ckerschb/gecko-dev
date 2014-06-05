@@ -38,7 +38,12 @@ function run_test() {
   registrar.registerFactory(classID, "", "@mozilla.org/network/protocol/about;1?what=unsafe", factory);
 
   let aboutUnsafeURI = Services.io.newURI("about:unsafe", null, null);
-  let aboutUnsafeChan = Services.io.newChannelFromURI(aboutUnsafeURI);
+  let aboutUnsafeChan = Services.io.newChannelFromURI2(aboutUnsafeURI,
+                                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                                      null, //requestingNode
+                                                      0,       //securityFlags
+                                                      Ci.nsIContentPolicy.TYPE_OTHER,
+                                                      0);      //loadFlags
   do_check_null(aboutUnsafeChan.owner, "URI_SAFE_FOR_UNTRUSTED_CONTENT channel has no owner");
 
   registrar.unregisterFactory(classID, factory);

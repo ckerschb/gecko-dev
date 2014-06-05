@@ -61,7 +61,13 @@ HelperAppLauncherDialog.prototype = {
     // For all other URIs, try to resolve them to an inner URI, and check that.
     if (!alreadyResolved) {
       let ioSvc = Cc["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-      let innerURI = ioSvc.newChannelFromURI(url).URI;
+      let innerURI = ioSvc.newChannelFromURI2(url,
+                                             Services.scriptSecurityManager.getSystemPrincipal(),
+                                             null, //requestingNode
+                                             0,       //securityFlags
+                                             Ci.nsIContentPolicy.TYPE_OTHER,
+                                             0        //loadFlags
+                                            ).URI;
       if (!url.equals(innerURI)) {
         return this._canDownload(innerURI, true);
       }

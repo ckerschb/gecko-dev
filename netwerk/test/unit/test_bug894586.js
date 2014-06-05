@@ -44,9 +44,19 @@ ProtocolHandler.prototype = {
     var file = do_get_file("test_bug894586.js", false);
     do_check_true(file.exists());
     var url = Services.io.newFileURI(file);
-    return Services.io.newChannelFromURI(url).open();
+    return Services.io.newChannelFromURI2(url
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null, //requestingNode
+                                         0,       //securityFlags
+                                         Ci.nsIContentPolicy.TYPE_OTHER,
+                                         0      //loadFlags
+                                        ).open();
   },
   asyncOpen: function(aListener, aContext) {
+    throw Components.Exception("Not implemented",
+                               Cr.NS_ERROR_NOT_IMPLEMENTED);
+  },
+  asyncOpen2: function(aListener, aContext) {
     throw Components.Exception("Not implemented",
                                Cr.NS_ERROR_NOT_IMPLEMENTED);
   },

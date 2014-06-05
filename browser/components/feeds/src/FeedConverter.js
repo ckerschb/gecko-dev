@@ -246,16 +246,27 @@ FeedConverter.prototype = {
 
         // Now load the actual XUL document.
         var aboutFeedsURI = ios.newURI("about:feeds", null, null);
-        chromeChannel = ios.newChannelFromURI(aboutFeedsURI, null);
+
+        chromeChannel = ios.newChannelFromURI2(aboutFeedsURI,
+                                               Services.scriptSecurityManager.getSystemPrincipal(),
+                                               null, //requestingNode
+                                               0,       //securityFlags
+                                               Ci.nsIContentPolicy.TYPE_OTHER,
+                                               0);      //loadFlags
         chromeChannel.originalURI = result.uri;
         chromeChannel.owner =
           Services.scriptSecurityManager.getNoAppCodebasePrincipal(aboutFeedsURI);
       } else {
-        chromeChannel = ios.newChannelFromURI(result.uri, null);
+        chromeChannel = ios.newChannelFromURI2(result.uri,
+                                               Services.scriptSecurityManager.getSystemPrincipal(),
+                                               null, //requestingNode
+                                               0,       //securityFlags
+                                               Ci.nsIContentPolicy.TYPE_OTHER,
+                                               0);      //loadFlags
       }
 
       chromeChannel.loadGroup = this._request.loadGroup;
-      chromeChannel.asyncOpen(this._listener, null);
+      chromeChannel.asyncOpen2(this._listener, null);
     }
     finally {
       this._releaseHandles();
@@ -546,7 +557,12 @@ GenericProtocolHandler.prototype = {
   newChannel: function GPH_newChannel(aUri) {
     var inner = aUri.QueryInterface(Ci.nsINestedURI).innerURI;
     var channel = Cc["@mozilla.org/network/io-service;1"].
-                  getService(Ci.nsIIOService).newChannelFromURI(inner, null);
+                  getService(Ci.nsIIOService).newChannelFromURI2(inner, 
+                                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                                 null, //requestingNode
+                                                                 0,       //securityFlags
+                                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                                 0);      //loadFlags
     if (channel instanceof Components.interfaces.nsIHttpChannel)
       // Set this so we know this is supposed to be a feed
       channel.setRequestHeader("X-Moz-Is-Feed", "1", false);

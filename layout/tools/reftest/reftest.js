@@ -820,7 +820,12 @@ function ReadManifest(aURL, inherited_status)
                      .getService(CI.nsIScriptSecurityManager);
 
     var listURL = aURL;
-    var channel = gIOService.newChannelFromURI(aURL);
+    var channel = gIOService.newChannelFromURI2(aURL,
+                                               Services.scriptSecurityManager.getSystemPrincipal(),
+                                               null, //requestingNode
+                                               0,       //securityFlags
+                                               CI.nsIContentPolicy.TYPE_OTHER,
+                                               0);      //loadFlags
     var inputStream = channel.open();
     if (channel instanceof Components.interfaces.nsIHttpChannel
         && channel.responseStatus != 200) {

@@ -504,7 +504,12 @@ function test_newChannel_with_nsIURI()
   // Check that we get the same URI back from channel the IO service creates and
   // the channel the utility method creates.
   let uri = NetUtil.newURI(TEST_SPEC);
-  let iosChannel = NetUtil.ioService.newChannelFromURI(uri);
+  let iosChannel = NetUtil.ioService.newChannelFromURI2(uri
+                                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                                       null, //requestingNode
+                                                       0,       //securityFlags
+                                                       Ci.nsIContentPolicy.TYPE_OTHER,
+                                                       0);      //loadFlags
   let NetUtilChannel = NetUtil.newChannel(uri);
   do_check_true(iosChannel.URI.equals(NetUtilChannel.URI));
 
@@ -521,7 +526,12 @@ function test_newChannel_with_nsIFile()
   // Check that we get the same URI back from channel the IO service creates and
   // the channel the utility method creates.
   let uri = NetUtil.newURI(file);
-  let iosChannel = NetUtil.ioService.newChannelFromURI(uri);
+  let iosChannel = NetUtil.ioService.newChannelFromURI2(uri,
+                                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                                       null, //requestingNode
+                                                       0,       //securityFlags
+                                                       Ci.nsIContentPolicy.TYPE_OTHER,
+                                                       0);      //loadFlags
   let NetUtilChannel = NetUtil.newChannel(uri);
   do_check_true(iosChannel.URI.equals(NetUtilChannel.URI));
 

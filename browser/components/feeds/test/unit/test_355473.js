@@ -7,9 +7,25 @@ function run_test() {
     ios.newURI("feed:https://example.com/feed.xml", null, null);
   var httpsURI = ios.newURI("https://example.com/feed.xml", null, null);
 
-  var feedChannel = ios.newChannelFromURI(feedFeedURI, null);
-  var httpChannel = ios.newChannelFromURI(httpFeedURI, null);
-  var httpsChannel = ios.newChannelFromURI(httpsFeedURI, null);
+  var feedChannel = ios.newChannelFromURI2(feedFeedURI,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null, //requestingNode
+                                          0,       //securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);      //loadFlags
+
+  var httpChannel = ios.newChannelFromURI2(httpFeedURI,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null, //requestingNode
+                                          0,       //securityFlags
+                                          Ci.nsIContentPolicy.TYPE_OTHER,
+                                          0);      //loadFlags
+  var httpsChannel = ios.newChannelFromURI2(httpsFeedURI,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null, //requestingNode
+                                          0,       //securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);      //loadFlags
 
   // not setting .originalURI to the original URI is naughty
   do_check_true(feedFeedURI.equals(feedChannel.originalURI));

@@ -7,9 +7,19 @@ function run_test() {
   var about1 = ioServ.newURI("about:blank", null, null);
   var about2 = ioServ.newURI("about:blank", null, base);
 
-  var chan1 = ioServ.newChannelFromURI(about1)
+  var chan1 = ioServ.newChannelFromURI2(about1,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null, //requestingNode
+                                       0,       //securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0)      //loadFlags
                     .QueryInterface(Components.interfaces.nsIPropertyBag2);
-  var chan2 = ioServ.newChannelFromURI(about2)
+  var chan2 = ioServ.newChannelFromURI2(about2,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null, //requestingNode
+                                       0,       //securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0)      //loadFlags
                     .QueryInterface(Components.interfaces.nsIPropertyBag2);
 
   var haveProp = false;

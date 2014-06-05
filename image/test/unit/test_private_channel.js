@@ -53,10 +53,15 @@ var gImgPath = 'http://localhost:' + server.identity.primaryPort + '/image.png';
 
 function setup_chan(path, isPrivate, callback) {
   var uri = gIoService.newURI(gImgPath, null, null);
-  var chan = gIoService.newChannelFromURI(uri);
+  var chan = gIoService.newChannelFromURI2(uri,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null, //requestingNode
+                                          0,       //securityFlags
+                                          Ci.nsIContentPolicy.TYPE_OTHER,
+                                          0);      //loadFlags
   chan.notificationCallbacks = new NotificationCallbacks(isPrivate);
   var channelListener = new ChannelListener();
-  chan.asyncOpen(channelListener, null);
+  chan.asyncOpen2(channelListener, null);
 
   var listener = new ImageListener(null, callback);
   var outlistener = {};

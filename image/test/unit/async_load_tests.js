@@ -140,9 +140,14 @@ function checkSecondChannelLoad()
   do_test_pending();
 
   var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);  
-  var channel = ioService.newChannelFromURI(uri);
+  var channel = ioService.newChannelFromURI2(uri,
+                                            Services.scriptSecurityManager.getSystemPrincipal(),
+                                            null, //requestingNode
+                                            0,       //securityFlags
+                                            Ci.nsIContentPolicy.TYPE_OTHER,
+                                            0);      //loadFlags
   var channellistener = new ChannelListener();
-  channel.asyncOpen(channellistener, null);
+  channel.asyncOpen2(channellistener, null);
 
   var listener = new ImageListener(getChannelLoadImageStartCallback(channellistener),
                                    getChannelLoadImageStopCallback(channellistener,
@@ -164,9 +169,14 @@ function run_loadImageWithChannel_tests()
   do_test_pending();
 
   var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);  
-  var channel = ioService.newChannelFromURI(uri);
+  var channel = ioService.newChannelFromURI2(uri,
+                                            Services.scriptSecurityManager.getSystemPrincipal(),
+                                            null, //requestingNode
+                                            0,       //securityFlags
+                                            Ci.nsIContentPolicy.TYPE_OTHER,
+                                            0);      //loadFlags
   var channellistener = new ChannelListener();
-  channel.asyncOpen(channellistener, null);
+  channel.asyncOpen2(channellistener, null);
 
   var listener = new ImageListener(getChannelLoadImageStartCallback(channellistener),
                                    getChannelLoadImageStopCallback(channellistener,

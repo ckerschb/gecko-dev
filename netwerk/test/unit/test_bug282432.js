@@ -33,6 +33,13 @@ function run_test() {
   let file = do_get_file("_NOT_EXIST_.txt", true);
   do_check_false(file.exists());
 
-  let channel = ios.newChannelFromURI(ios.newFileURI(file));
-  channel.asyncOpen(listener, null);
+  let channel = ios.newChannelFromURI2(ios.newFileURI(file),
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null, //requestingNode
+                                      0,       //securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);      //loadFlags
+
+
+  channel.asyncOpen2(listener, null);
 }
