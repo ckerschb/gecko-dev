@@ -18,6 +18,8 @@
 #include "nsComponentManagerUtils.h"
 #include "nsServiceManagerUtils.h"
 #include "nsISimpleEnumerator.h"
+#include "nsIPrincipal.h"
+#include "nsSystemPrincipal.h"
 
 #define TEST_URL "resource:/res/test.properties"
 static NS_DEFINE_CID(kPersistentPropertiesCID, NS_IPERSISTENTPROPERTIES_CID);
@@ -43,7 +45,16 @@ main(int argc, char* argv[])
   if (NS_FAILED(ret)) return 1;
 
   nsIChannel *channel = nullptr;
-  ret = service->NewChannel(NS_LITERAL_CSTRING(TEST_URL), nullptr, nullptr, &channel);
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+  ret = service->NewChannel2(NS_LITERAL_CSTRING(TEST_URL),
+                             nullptr,
+                             nullptr, // base uri
+                             systemPrincipal,
+                             nullptr, // requestingNode
+                             0,       // security flags
+                             nsIContentPolicy::TYPE_OTHER,
+                             0,       // load flags
+                             &channel);
   if (NS_FAILED(ret)) return 1;
 
   ret = channel->Open2(&in);

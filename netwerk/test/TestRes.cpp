@@ -14,6 +14,8 @@
 #include "nsIURI.h"
 #include "nsCRT.h"
 #include "nsNetCID.h"
+#include "nsIPrincipal.h"
+#include "nsSystemPrincipal.h"
 
 static NS_DEFINE_CID(kIOServiceCID, NS_IOSERVICE_CID);
 static NS_DEFINE_CID(kEventQueueServiceCID, NS_EVENTQUEUESERVICE_CID);
@@ -55,9 +57,18 @@ TestOpenInputStream(const char* url)
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIChannel> channel;
-    rv = serv->NewChannel(url,
-                          nullptr, // base uri
-                          getter_AddRefs(channel));
+    /* Note that this test originally called NewChannel() with 3 arguments, but IOService NewChannel()
+     * takes 4 arguements.  This test is probably not run anyway.  Updating to NewChannel2 anyway */
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = serv->NewChannel2(url,
+                           nullptr,
+                           nullptr, // base uri
+                           systemPrincipal,
+                           nullptr, // requestingNode
+                           0,       // security flags
+                           nsIContentPolicy::TYPE_OTHER,
+                           0,       // load flags
+                           getter_AddRefs(channel));
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIInputStream> in;
@@ -184,9 +195,19 @@ TestAsyncRead(const char* url)
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIChannel> channel;
-    rv = serv->NewChannel(url,
-                          nullptr, // base uri
-                          getter_AddRefs(channel));
+    /* Note that this test originally called NewChannel() with 3 arguments, but IOService NewChannel()
+     * takes 4 arguements.  This test is probably not run anyway.  Updating to NewChannel2 anyway */
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = serv->NewChannel2(url,
+                           nullptr,
+                           nullptr, // base uri
+                           systemPrincipal,
+                           nullptr, // requestingNode
+                           0,       // security flags
+                           nsIContentPolicy::TYPE_OTHER,
+                           0,       // load flags
+                           getter_AddRefs(channel));
+
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIStreamListener> listener = new Listener();
