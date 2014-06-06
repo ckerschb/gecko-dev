@@ -157,6 +157,24 @@ AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
 }
 
 NS_IMETHODIMP
+AboutRedirector::NewChannel2(nsIURI* aURI,
+                                      nsIPrincipal* aRequestingPrincipal,
+                                      nsINode* aRequestingNode,
+                                      uint32_t aSecurityFlags,
+                                      nsContentPolicyType aContentPolicyType,
+                                      uint32_t aLoadFlags,
+                                      nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+  nsresult rv = NewChannel(aURI, outChannel);
+  NS_ENSURE_SUCCESS(rv, rv);
+  (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
+  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
 AboutRedirector::GetURIFlags(nsIURI *aURI, uint32_t *result)
 {
   NS_ENSURE_ARG_POINTER(aURI);

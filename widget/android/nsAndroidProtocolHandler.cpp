@@ -168,3 +168,28 @@ nsAndroidProtocolHandler::NewChannel(nsIURI* aURI,
     NS_ADDREF(*aResult = channel);
     return NS_OK;
 }
+
+
+/* There appear to be no callers to NewChannel().  After updating all callsites from
+ * NewChannel() to NewChannel2(), the browser still runs - the absence of
+ * nsAndroidProtocolHandler:NewChannel2() causes no issues, and hence the need for it
+ * and NewChannel in nsAndroidProtocolHandler may only be for addons.  Including it here
+ * for completeness, and we can followup on this later. */
+
+NS_IMETHODIMP
+nsAndroidProtocolHandler::NewChannel2(nsIURI* aURI,
+                                      nsIPrincipal* aRequestingPrincipal,
+                                      nsINode* aRequestingNode,
+                                      uint32_t aSecurityFlags,
+                                      nsContentPolicyType aContentPolicyType,
+                                      uint32_t aLoadFlags,
+                                      nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+  nsresult rv = NewChannel(aURI, outChannel);
+  NS_ENSURE_SUCCESS(rv, rv);
+  (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
+  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  return NS_OK;
+}

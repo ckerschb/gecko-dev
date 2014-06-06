@@ -4,9 +4,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "nsISupports.idl"
+#include "nsIContentPolicy.idl"
 
 interface nsIURI;
 interface nsIChannel;
+interface nsIPrincipal;
+interface nsINode;
 
 [scriptable, uuid(9575693c-60d9-4332-b6b8-6c29289339cb)]
 interface nsIAboutModule : nsISupports 
@@ -17,6 +20,13 @@ interface nsIAboutModule : nsISupports
      * @param aURI the uri of the new channel
      */
     nsIChannel newChannel(in nsIURI aURI);
+
+    nsIChannel newChannel2(in nsIURI aURI,
+                           in nsIPrincipal aRequestingPrincipal,
+                           in nsINode aRequestingNode,
+                           in unsigned long aSecurityFlags,
+                           in nsContentPolicyType aContentPolicyType,
+                           in unsigned long aLoadFlags);
 
     /**
      * A flag that indicates whether a URI is safe for untrusted

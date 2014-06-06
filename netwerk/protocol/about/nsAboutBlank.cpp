@@ -29,6 +29,24 @@ nsAboutBlank::NewChannel(nsIURI *aURI, nsIChannel **result)
 }
 
 NS_IMETHODIMP
+nsAboutBlank::NewChannel2(nsIURI* aURI,
+                          nsIPrincipal* aRequestingPrincipal,
+                          nsINode* aRequestingNode,
+                          uint32_t aSecurityFlags,
+                          nsContentPolicyType aContentPolicyType,
+                          uint32_t aLoadFlags,
+                          nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+  nsresult rv = NewChannel(aURI, outChannel);
+  NS_ENSURE_SUCCESS(rv, rv);
+  (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  (*outChannel)->SetRequestingContext(aRequestingNode);
+  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
 nsAboutBlank::GetURIFlags(nsIURI *aURI, uint32_t *result)
 {
     *result = nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
