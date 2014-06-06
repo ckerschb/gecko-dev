@@ -285,6 +285,7 @@ protected:
   nsAutoPtr<nsString>                 mContentDispositionFilename;
   int64_t                             mContentLength;
   nsContentPolicyType                 mContentPolicyType;
+  // TODO: mRequestingContext should be renamed to mRequestingNode
   nsCOMPtr<nsISupports>               mRequestingContext;
   nsCOMPtr<nsIPrincipal>              mRequestingPrincipal;
   bool                                mUsesNewAPI;

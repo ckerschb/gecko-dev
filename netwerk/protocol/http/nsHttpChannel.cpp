@@ -67,6 +67,7 @@
 #include "nsPerformance.h"
 #include "CacheObserver.h"
 #include "mozilla/Telemetry.h"
+#include "nsINode.h"
 
 namespace mozilla { namespace net {
 
@@ -1657,13 +1658,15 @@ nsHttpChannel::StartRedirectChannelToURI(nsIURI *upgradedURI, uint32_t flags)
     rv = gHttpHandler->GetIOService(getter_AddRefs(ioService));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    nsCOMPtr<nsINode> requestingNode = do_QueryInterface(mRequestingContext);
 
+    // Setting up the redirect channel, we should use:
+    // principal, node, contentPolicyType from current channel
     rv = ioService->NewChannelFromURI2(upgradedURI,
-                                       systemPrincipal,
-                                       nullptr, // requestingNode
+                                       mRequestingPrincipal,
+                                       requestingNode,
                                        0,       // securityFlags
-                                       nsIContentPolicy::TYPE_OTHER,
+                                       mContentPolicyType,
                                        0,       // loadFlags
                                        getter_AddRefs(newChannel));
     NS_ENSURE_SUCCESS(rv, rv);
@@ -1761,17 +1764,17 @@ nsHttpChannel::AsyncDoReplaceWithProxy(nsIProxyInfo* pi)
     LOG(("nsHttpChannel::AsyncDoReplaceWithProxy [this=%p pi=%p]", this, pi));
     nsresult rv;
 
-    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    nsCOMPtr<nsINode> requestingNode = do_QueryInterface(mRequestingContext);
 
     nsCOMPtr<nsIChannel> newChannel;
     rv = gHttpHandler->NewProxiedChannel2(mURI,
                                           pi,
                                           mProxyResolveFlags,
                                           mProxyURI,
-                                          systemPrincipal,
-                                          nullptr, // requestingNode
+                                          mRequestingPrincipal,
+                                          requestingNode,
                                           0,       // securityFlags
-                                          nsIContentPolicy::TYPE_OTHER,
+                                          mContentPolicyType,
                                           0,       // loadFlags
                                           getter_AddRefs(newChannel));
     if (NS_FAILED(rv))
@@ -2427,15 +2430,15 @@ nsHttpChannel::ProcessFallback(bool *waitingForRedirectCallback)
     // Close the current cache entry.
     CloseCacheEntry(true);
 
-    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    nsCOMPtr<nsINode> requestingNode = do_QueryInterface(mRequestingContext);
 
     // Create a new channel to load the fallback entry.
     nsRefPtr<nsIChannel> newChannel;
     rv = gHttpHandler->NewChannel2(mURI,
-                                   systemPrincipal,
-                                   nullptr, // requestingNode
+                                   mRequestingPrincipal,
+                                   requestingNode,
                                    0,       // securityFlags
-                                   nsIContentPolicy::TYPE_OTHER,
+                                   mContentPolicyType,
                                    0,       // loadFlags
                                    getter_AddRefs(newChannel));
     NS_ENSURE_SUCCESS(rv, rv);
@@ -4229,14 +4232,17 @@ nsHttpChannel::ContinueProcessRedirectionAfterFallback(nsresult rv)
     rv = gHttpHandler->GetIOService(getter_AddRefs(ioService));
     if (NS_FAILED(rv)) return rv;
 
-    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
+    nsCOMPtr<nsINode> requestingNode = do_QueryInterface(mRequestingContext);
+
+    // Setting up the redirect channel, we should use:
+    // principal, node, contentPolicyType from current channel
     nsCOMPtr<nsIChannel> newChannel;
     rv = ioService->NewChannelFromURI2(mRedirectURI,
-                                       systemPrincipal,
-                                       nullptr, // requestingNode
+                                       mRequestingPrincipal,
+                                       requestingNode,
                                        0,       // securityFlags
-                                       nsIContentPolicy::TYPE_OTHER,
+                                       mContentPolicyType,
                                        0,       // loadFlags
                                        getter_AddRefs(newChannel));
     if (NS_FAILED(rv)) return rv;
@@ -4559,7 +4565,8 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
-                                           mRequestingContext);
+                                           mRequestingContext,
+                                           mRedirectCount > 0 ? true : false);
   if (NS_FAILED(rv)) {
       return rv;
   }
