@@ -123,6 +123,8 @@ interface nsIChannel : nsIRequest
       *
       * NOTE: The requesting context may not be set for all requests!
       */
+    // TODO: This should be an nsINode
+    // attribute nsINode requestingNode;
     attribute nsISupports requestingContext;
 
     /**

@@ -19,6 +19,8 @@
 #include "nsIScriptSecurityManager.h"
 #include "nsIURI.h"
 #include "nsServiceManagerUtils.h"
+#include "nsMixedContentBlocker.h"
+#include "nsCSPService.h"
 
 //XXXtw sadly, this makes consumers of nsContentPolicyUtils depend on widget
 #include "nsIDocument.h"
@@ -225,7 +227,9 @@ inline nsresult
 NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
                            nsIURI*         aContentLocation,
                            nsIPrincipal*   aRequestingPrincipal,
-                           nsISupports*    aRequestingContext)
+                           // TODO, should be: nsINode* aRequestingNode
+                           nsISupports*    aRequestingContext,
+                           bool            aIsRedirected)
 {
   NS_ASSERTION(aContentLocation, "Can not perform check without a aContentLocation");
   NS_ASSERTION(aRequestingPrincipal, "Can not perform checkout with aRequestingPrincipal");
@@ -260,6 +264,57 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
         fprintf(stderr, "  aRequestingContext: %s\n", nodeSpec.get());
       }
     }
+  }
+
+  // TODO: the following code needs to be fixed, but if a channel is redirected
+  // we do *not* want to call all contentPolicies, but probably CSP and MCB
+  // It's also suboptimal because we create an object which gets destroyed right after
+  // but as a proof of concept that should do what we want.
+  if (aIsRedirected) {
+
+    // a) check MCB
+    nsCOMPtr<nsIContentPolicy> mcb = do_GetService(NS_MIXEDCONTENTBLOCKER_CONTRACTID);
+    int16_t shouldLoad = false;
+    nsresult rv = mcb->ShouldLoad(aContentPolicyType,
+                                  aContentLocation,
+                                  nullptr, // aRequestingLocation
+                                  aRequestingContext,
+                                  EmptyCString(), // mime guess
+                                  nullptr, // extra
+                                  aRequestingPrincipal,
+                                  &shouldLoad);
+
+    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+      if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
+        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
+        return NS_ERROR_CONTENT_BLOCKED;
+      }
+      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
+      return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+    }
+
+    // b) check CSP
+    nsCOMPtr<nsIContentPolicy> csp = do_GetService(CSPSERVICE_CID);
+    rv = csp->ShouldLoad(aContentPolicyType,
+                         aContentLocation,
+                         nullptr, // aRequestingLocation
+                         aRequestingContext,
+                         EmptyCString(), // mime guess
+                         nullptr, // extra
+                         aRequestingPrincipal,
+                         &shouldLoad);
+
+    if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
+      if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
+        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
+        return NS_ERROR_CONTENT_BLOCKED;
+      }
+      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
+      return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
+    }
+
+    fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED [REDIRECTED]\n}\n");
+    return NS_OK;
   }
 
   //Call content policies to see if this load is allowed

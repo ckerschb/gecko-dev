@@ -635,7 +635,8 @@ nsBaseChannel::Open2(nsIInputStream **result)
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
-                                           mRequestingContext);
+                                           mRequestingContext,
+                                           false); // mRedirectCount > 0 ? true : false);
   if (NS_FAILED(rv)) {
       return rv;
   }
@@ -708,7 +709,8 @@ nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
-                                           mRequestingContext);
+                                           mRequestingContext,
+                                           false); //mRedirectCount > 0 ? true : false);
   if (NS_FAILED(rv)) {
     // TODO: should we return this here? TANVI??
     return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;

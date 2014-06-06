@@ -810,7 +810,11 @@ HttpChannelChild::Redirect1Begin(const uint32_t& newChannelId,
 
   nsCOMPtr<nsIURI> uri = DeserializeURI(newUri);
 
- nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+  // TODO: we should use:
+  // mRequestingPrincipal
+  // mRequesintingContext(Node)
+  // mContentPolicyType
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
   nsCOMPtr<nsIChannel> newChannel;
   rv = ioService->NewChannelFromURI2(uri,
