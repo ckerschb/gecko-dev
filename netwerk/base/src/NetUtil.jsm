@@ -139,9 +139,7 @@ this.NetUtil = {
         }
 
         try {
-            //TODO - use asyncOpen2 instead
-            channel.asyncOpen(listener, null);
-            //channel.asyncOpen2(listener, null);
+            channel.asyncOpen2(listener, null);
         }
         catch (e) {
             let exception = new Components.Exception(
@@ -220,14 +218,12 @@ this.NetUtil = {
             uri = this.newURI(aWhatToLoad, aOriginCharset, aBaseURI);
         }
 
-        //TODO - update to newChannelFromURI2
-        return this.ioService.newChannelFromURI(uri);
-        /*return this.ioService.newChannelFromURI2(uri
+        return this.ioService.newChannelFromURI2(uri,
                                                 Services.scriptSecurityManager.getSystemPrincipal(),
-                                                null, //requestingNode
+                                                null,    //requestingNode
                                                 0,       //securityFlags
                                                 Ci.nsIContentPolicy.TYPE_OTHER,
-                                                0);      //loadFlags*/
+                                                0);      //loadFlags
 
     },
 
