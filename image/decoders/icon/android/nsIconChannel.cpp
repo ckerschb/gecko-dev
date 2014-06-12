@@ -102,8 +102,16 @@ moz_icon_to_channel(nsIURI *aURI, const nsACString& aFileExt, uint32_t aIconSize
   rv = stream->AdoptData((char*)buf, buf_size);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  return NS_NewInputStreamChannel(aChannel, aURI, stream,
-                                  NS_LITERAL_CSTRING(IMAGE_ICON_MS));
+
+  // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+  // needs to be changed to set the correct requesting Principal and/or requestingNode
+  // Also setting to TYPE_IMAGE.
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+  return NS_NewInputStreamChannel2(aChannel, aURI, stream,
+                                   NS_LITERAL_CSTRING(IMAGE_ICON_MS),
+                                   systemPrincipal
+                                   nullptr,
+                                   nsIContentPolicyType::TYPE_IMAGE);
 }
 
 nsresult

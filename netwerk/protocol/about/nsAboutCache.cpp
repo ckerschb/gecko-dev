@@ -126,13 +126,105 @@ nsAboutCache::NewChannel2(nsIURI* aURI,
                           uint32_t aLoadFlags,
                           nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
+    // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
+    // to the input stream channel, so we can't call NewChannel() directly.  Implementing it here inline
+    NS_ENSURE_ARG_POINTER(aURI);
+
+    nsresult rv;
+
+    *outChannel = nullptr;
+
+    nsCOMPtr<nsIInputStream> inputStream;
+    rv = NS_NewPipe(getter_AddRefs(inputStream), getter_AddRefs(mStream),
+                    16384, (uint32_t)-1,
+                    true, // non-blocking input
+                    false // blocking output
+    );
+    if (NS_FAILED(rv)) return rv;
+
+    nsAutoCString storageName;
+    rv = ParseURI(aURI, storageName);
+    if (NS_FAILED(rv)) return rv;
+
+    mOverview = storageName.IsEmpty();
+    if (mOverview) {
+        // ...and visit all we can
+        mStorageList.AppendElement(NS_LITERAL_CSTRING("memory"));
+        mStorageList.AppendElement(NS_LITERAL_CSTRING("disk"));
+        mStorageList.AppendElement(NS_LITERAL_CSTRING("appcache"));
+    } else {
+        // ...and visit just the specified storage, entries will output too
+        mStorageList.AppendElement(storageName);
+    }
+
+    // The entries header is added on encounter of the first entry
+    mEntriesHeaderAdded = false;
+
+    nsCOMPtr<nsIChannel> channel;
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), aURI, inputStream,
+                                   NS_LITERAL_CSTRING("text/html"),
+                                   NS_LITERAL_CSTRING("utf-8"),
+                                   aRequestingPrincipal,
+                                   aRequestingNode,
+                                   aContentPolicyType);
+    if (NS_FAILED(rv)) return rv;
+
+    mBuffer.AssignLiteral(
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head>\n"
+        "  <title>Network Cache Storage Information</title>\n"
+        "  <meta charset=\"utf-8\">\n"
+        "  <link rel=\"stylesheet\" href=\"chrome://global/skin/about.css\"/>\n"
+        "  <link rel=\"stylesheet\" href=\"chrome://global/skin/aboutCache.css\"/>\n"
+        "  <script src=\"chrome://global/content/aboutCache.js\"></script>"
+        "</head>\n"
+        "<body class=\"aboutPageWideContainer\">\n"
+        "<h1>Information about the Network Cache Storage Service</h1>\n");
+
+    // Add the context switch controls
+    mBuffer.AppendLiteral(
+        "<label><input id='priv' type='checkbox'/> Private</label>\n"
+        "<label><input id='anon' type='checkbox'/> Anonymous</label>\n"
+    );
+
+    if (CacheObserver::UseNewCache()) {
+        // Visit scoping by browser and appid is not implemented for
+        // the old cache, simply don't add these controls.
+        // The appid/inbrowser entries are already mixed in the default
+        // view anyway.
+        mBuffer.AppendLiteral(
+            "<label><input id='appid' type='text' size='6'/> AppID</label>\n"
+            "<label><input id='inbrowser' type='checkbox'/> In Browser Element</label>\n"
+        );
+    }
+
+    mBuffer.AppendLiteral(
+        "<label><input id='submit' type='button' value='Update' onclick='navigate()'/></label>\n"
+    );
+
+    if (!mOverview) {
+        mBuffer.AppendLiteral("<a href=\"about:cache?storage=&amp;context=");
+        char* escapedContext = nsEscapeHTML(mContextString.get());
+        mBuffer.Append(escapedContext);
+        nsMemory::Free(escapedContext);
+        mBuffer.AppendLiteral("\">Back to overview</a>");
+    }
+
+    FlushBuffer();
+
+    // Kick it, this goes async.
+    rv = VisitNextStorage();
+    if (NS_FAILED(rv)) return rv;
+
+    channel.forget(outChannel);
+
+    (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    (*outChannel)->SetRequestingContext(aRequestingNode);
+    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    return NS_OK;
 }
 
 nsresult

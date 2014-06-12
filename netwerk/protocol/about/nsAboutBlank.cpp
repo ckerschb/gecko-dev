@@ -37,13 +37,31 @@ nsAboutBlank::NewChannel2(nsIURI* aURI,
                           uint32_t aLoadFlags,
                           nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
+    // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
+    // to the input stream channel, so we can't call NewChannel() directly.  Implementing it here inline
+    NS_ENSURE_ARG_POINTER(aURI);
+
+    nsCOMPtr<nsIInputStream> in;
+    nsresult rv = NS_NewCStringInputStream(getter_AddRefs(in), EmptyCString());
+    if (NS_FAILED(rv)) return rv;
+
+    nsCOMPtr<nsIChannel> channel;
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), aURI, in,
+                                   NS_LITERAL_CSTRING("text/html"),
+                                   NS_LITERAL_CSTRING("utf-8"),
+                                   aRequestingPrincipal,
+                                   aRequestingNode,
+                                   aContentPolicyType);
+    if (NS_FAILED(rv)) return rv;
+
+    channel.forget(outChannel);
+
+    (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    (*outChannel)->SetRequestingContext(aRequestingNode);
+    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    return rv;
 }
 
 NS_IMETHODIMP

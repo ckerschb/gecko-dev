@@ -85,9 +85,48 @@ nsViewSourceChannel::InitSrcdoc(nsIURI* aURI, const nsAString &aSrcdoc,
                    NS_LITERAL_STRING("about:srcdoc"));
     NS_ENSURE_SUCCESS(rv, rv);
 
+    // What is the requestingPrincipal of a view-source load?
     rv = NS_NewInputStreamChannel(getter_AddRefs(mChannel), inStreamURI,
                                   aSrcdoc, NS_LITERAL_CSTRING("text/html"),
                                   true);
+
+    NS_ENSURE_SUCCESS(rv, rv);
+    mOriginalURI = aURI;
+    mIsSrcdocChannel = true;
+    nsCOMPtr<nsIInputStreamChannel> isc = do_QueryInterface(mChannel);
+    MOZ_ASSERT(isc);
+    isc->SetBaseURI(aBaseURI);
+
+    mChannel->SetOriginalURI(mOriginalURI);
+    mHttpChannel = do_QueryInterface(mChannel);
+    mHttpChannelInternal = do_QueryInterface(mChannel);
+    mCachingChannel = do_QueryInterface(mChannel);
+    mApplicationCacheChannel = do_QueryInterface(mChannel);
+    mUploadChannel = do_QueryInterface(mChannel);
+    return NS_OK;
+}
+nsresult
+nsViewSourceChannel::InitSrcdoc2(nsIURI* aURI, const nsAString &aSrcdoc,
+                                 nsIURI* aBaseURI,
+                                 nsIPrincipal* aRequestingPrincipal,
+                                 nsINode* aRequestingNode,
+                                 nsContentPolicyType aContentPolicyType)
+{
+
+    nsresult rv;
+
+    nsCOMPtr<nsIURI> inStreamURI;
+    // Need to strip view-source: from the URI.  Hardcoded to
+    // about:srcdoc as this is the only permissible URI for srcdoc 
+    // loads
+    rv = NS_NewURI(getter_AddRefs(inStreamURI),
+                   NS_LITERAL_STRING("about:srcdoc"));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(mChannel), inStreamURI,
+                                   aSrcdoc, NS_LITERAL_CSTRING("text/html"),
+                                   true, aRequestingPrincipal,
+                                   aRequestingNode, aContentPolicyType);
 
     NS_ENSURE_SUCCESS(rv, rv);
     mOriginalURI = aURI;

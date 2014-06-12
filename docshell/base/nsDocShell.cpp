@@ -9862,8 +9862,10 @@ nsDocShell::DoURILoad(nsIURI * aURI,
             nsViewSourceHandler *vsh = nsViewSourceHandler::GetInstance();
             NS_ENSURE_TRUE(vsh,NS_ERROR_FAILURE);
 
-            rv = vsh->NewSrcdocChannel(aURI, aSrcdoc, aBaseURI,
-                                       getter_AddRefs(channel));
+            rv = vsh->NewSrcdocChannel2(aURI, aSrcdoc, aBaseURI,
+                                        getter_AddRefs(channel),
+                                        requestingNode->NodePrincipal(),
+                                        requestingNode, aContentType);
             NS_ENSURE_SUCCESS(rv, rv);
         }
         else {

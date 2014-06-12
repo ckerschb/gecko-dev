@@ -19,6 +19,7 @@
 #include "nsStringStream.h"
 #include "nsStreamUtils.h"
 #include "nsIPrincipal.h"
+#include "nsIContentPolicy.h"
 #include "mozilla/dom/Element.h"
 #include "nsSVGUtils.h"
 #include "nsIScriptSecurityManager.h"
@@ -367,8 +368,13 @@ gfxSVGGlyphsDocument::ParseDocument(const uint8_t *aBuffer, uint32_t aBufLen)
     }
 
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewInputStreamChannel(getter_AddRefs(channel), uri, nullptr /* stream */,
-                                  SVG_CONTENT_TYPE, UTF8_CHARSET);
+    // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+    // needs to be changed to set the correct requesting Principal and/or requestingNode
+    // Also setting to TYPE_IMAGE.  We can ask eflores since hg blame shows he wrote most of this file.
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), uri, nullptr /* stream */,
+                                   SVG_CONTENT_TYPE, UTF8_CHARSET, systemPrincipal,
+                                   nullptr, nsIContentPolicy::TYPE_IMAGE);
     NS_ENSURE_SUCCESS(rv, rv);
 
     channel->SetOwner(principal);

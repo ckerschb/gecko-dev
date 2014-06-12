@@ -24,6 +24,12 @@ public:
     nsresult NewSrcdocChannel(nsIURI* uri, const nsAString &srcdoc,
                               nsIURI* baseURI, nsIChannel** result);
 
+    nsresult NewSrcdocChannel2(nsIURI* uri, const nsAString &srcdoc,
+                               nsIURI* baseURI, nsIChannel** result,
+                               nsIPrincipal* aRequestingPrincipal = nullptr,
+                               nsINode* aRequestingNode = nullptr,
+                               nsContentPolicyType aContentPolicyType = 0); 
+
     static nsViewSourceHandler* GetInstance();
 
 private:

@@ -146,6 +146,32 @@ nsViewSourceHandler::NewSrcdocChannel(nsIURI* uri, const nsAString &srcdoc,
     return NS_OK;
 }
 
+nsresult
+nsViewSourceHandler::NewSrcdocChannel2(nsIURI* uri, const nsAString &srcdoc,
+                                       nsIURI* baseURI, nsIChannel* *result,
+                                       nsIPrincipal* aRequestingPrincipal,
+                                       nsINode* aRequestingNode,
+                                       nsContentPolicyType aContentPolicyType)
+{
+    NS_ENSURE_ARG_POINTER(uri);
+    nsViewSourceChannel *channel = new nsViewSourceChannel();
+    if (!channel)
+        return NS_ERROR_OUT_OF_MEMORY;
+    NS_ADDREF(channel);
+
+    nsresult rv = channel->InitSrcdoc2(uri, srcdoc, baseURI,
+                                       aRequestingPrincipal, 
+                                       aRequestingNode,
+                                       aContentPolicyType); 
+    if (NS_FAILED(rv)) {
+        NS_RELEASE(channel);
+        return rv;
+    }
+
+    *result = static_cast<nsIViewSourceChannel*>(channel);
+    return NS_OK;
+}
+
 NS_IMETHODIMP 
 nsViewSourceHandler::AllowPort(int32_t port, const char *scheme, bool *_retval)
 {

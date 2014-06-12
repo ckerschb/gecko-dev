@@ -16,6 +16,7 @@
 #include "nsICachingChannel.h"
 #include "nsIApplicationCacheChannel.h"
 #include "nsIUploadChannel.h"
+#include "nsINode.h"
 #include "mozilla/Attributes.h"
 
 class nsViewSourceChannel MOZ_FINAL : public nsIViewSourceChannel,
@@ -51,7 +52,12 @@ public:
     nsresult Init(nsIURI* uri);
 
     nsresult InitSrcdoc(nsIURI* aURI, const nsAString &aSrcdoc,
-                                    nsIURI* aBaseURI);
+                        nsIURI* aBaseURI);
+    nsresult InitSrcdoc2(nsIURI* aURI, const nsAString &aSrcdoc,
+                         nsIURI* aBaseURI,
+                         nsIPrincipal* aRequestingPrincipal,
+                         nsINode* aRequestingNode,
+                         nsContentPolicyType aContentPolicyType);
 
 protected:
     nsCOMPtr<nsIChannel>        mChannel;
