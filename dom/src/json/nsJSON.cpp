@@ -411,6 +411,8 @@ nsJSON::DecodeInternal(JSContext* cx,
       return NS_ERROR_OUT_OF_MEMORY;
   }
 
+
+  // TODO - change to NS_NewInputStreamChannel2.  What is the principal?
   nsresult rv =
     NS_NewInputStreamChannel(getter_AddRefs(jsonChannel), mURI, aStream,
                              NS_LITERAL_CSTRING("application/json"));

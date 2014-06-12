@@ -9773,6 +9773,25 @@ nsDocShell::DoURILoad(nsIURI * aURI,
     // open a channel for the url
     nsCOMPtr<nsIChannel> channel;
 
+    /* nsINode
+       Get the corresponding nsINode, so that we can pass it into NS_NewChannel3 and NS_NewInputStreamChannel.
+       mScriptGlobal is an nsGlobalWindow.  To get a node from it, QI to nsPIDOMWindow, then get the inner window, then call GetExtantDoc and get the node.
+       mscriptglobal->getframelemeentinternal is an Element.  We can get the owner doc and then get the node from it.
+       In the case that we have a requestingElement, we are in an iframe.  Note that here we will get the outer window, even though we have agreed we want the inner window.
+       For compataiblity, I'm not going to change this right now, since we currently use the outer window.
+    */
+    nsCOMPtr<nsINode> requestingNode;
+    if (mScriptGlobal) {
+      requestingNode =  mScriptGlobal->GetFrameElementInternal();
+      if (!requestingNode) {
+        nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
+        if (win) {
+          requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
+        }
+      }
+    }
+    NS_ASSERTION(requestingNode, "Can not create channel without a node");
+
     bool isSrcdoc = !aSrcdoc.IsVoid();
     if (!isSrcdoc) {
 
@@ -9790,17 +9809,6 @@ nsDocShell::DoURILoad(nsIURI * aURI,
           requestingContext = ToSupports(mScriptGlobal);
         }
 
-
-        // Get the requestingPrincipal in the same way we get it in InternalLoad to pass into content policy
-        // TANVI - Is this going to be the same principal that is associated with the context?
-        // Ex: for loads initiated by css, the principal from the requestingContext and the requestingPrincipal are not the same.
-        // But since this is nsDocShell and the content type is TYPE_DOCUMENT or TYPE_SUBDOCUMENT, perhaps they will yield the same result here.
-        // This is somethign we will have to reserach and followup on.  For now, get it the same way we got it in InternalLoad
-        //
-        // Also note, the owner passed into DoURILoad() could be different from the owner that InternalLoad used to calculate
-        // the principal.  Here we take into account whether we should inherit the principal before we call the content policies
-        // instead of after we call them.  Is that okay?  Something else to research and followup on
-        
         // XXXbz would be nice to know the loading principal here... but we don't
         nsCOMPtr<nsIPrincipal> loadingPrincipal = do_QueryInterface(aOwner);
         if (!loadingPrincipal && aReferrerURI) {
@@ -9812,26 +9820,6 @@ nsDocShell::DoURILoad(nsIURI * aURI,
                                                   getter_AddRefs(loadingPrincipal));
         }
 
-
-        /* nsINode
-           Get the corresponding nsINode
-           Instead of passing the Principal and the Context to NS_NewChannel2, lets see if we can pass an nsINode
-           mScriptGlobal is an nsGlobalWindow.  To get a node from it, QI to nsPIDOMWindow, then get the inner window, then call GetExtantDoc and get the node.
-           mscriptglobal->getframelemeentinternal is an Element.  We can get the owner doc and then get the node from it.
-           In the case that we have a requestingElement, we are in an iframe.  Note that here we will get the outer window, even though we have agreed we want the inner window.
-           For compataiblity, I'm not going to change this right now, since we currently use the outer window.
-        */
-        nsCOMPtr<nsINode> requestingNode;
-        if (mScriptGlobal) {
-          requestingNode =  mScriptGlobal->GetFrameElementInternal();
-          if (!requestingNode) {
-            nsCOMPtr<nsPIDOMWindow> win = do_QueryObject(mScriptGlobal);
-            if (win) {
-              requestingNode = win->GetCurrentInnerWindow()->GetExtantDoc();
-            }
-          }
-        }
-        NS_ASSERTION(requestingNode, "Can not create channel without a node");
         rv = NS_NewChannel3(getter_AddRefs(channel),
                             aURI,
                             nullptr,
@@ -9879,10 +9867,11 @@ nsDocShell::DoURILoad(nsIURI * aURI,
             NS_ENSURE_SUCCESS(rv, rv);
         }
         else {
-            rv = NS_NewInputStreamChannel(getter_AddRefs(channel),aURI,
+            rv = NS_NewInputStreamChannel2(getter_AddRefs(channel),aURI,
                                           aSrcdoc,
                                           NS_LITERAL_CSTRING("text/html"),
-                                          true);
+                                          true, requestingNode->NodePrincipal(),
+                                          requestingNode, aContentType);
             NS_ENSURE_SUCCESS(rv, rv);
             nsCOMPtr<nsIInputStreamChannel> isc = do_QueryInterface(channel);
             MOZ_ASSERT(isc);

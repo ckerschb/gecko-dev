@@ -391,7 +391,10 @@ public:
     NS_FORWARD_SAFE_NSIPROPERTYBAG(mPropertyBag)
     NS_FORWARD_SAFE_NSIPROPERTYBAG2(mPropertyBag)
 
-    nsresult Init(nsIURI *aURI);
+    nsresult Init(nsIURI *aURI,
+                  nsIPrincipal* aRequestingPrincipal,
+                  nsINode* aRequestingNode,
+                  nsContentPolicyType aContentPolicyType);
 
     // Actually evaluate the script.
     void EvaluateScript();
@@ -461,7 +464,10 @@ nsresult nsJSChannel::StopAll()
     return rv;
 }
 
-nsresult nsJSChannel::Init(nsIURI *aURI)
+nsresult nsJSChannel::Init(nsIURI *aURI,
+                           nsIPrincipal* aRequestingPrincipal,
+                           nsINode* aRequestingNode,
+                           nsContentPolicyType aContentPolicyType)
 {
     nsRefPtr<nsJSURI> jsURI;
     nsresult rv = aURI->QueryInterface(kJSURICID,
@@ -480,8 +486,12 @@ nsresult nsJSChannel::Init(nsIURI *aURI)
 
     // If the resultant script evaluation actually does return a value, we
     // treat it as html.
-    rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, mIOThunk,
-                                  NS_LITERAL_CSTRING("text/html"));
+    // Use NS_NewInputStreamChannel2.
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), aURI, mIOThunk,
+                                   NS_LITERAL_CSTRING("text/html"),
+                                   aRequestingPrincipal,
+                                   aRequestingNode,
+                                   aContentPolicyType);  //perhaps we could do a check to make sure this is TYPE_SCRIPT
     if (NS_FAILED(rv)) return rv;
 
     rv = mIOThunk->Init(aURI);
@@ -1291,6 +1301,8 @@ nsJSProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsJSProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
+    NS_WARNING("Deprecated, you should use nsJSProtocolHander::NewChannel2");
+
     nsresult rv;
     nsJSChannel * channel;
 
@@ -1302,7 +1314,9 @@ nsJSProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
     }
     NS_ADDREF(channel);
 
-    rv = channel->Init(uri);
+    // Init now takes 4 arguments.  Just putting nulls and 0s here because we don't have
+    // the loading info.
+    rv = channel->Init(uri, nullptr, nullptr, 0);
     if (NS_SUCCEEDED(rv)) {
         *result = channel;
         NS_ADDREF(*result);
@@ -1321,12 +1335,33 @@ nsJSProtocolHandler::NewChannel2(nsIURI* aURI,
                                  nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
+
+  // Below is the NewChannel() code.  We need the load info from the JSChannel to pass
+  // it into the input stream channel, so that we can set it on that too.
+  // BZ says that we are the only callers of JSChannel::Init()
+
+  nsresult rv;
+  nsJSChannel * channel;
+
+  NS_ENSURE_ARG_POINTER(aURI);
+
+  channel = new nsJSChannel();
+  if (!channel) {
+      return NS_ERROR_OUT_OF_MEMORY;
+  }
+  NS_ADDREF(channel);
+
+  rv = channel->Init(aURI, aRequestingPrincipal, aRequestingNode, aContentPolicyType);
+  if (NS_SUCCEEDED(rv)) {
+      *outChannel = channel;
+      NS_ADDREF(*outChannel);
+  }
+  NS_RELEASE(channel);
+
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
   (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+  return rv;
 }
 
 NS_IMETHODIMP 

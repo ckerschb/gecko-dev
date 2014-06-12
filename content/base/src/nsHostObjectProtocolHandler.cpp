@@ -450,6 +450,7 @@ nsHostObjectProtocolHandler::NewURI(const nsACString& aSpec,
 NS_IMETHODIMP
 nsHostObjectProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
+  NS_WARNING("Deprecated, you should use nsHostObjectProtocolHandler::NewChannel2");
   *result = nullptr;
 
   nsCString spec;
@@ -522,8 +523,72 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
                                          nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
+
+  // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
+  // to the input stream channel, so we can't call NewChannel() directly.  Implementing it here inline
+  *outChannel = nullptr;
+
+  nsCString spec;
+  aURI->GetSpec(spec);
+
+  DataInfo* info = GetDataInfo(spec);
+
+  if (!info) {
+    return NS_ERROR_DOM_BAD_URI;
+  }
+  nsCOMPtr<nsIDOMBlob> blob = do_QueryInterface(info->mObject);
+  if (!blob) {
+    return NS_ERROR_DOM_BAD_URI;
+  }
+
+#ifdef DEBUG
+  {
+    nsCOMPtr<nsIURIWithPrincipal> uriPrinc = do_QueryInterface(aURI);
+    nsCOMPtr<nsIPrincipal> principal;
+    uriPrinc->GetPrincipal(getter_AddRefs(principal));
+    NS_ASSERTION(info->mPrincipal == principal, "Wrong principal!");
+  }
+#endif
+
+  nsCOMPtr<nsIInputStream> stream;
+  nsresult rv = blob->GetInternalStream(getter_AddRefs(stream));
   NS_ENSURE_SUCCESS(rv, rv);
+
+  nsCOMPtr<nsIChannel> channel;
+  rv = NS_NewInputStreamChannel2(getter_AddRefs(channel),
+                                 aURI,
+                                 stream,
+                                 EmptyCString(),
+                                 aRequestingPrincipal,
+                                 aRequestingNode,
+                                 aContentPolicyType);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  nsCOMPtr<nsISupports> owner = do_QueryInterface(info->mPrincipal);
+
+  nsString type;
+  rv = blob->GetType(type);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  nsCOMPtr<nsIDOMFile> file = do_QueryInterface(info->mObject);
+  if (file) {
+    nsString filename;
+    rv = file->GetName(filename);
+    NS_ENSURE_SUCCESS(rv, rv);
+    channel->SetContentDispositionFilename(filename);
+  }
+
+  uint64_t size;
+  rv = blob->GetSize(&size);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  channel->SetOwner(owner);
+  channel->SetOriginalURI(aURI);
+  channel->SetContentType(NS_ConvertUTF16toUTF8(type));
+  channel->SetContentLength(size);
+
+  channel.forget(outChannel);
+
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
   (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
