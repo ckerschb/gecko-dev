@@ -46,6 +46,13 @@ protected:
   nsresult NewFaviconChannel(nsIURI *aURI,
                              nsIURI *aAnnotationURI,
                              nsIChannel **_channel);
+
+  nsresult NewFaviconChannel2(nsIURI *aURI,
+                              nsIURI *aAnnotationURI,
+                              nsIChannel **_channel,
+                              nsIPrincipal *aRequestingPrincipal,
+                              nsINode *aRequestingNode,
+                              nsContentPolicyType aContentPolicyType);
 };
 
 #endif /* nsAnnoProtocolHandler_h___ */

@@ -1045,6 +1045,9 @@ nsGIOProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsGIOProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
 {
+  // TODO, the following warning should turn into into an ASSERTION at some point
+  NS_WARNING("Deprecated, you should use nsGIOProtocolHandler::NewChannel2");
+
   NS_ENSURE_ARG_POINTER(aURI);
   nsresult rv;
 
@@ -1082,11 +1085,48 @@ nsGIOProtocolHandler::NewChannel2(nsIURI* aURI,
                                   nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
+
+  // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
+  // to the input stream channel, so we can't call NewChannel() directly.  Implementing it here inline.
+  NS_ENSURE_ARG_POINTER(aURI);
+  nsresult rv;
+
+  nsAutoCString spec;
+  rv = aURI->GetSpec(spec);
+  if (NS_FAILED(rv))
+    return rv;
+
+  nsRefPtr<nsGIOInputStream> stream = new nsGIOInputStream(spec);
+  if (!stream)
+  {
+    rv = NS_ERROR_OUT_OF_MEMORY;
+  }
+  else
+  {
+    // start out assuming an unknown content-type.  we'll set the content-type
+    // to something better once we open the URI.
+    rv = NS_NewInputStreamChannel2(outChannel,
+                                   aURI,
+                                   stream,
+                                   NS_LITERAL_CSTRING(UNKNOWN_CONTENT_TYPE),
+                                   aRequestingPrincipal,
+                                   aRequestingNode,
+                                   aContentPolicyType);
+    if (NS_SUCCEEDED(rv))
+      stream->SetChannel(*outChannel);
+  }
+
   NS_ENSURE_SUCCESS(rv, rv);
+
+  // In this case, we only have one channel - outChannel.  NS_NewInputStreamChannel2() will set
+  // the loading info on the channel, so we don't have to here.
+  // Alternatively, we could set the load info here and call NewChannel() directly (instead of implementing it 
+  // inline in NewChannel2()) which calls NS_NewInputStreamChannel() instead of calling NS_NewInputStreamChannel2()
+  /*
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
   (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  */
   return NS_OK;
 }
 

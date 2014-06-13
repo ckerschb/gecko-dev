@@ -272,6 +272,9 @@ nsAnnoProtocolHandler::NewURI(const nsACString& aSpec,
 NS_IMETHODIMP
 nsAnnoProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **_retval)
 {
+
+  // TODO, the following warning should turn into into an ASSERTION at some point
+  NS_WARNING("Deprecated, you should use nsAnnoProtocolHandler::NewChannel2");
   NS_ENSURE_ARG_POINTER(aURI);
 
   // annotation info
@@ -297,8 +300,28 @@ nsAnnoProtocolHandler::NewChannel2(nsIURI* aURI,
                                    nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
+
+  // NewChannel() calls NewFaviconChannel() which calls NS_NewInputStreamChannel().
+  // We need to pass the load info to the input stream channel, so we can't call 
+  // NewChannel() directly here.  We also need to pass the info to NewFaviconChannel.
+
+  NS_ENSURE_ARG_POINTER(aURI);
+
+  // annotation info
+  nsCOMPtr<nsIURI> annoURI;
+  nsAutoCString annoName;
+  nsresult rv = ParseAnnoURI(aURI, getter_AddRefs(annoURI), annoName);
   NS_ENSURE_SUCCESS(rv, rv);
+
+  // Only favicon annotation are supported.
+  if (!annoName.EqualsLiteral(FAVICON_ANNOTATION_NAME))
+    return NS_ERROR_INVALID_ARG;
+
+  rv = NewFaviconChannel2(aURI, annoURI, outChannel, aRequestingPrincipal,
+                          aRequestingNode, aContentPolicyType);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
   (*outChannel)->SetRequestingContext(aRequestingNode);
   (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
@@ -361,6 +384,45 @@ nsAnnoProtocolHandler::NewFaviconChannel(nsIURI *aURI, nsIURI *aAnnotationURI,
   nsCOMPtr<nsIChannel> channel;
   rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, inputStream,
                                 EmptyCString());
+  NS_ENSURE_SUCCESS(rv, GetDefaultIcon(_channel));
+
+  // Now we go ahead and get our data asynchronously for the favicon.
+  nsCOMPtr<mozIStorageStatementCallback> callback =
+    new faviconAsyncLoader(channel, outputStream);
+  NS_ENSURE_TRUE(callback, GetDefaultIcon(_channel));
+  nsFaviconService* faviconService = nsFaviconService::GetFaviconService();
+  NS_ENSURE_TRUE(faviconService, GetDefaultIcon(_channel));
+
+  rv = faviconService->GetFaviconDataAsync(aAnnotationURI, callback);
+  NS_ENSURE_SUCCESS(rv, GetDefaultIcon(_channel));
+
+  channel.forget(_channel);
+  return NS_OK;
+}
+
+nsresult
+nsAnnoProtocolHandler::NewFaviconChannel2(nsIURI *aURI, nsIURI *aAnnotationURI,
+                                          nsIChannel **_channel,
+                                          nsIPrincipal *aRequestingPrincipal,
+                                          nsINode *aRequestingNode,
+                                          nsContentPolicyType aContentPolicyType)
+{
+  // Create our pipe.  This will give us our input stream and output stream
+  // that will be written to when we get data from the database.
+  nsCOMPtr<nsIInputStream> inputStream;
+  nsCOMPtr<nsIOutputStream> outputStream;
+  nsresult rv = NS_NewPipe(getter_AddRefs(inputStream),
+                           getter_AddRefs(outputStream),
+                           MAX_FAVICON_SIZE, MAX_FAVICON_SIZE, true,
+                           true);
+  NS_ENSURE_SUCCESS(rv, GetDefaultIcon(_channel));
+
+  // Create our channel.  We'll call SetContentType with the right type when
+  // we know what it actually is.
+  nsCOMPtr<nsIChannel> channel;
+  rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), aURI, inputStream,
+                                 EmptyCString(), aRequestingPrincipal,
+                                 aRequestingNode, aContentPolicyType);
   NS_ENSURE_SUCCESS(rv, GetDefaultIcon(_channel));
 
   // Now we go ahead and get our data asynchronously for the favicon.
