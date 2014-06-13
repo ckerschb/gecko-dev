@@ -7,6 +7,7 @@
 #include "nsRDFXMLParser.h"
 
 #include "nsIComponentManager.h"
+#include "nsIContentPolicy.h"
 #include "nsIParser.h"
 #include "nsCharsetSource.h"
 #include "nsIRDFContentSink.h"
@@ -115,8 +116,14 @@ nsRDFXMLParser::ParseString(nsIRDFDataSource* aSink, nsIURI* aBaseURI, const nsA
     if (NS_FAILED(rv)) return rv;
 
     nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aBaseURI, stream,
-                                  NS_LITERAL_CSTRING("text/xml"));
+
+    // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+    // needs to be changed to set the correct requesting Principal and/or requestingNode
+    // Also setting to TYPE_OTHER for now.
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), aBaseURI, stream,
+                                   NS_LITERAL_CSTRING("text/xml"),
+                                   systemPrincipal, nullptr, nsIContentPolicy::TYPE_OTHER);
     if (NS_FAILED(rv)) return rv;
 
     listener->OnStartRequest(channel, nullptr);

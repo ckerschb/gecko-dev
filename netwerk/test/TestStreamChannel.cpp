@@ -12,6 +12,7 @@
 #include "nsIRequest.h"
 #include "nsIServiceManager.h"
 #include "nsIComponentManager.h"
+#include "nsIContentPolicy.h"
 #include "nsCOMPtr.h"
 #include "nsMemory.h"
 #include "nsStringAPI.h"
@@ -148,13 +149,19 @@ RunTest(nsIFile *file)
         uri->SetSpec(NS_LITERAL_CSTRING("foo://bar"));
 
     nsCOMPtr<nsIChannel> chan;
-    rv = NS_NewInputStreamChannel(getter_AddRefs(chan), uri, stream);
+
+    // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+    // needs to be changed to set the correct requesting Principal and/or requestingNode
+    // Also setting to TYPE_OTHER - what is the right type? 
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = NS_NewInputStreamChannel2(getter_AddRefs(chan), uri, stream, EmptyCString(),
+                                   systemPrincipal, nullptr, nsIContentType::TYPE_OTHER);
     if (NS_FAILED(rv)) return rv;
 
     rv = chan->SetNotificationCallbacks(new MyCallbacks());
     if (NS_FAILED(rv)) return rv;
 
-    rv = chan->AsyncOpen(new MyListener(), nullptr);
+    rv = chan->AsyncOpen2(new MyListener(), nullptr);
     if (NS_FAILED(rv)) return rv;
 
     PumpEvents();

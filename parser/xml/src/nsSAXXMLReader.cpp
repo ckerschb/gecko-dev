@@ -15,6 +15,7 @@
 #include "nsSAXLocator.h"
 #include "nsSAXXMLReader.h"
 #include "nsCharsetSource.h"
+#include "nsIContentPolicy.h"
 
 #include "mozilla/dom/EncodingUtils.h"
 
@@ -496,8 +497,15 @@ nsSAXXMLReader::ParseFromStream(nsIInputStream *aStream,
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIChannel> parserChannel;
-  rv = NS_NewInputStreamChannel(getter_AddRefs(parserChannel), mBaseURI,
-                                aStream, nsDependentCString(aContentType));
+
+  // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+  // needs to be changed to set the correct requesting Principal and/or requestingNode
+  // Also setting to TYPE_OTHER for now.
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
+  rv = NS_NewInputStreamChannel2(getter_AddRefs(parserChannel), mBaseURI,
+                                 aStream, nsDependentCString(aContentType),
+                                 systemPrincipal, nullptr, nsIContentPolicy::TYPE_OTHER);
   if (!parserChannel || NS_FAILED(rv))
     return NS_ERROR_FAILURE;
 

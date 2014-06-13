@@ -7,6 +7,7 @@
 #include "nsIStreamConverterService.h"
 #include "nsIStreamConverter.h"
 #include "nsICategoryManager.h"
+#include "nsIContentPolicy.h"
 #include "mozilla/Module.h"
 #include "nsXULAppAPI.h"
 #include "nsIStringStream.h"
@@ -194,11 +195,18 @@ main(int argc, char* argv[])
         rv = NS_NewURI(getter_AddRefs(dummyURI), "http://meaningless");
         if (NS_FAILED(rv)) return -1;
 
-        rv = NS_NewInputStreamChannel(getter_AddRefs(channel),
-                                      dummyURI,
-                                      nullptr,   // inStr
-                                      "text/plain", // content-type
-                                      -1);      // XXX fix contentLength
+        // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+        // needs to be changed to set the correct requesting Principal and/or requestingNode
+        // Also setting to TYPE_OTHER - what is the right type? 
+        nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+        rv = NS_NewInputStreamChannel2(getter_AddRefs(channel),
+                                       dummyURI,
+                                       nullptr,   // inStr
+                                       "text/plain", // content-type
+                                       -1,      // XXX fix contentLength
+                                       systemPrincipal,
+                                       nullptr,
+                                       nsIContentType::TYPE_OTHER);
         if (NS_FAILED(rv)) return -1;
 
         nsCOMPtr<nsIRequest> request(do_QueryInterface(channel));
