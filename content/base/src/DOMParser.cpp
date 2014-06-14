@@ -237,8 +237,16 @@ DOMParser::ParseFromStream(nsIInputStream *stream,
 
   // Create a fake channel 
   nsCOMPtr<nsIChannel> parserChannel;
-  NS_NewInputStreamChannel(getter_AddRefs(parserChannel), mDocumentURI, nullptr,
-                           nsDependentCString(contentType), nullptr);
+
+  // Using systemPrincipal and TYPE_OTHER for now
+  // Looking at some comments in this file, we may be able to use
+  // mOwner, mOriginalPrincipal, mScriptHandlingObject, domDocument, etc
+  // Needs more investigation.  On the other hand, maybe the security checks
+  // done on the original channel that retrieved this stream is enough.
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+  NS_NewInputStreamChannel2(getter_AddRefs(parserChannel), mDocumentURI, nullptr,
+                            nsDependentCString(contentType), nullptr,
+                            systemPrincipal, nullptr, nsIContentPolicy::TYPE_OTHER);
   NS_ENSURE_STATE(parserChannel);
 
   // More principal-faking here 

@@ -412,10 +412,16 @@ nsJSON::DecodeInternal(JSContext* cx,
   }
 
 
-  // TODO - change to NS_NewInputStreamChannel2.  What is the principal?
+  // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+  // needs to be changed to set the correct requesting Principal and/or requestingNode
+  // Also setting to TYPE_OTHER for now.
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
   nsresult rv =
-    NS_NewInputStreamChannel(getter_AddRefs(jsonChannel), mURI, aStream,
-                             NS_LITERAL_CSTRING("application/json"));
+    NS_NewInputStreamChannel2(getter_AddRefs(jsonChannel), mURI, aStream,
+                              NS_LITERAL_CSTRING("application/json"),
+                              systemPrincipal,
+                              nullptr,
+                              nsIContentPolicy::TYPE_OTHER);
   if (!jsonChannel || NS_FAILED(rv))
     return NS_ERROR_FAILURE;
 

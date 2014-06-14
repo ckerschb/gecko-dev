@@ -370,11 +370,13 @@ gfxSVGGlyphsDocument::ParseDocument(const uint8_t *aBuffer, uint32_t aBufLen)
     nsCOMPtr<nsIChannel> channel;
     // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
     // needs to be changed to set the correct requesting Principal and/or requestingNode
-    // Also setting to TYPE_IMAGE.  We can ask eflores since hg blame shows he wrote most of this file.
+    // Also setting to TYPE_FONT for now.  Spoke to eflores and roc, who gave some hints.
+    // gfxUserFontSet::LoadFont would need to get this data from gfxProxyFontEntry::nsFontFaceLoader
+    // and set it on gfxUserFontData?
     nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
     rv = NS_NewInputStreamChannel2(getter_AddRefs(channel), uri, nullptr /* stream */,
                                    SVG_CONTENT_TYPE, UTF8_CHARSET, systemPrincipal,
-                                   nullptr, nsIContentPolicy::TYPE_IMAGE);
+                                   nullptr, nsIContentPolicy::TYPE_FONT);
     NS_ENSURE_SUCCESS(rv, rv);
 
     channel->SetOwner(principal);

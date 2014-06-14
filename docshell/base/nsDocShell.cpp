@@ -1644,9 +1644,19 @@ nsDocShell::LoadStream(nsIInputStream *aStream, nsIURI * aURI,
 
     // build up a channel for this stream.
     nsCOMPtr<nsIChannel> channel;
-    NS_ENSURE_SUCCESS(NS_NewInputStreamChannel
+
+    // LoadStream() is called from OpenStream(), who has many callers
+    // in order to know the principal and content policy type, all callers
+    // would have to pass this into OpenStream and then LoadStream.
+    // TODO - We are using the wrong principal!!! Setting to systemPrincipal for now but this
+    // needs to be changed to set the correct requesting Principal and/or requestingNode
+    // Also setting to TYPE_OTHER for now.
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
+    NS_ENSURE_SUCCESS(NS_NewInputStreamChannel2
                       (getter_AddRefs(channel), uri, aStream,
-                       aContentType, aContentCharset),
+                       aContentType, aContentCharset,
+                       systemPrincipal, nullptr, nsIContentPolicy::TYPE_OTHER),
                       NS_ERROR_FAILURE);
 
     nsCOMPtr<nsIURILoader>

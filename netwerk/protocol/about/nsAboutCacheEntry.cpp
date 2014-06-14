@@ -129,9 +129,15 @@ nsAboutCacheEntry::NewChannel2(nsIURI* aURI,
 
     if (NS_FAILED(rv)) return rv;
 
+    // In this case, we only have one channel - outChannel.  NS_NewInputStreamChannel2() will set
+    // the loading info on the channel, so we don't have to here.
+    // Alternatively, we could set the load info here and call NewChannel() directly (instead of implementing it 
+    // inline in NewChannel2()) which calls NS_NewInputStreamChannel() instead of calling NS_NewInputStreamChannel2()
+    /*
     (*outChannel)->SetContentPolicyType(aContentPolicyType);
     (*outChannel)->SetRequestingContext(aRequestingNode);
     (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    */
     return NS_OK;
 }
 
