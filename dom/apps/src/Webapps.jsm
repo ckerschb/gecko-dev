@@ -2855,10 +2855,20 @@ this.DOMApplicationRegistry = {
     let requestChannel;
 
     if (aIsLocalFileInstall) {
-      requestChannel = NetUtil.newChannel(aFullPackagePath)
+      requestChannel = NetUtil.newChannel2(aFullPackagePath,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,      // requestingNode
+                                           0,         // securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0)
                               .QueryInterface(Ci.nsIFileChannel);
     } else {
-      requestChannel = NetUtil.newChannel(aFullPackagePath)
+      requestChannel = NetUtil.newChannel2(aFullPackagePath,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,      // requestingNode
+                                           0,         // securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0)
                               .QueryInterface(Ci.nsIHttpChannel);
       requestChannel.loadFlags |= Ci.nsIRequest.INHIBIT_CACHING;
     }

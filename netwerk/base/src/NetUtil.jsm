@@ -135,7 +135,12 @@ this.NetUtil = {
 
         let channel = aSource;
         if (!(channel instanceof Ci.nsIChannel)) {
-            channel = this.newChannel(aSource);
+            channel = this.newChannel2(aSource,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null,      // requestingNode
+                                       0,         // securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0);        // loadFlags
         }
 
         try {

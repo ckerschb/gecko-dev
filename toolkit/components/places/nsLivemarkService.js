@@ -658,7 +658,12 @@ Livemark.prototype = {
       // cancel the channel.
       let loadgroup = Cc["@mozilla.org/network/load-group;1"].
                       createInstance(Ci.nsILoadGroup);
-      let channel = NetUtil.newChannel(this.feedURI.spec).
+      let channel = NetUtil.newChannel2(this.feedURI.spec,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0).
                     QueryInterface(Ci.nsIHttpChannel);
       channel.loadGroup = loadgroup;
       channel.loadFlags |= Ci.nsIRequest.LOAD_BACKGROUND |

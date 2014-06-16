@@ -146,7 +146,12 @@ AsyncResource.prototype = {
   // to obtain a request channel.
   //
   _createRequest: function Res__createRequest(method) {
-    let channel = Services.io.newChannel(this.spec, null, null)
+    let channel = Services.io.newChannel2(this.spec, null, null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,   //requestingNode
+                                          0,      //securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0)      //loadFlags
                           .QueryInterface(Ci.nsIRequest)
                           .QueryInterface(Ci.nsIHttpChannel);
 
