@@ -54,7 +54,17 @@ nsViewSourceChannel::Init(nsIURI* uri)
       return NS_ERROR_INVALID_ARG;
     }
 
-    rv = pService->NewChannel(path, nullptr, nullptr, getter_AddRefs(mChannel));
+    // TODO - verify that we can pass in systemPrincipal
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = pService->NewChannel2(path,
+                               nullptr, 
+                               nullptr,  //base uri
+                               systemPrincipal,
+                               nullptr, //requestingNode
+                               0,       //security flags
+                               nsIContentPolicy::TYPE_OTHER,
+                               0,       //load flags 
+                               getter_AddRefs(mChannel));
     if (NS_FAILED(rv))
       return rv;
 
