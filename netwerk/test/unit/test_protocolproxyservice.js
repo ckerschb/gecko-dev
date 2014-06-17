@@ -668,7 +668,14 @@ function failed_script_callback(pi)
   obs = obs.QueryInterface(Components.interfaces.nsIObserverService);
   obs.addObserver(directFilterListener, "http-on-modify-request", false);
 
-  var chan = ios.newChannel("http://127.0.0.1:7247", "", null);
+  var chan = ios.newChannel2("http://127.0.0.1:7247",
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   chan.asyncOpen(directFilterListener, chan);
 }
 

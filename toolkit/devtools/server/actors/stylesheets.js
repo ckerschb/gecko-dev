@@ -1193,12 +1193,26 @@ function fetch(aURL, aOptions={ loadFromCache: true, window: null,
     default:
       let channel;
       try {
-        channel = Services.io.newChannel(url, null, null);
+        channel = Services.io.newChannel2(url,
+                                          null,
+                                          null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,      // requestingNode
+                                          0,         // securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);        // loadFlags
       } catch (e if e.name == "NS_ERROR_UNKNOWN_PROTOCOL") {
         // On Windows xpcshell tests, c:/foo/bar can pass as a valid URL, but
         // newChannel won't be able to handle it.
         url = "file:///" + url;
-        channel = Services.io.newChannel(url, null, null);
+        channel = Services.io.newChannel2(url,
+                                          null,
+                                          null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,      // requestingNode
+                                          0,         // securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);        // loadFlags
       }
       let chunks = [];
       let streamListener = {

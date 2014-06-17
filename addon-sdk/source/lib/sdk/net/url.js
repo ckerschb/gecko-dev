@@ -33,7 +33,12 @@ function readURI(uri, options) {
   options = options || {};
   let charset = options.charset || 'UTF-8';
 
-  let channel = NetUtil.newChannel(uri, charset, null);
+  let channel = NetUtil.newChannel2(uri,
+                                    Services.scriptSecurityManager.getSystemPrincipal(),
+                                    null,      // requestingNode
+                                    0,         // securityFlags
+                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                    0);        // loadFlags
 
   let { promise, resolve, reject } = defer();
 
@@ -74,7 +79,12 @@ exports.readURI = readURI;
 function readURISync(uri, charset) {
   charset = typeof charset === "string" ? charset : "UTF-8";
 
-  let channel = NetUtil.newChannel(uri, charset, null);
+  let channel = NetUtil.newChannel2(uri,
+                                    Services.scriptSecurityManager.getSystemPrincipal(),
+                                    null,      // requestingNode
+                                    0,         // securityFlags
+                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                    0);        // loadFlags
   let stream = channel.open();
 
   let count = stream.available();

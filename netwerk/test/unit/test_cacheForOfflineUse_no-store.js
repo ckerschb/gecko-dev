@@ -21,7 +21,14 @@ var appCache = null;
 function make_channel_for_offline_use(url, callback, ctx) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
-  var chan = ios.newChannel(url, "", null);
+  var chan = ios.newChannel2(url,
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   
   var cacheService = Components.classes["@mozilla.org/network/application-cache-service;1"].
                      getService(Components.interfaces.nsIApplicationCacheService);

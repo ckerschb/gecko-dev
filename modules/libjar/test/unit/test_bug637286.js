@@ -11,7 +11,14 @@ var ios = Cc["@mozilla.org/network/io-service;1"].
 
 function open_inner_zip(base, idx) {
     var spec = "jar:" + base + "inner" + idx + ".zip!/foo";
-    var channel = ios.newChannel(spec, null, null);
+    var channel = ios.newChannel2(spec,
+                                  null,
+                                  null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,      // requestingNode
+                                  0,         // securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0);        // loadFlags
     var stream = channel.open();
 }
 

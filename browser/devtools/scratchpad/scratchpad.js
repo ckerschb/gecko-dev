@@ -1073,7 +1073,12 @@ var Scratchpad = {
   importFromFile: function SP_importFromFile(aFile, aSilentError, aCallback)
   {
     // Prevent file type detection.
-    let channel = NetUtil.newChannel(aFile);
+    let channel = NetUtil.newChannel2(aFile,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
     channel.contentType = "application/javascript";
 
     NetUtil.asyncFetch(channel, (aInputStream, aStatus) => {

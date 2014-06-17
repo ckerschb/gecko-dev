@@ -328,7 +328,14 @@
        return newURI.spec;
      },
      getFile: function getFile(path) {
-       var channel = ios.newChannel(path, null, null);
+       var channel = ios.newChannel2(path,
+                                     null,
+                                     null,
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     null,      // requestingNode
+                                     0,         // securityFlags
+                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     0);        // loadFlags
        var iStream = channel.open();
        var ciStream = Cc["@mozilla.org/intl/converter-input-stream;1"].
                       createInstance(Ci.nsIConverterInputStream);

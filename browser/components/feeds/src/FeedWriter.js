@@ -1121,7 +1121,14 @@ FeedWriter.prototype = {
 
     var resolvedURI = Cc["@mozilla.org/network/io-service;1"].
                       getService(Ci.nsIIOService).
-                      newChannel("about:feeds", null, null).URI;
+                      newChannel2("about:feeds",
+                                  null,
+                                  null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,      // requestingNode
+                                  0,         // securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0).URI;    // loadFlags
 
     if (resolvedURI.equals(chan.URI))
       return chan.originalURI;

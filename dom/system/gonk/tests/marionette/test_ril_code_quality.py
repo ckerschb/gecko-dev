@@ -113,7 +113,14 @@ class ResourceUriFileReader:
     var Ci = SpecialPowers.Ci;
     var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
     global.uri = '%(uri)s';
-    global.channel = ios.newChannel(global.uri, null, null);
+    global.channel = ios.newChannel2(global.uri,
+                                     null,
+                                     null,
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     null,      // requestingNode
+                                     0,         // securityFlags
+                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     0);        // loadFlags
     '''
 
     CODE_GET_SPEC = '''

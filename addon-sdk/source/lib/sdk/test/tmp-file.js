@@ -33,7 +33,14 @@ unload.when(function () {
 // `uri` and returns content string. Read in binary mode.
 function readBinaryURI(uri) {
   let ioservice = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  let channel = ioservice.newChannel(uri, "UTF-8", null);
+  let channel = ioservice.newChannel2(uri,
+                                      "UTF-8",
+                                      null,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
   let stream = Cc["@mozilla.org/binaryinputstream;1"].
                createInstance(Ci.nsIBinaryInputStream);
   stream.setInputStream(channel.open());

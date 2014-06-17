@@ -79,7 +79,14 @@ function test_accepted_languages() {
 
 function setupChannel(path) {
   let ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  let chan = ios.newChannel("http://localhost:4444" + path, "", null);
+  let chan = ios.newChannel2("http://localhost:4444" + path,
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   chan.QueryInterface(Ci.nsIHttpChannel);
   return chan;
 }

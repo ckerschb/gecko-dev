@@ -36,7 +36,14 @@ var port = null; // set in run_test
 function make_channel(url, callback, ctx) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
-  var chan = ios.newChannel(url, "", null);
+  var chan = ios.newChannel2(url,
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   return chan.QueryInterface(Ci.nsIHttpChannel);
 }
 

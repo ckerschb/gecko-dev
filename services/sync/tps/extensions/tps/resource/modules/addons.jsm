@@ -20,7 +20,14 @@ const STATE_ENABLED = 1;
 const STATE_DISABLED = 2;
 
 function GetFileAsText(file) {
-  let channel = Services.io.newChannel(file, null, null);
+  let channel = Services.io.newChannel2(file,
+                                        null,
+                                        null,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
   let inputStream = channel.open();
   if (channel instanceof Ci.nsIHttpChannel &&
       channel.responseStatus != 200) {

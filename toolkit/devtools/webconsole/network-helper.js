@@ -272,7 +272,12 @@ let NetworkHelper = {
    */
   loadFromCache: function NH_loadFromCache(aUrl, aCharset, aCallback)
   {
-    let channel = NetUtil.newChannel(aUrl);
+    let channel = NetUtil.newChannel2(aUrl,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
 
     // Ensure that we only read from the cache and not the server.
     channel.loadFlags = Ci.nsIRequest.LOAD_FROM_CACHE |

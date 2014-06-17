@@ -152,7 +152,14 @@ function read(aSrcChromeURL)
   let scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"]
     .getService(Ci.nsIScriptableInputStream);
 
-  let channel = Services.io.newChannel(aSrcChromeURL, null, null);
+  let channel = Services.io.newChannel2(aSrcChromeURL,
+                                        null,
+                                        null,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
   let input = channel.open();
   scriptableStream.init(input);
 

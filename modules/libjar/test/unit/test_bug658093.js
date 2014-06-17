@@ -12,7 +12,14 @@ var ios = Cc["@mozilla.org/network/io-service;1"].
 function run_test() {
   var file = do_get_file("data/test_bug658093.zip");
   var spec = "jar:" + ios.newFileURI(file).spec + "!/0000";
-  var channel = ios.newChannel(spec, null, null);
+  var channel = ios.newChannel2(spec,
+                                null,
+                                null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,      // requestingNode
+                                0,         // securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0);        // loadFlags
   var failed = false;
   try {
     var stream = channel.open();

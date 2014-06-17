@@ -53,7 +53,14 @@ function handler(metadata, response) {
 function makeChan(url) {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
-  var chan = ios.newChannel(url, null, null);
+  var chan = ios.newChannel2(url,
+                             null,
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   // Force sniffing if we have "application/octet-stream" as Content-Type
   chan.loadFlags |= Components.interfaces
                               .nsIChannel

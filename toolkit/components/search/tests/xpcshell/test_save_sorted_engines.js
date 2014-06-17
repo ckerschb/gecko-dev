@@ -40,7 +40,12 @@ function run_test() {
     metadata.append("search-metadata.json");
     do_check_true(metadata.exists());
 
-    let stream = NetUtil.newChannel(metadata).open();
+    let stream = NetUtil.newChannel2(metadata,
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     null,      // requestingNode
+                                     0,         // securityFlags
+                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     0).open(); // loadFlags
     do_print("Parsing metadata");
     let json = parseJsonFromStream(stream);
     stream.close(); // Stream must be closed under Windows

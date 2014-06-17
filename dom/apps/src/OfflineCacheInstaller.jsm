@@ -77,7 +77,12 @@ function storeCache(applicationCache, url, file, itemType) {
 }
 
 function readFile(aFile, aCallback) {
-  let channel = NetUtil.newChannel(aFile);
+  let channel = NetUtil.newChannel2(aFile,
+                                    Services.scriptSecurityManager.getSystemPrincipal(),
+                                    null,      // requestingNode
+                                    0,         // securityFlags
+                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                    0);        // loadFlags
   channel.contentType = "plain/text";
   NetUtil.asyncFetch(channel, function(aStream, aResult) {
     if (!Components.isSuccessCode(aResult)) {

@@ -38,16 +38,36 @@ function run_test() {
   let spec2 = "http://bar.com/bar.html";
   let uri1 = NetUtil.newURI(spec1);
   let uri2 = NetUtil.newURI(spec2);
-  let channel1 = NetUtil.newChannel(uri1);
-  let channel2 = NetUtil.newChannel(uri2);
+  let channel1 = NetUtil.newChannel2(uri1,
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     null,      // requestingNode
+                                     0,         // securityFlags
+                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     0);        // loadFlags
+  let channel2 = NetUtil.newChannel2(uri2,
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     null,      // requestingNode
+                                     0,         // securityFlags
+                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     0);        // loadFlags
 
   // Create some file:// URIs.
   let filespec1 = "file://foo.txt";
   let filespec2 = "file://bar.txt";
   let fileuri1 = NetUtil.newURI(filespec1);
   let fileuri2 = NetUtil.newURI(filespec2);
-  let filechannel1 = NetUtil.newChannel(fileuri1);
-  let filechannel2 = NetUtil.newChannel(fileuri2);
+  let filechannel1 = NetUtil.newChannel2(fileuri1,
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null,      // requestingNode
+                                         0,         // securityFlags
+                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                         0);        // loadFlags
+  let filechannel2 = NetUtil.newChannel2(fileuri2,
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null,      // requestingNode
+                                         0,         // securityFlags
+                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                         0);        // loadFlags
 
   // Test isThirdPartyURI.
   do_check_false(util.isThirdPartyURI(uri1, uri1));

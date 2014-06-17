@@ -513,7 +513,12 @@ this.AppsUtils = {
       let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
       file.initWithPath(aPath);
 
-      let channel = NetUtil.newChannel(file);
+      let channel = NetUtil.newChannel2(file,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
       channel.contentType = "application/json";
 
       NetUtil.asyncFetch(channel, function(aStream, aResult) {

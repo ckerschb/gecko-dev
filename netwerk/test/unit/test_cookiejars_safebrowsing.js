@@ -69,7 +69,14 @@ function safebrowsingUpdateHandler(metadata, response) {
 
 function setupChannel(path, loadContext) {
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var channel = ios.newChannel(URL + path, "", null);
+  var channel = ios.newChannel2(URL + path,
+                                "",
+                                null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,      // requestingNode
+                                0,         // securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0);        // loadFlags
   channel.notificationCallbacks = loadContext;
   channel.QueryInterface(Ci.nsIHttpChannel);
   return channel;

@@ -64,7 +64,14 @@ function setup_test() {
 
 function setupChannel(path) {
   ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var chan = ios.newChannel(URL + path, "", null);
+  var chan = ios.newChannel2(URL + path,
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   chan.QueryInterface(Ci.nsIHttpChannel);
   chan.requestMethod = "GET";
   return chan;

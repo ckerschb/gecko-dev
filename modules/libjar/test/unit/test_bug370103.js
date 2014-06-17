@@ -12,7 +12,14 @@ function run_test() {
   url = "jar:" + url + "!/test_bug370103";
 
   // Try opening channel with null listener
-  var channel = ioService.newChannel(url, null, null);
+  var channel = ioService.newChannel2(url,
+                                      null,
+                                      null,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
 
   var exception = false;
   try {

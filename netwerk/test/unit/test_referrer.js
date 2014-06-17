@@ -2,7 +2,14 @@ var ios = Cc["@mozilla.org/network/io-service;1"].
     getService(Ci.nsIIOService);
 
 function getTestReferrer(server_uri, referer_uri) {
-  var chan = ios.newChannel(server_uri, "", null);
+  var chan = ios.newChannel2(server_uri,
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);        // loadFlags
   chan.QueryInterface(Components.interfaces.nsIHttpChannel);
   chan.referrer = ios.newURI(referer_uri, null, null);
   var header = null;

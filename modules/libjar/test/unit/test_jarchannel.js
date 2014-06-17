@@ -71,7 +71,14 @@ Listener.prototype = {
  */
 function testAsync() {
     var uri = jarBase + "/inner40.zip";
-    var chan = ios.newChannel(uri, null, null);
+    var chan = ios.newChannel2(uri,
+                               null,
+                               null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,      // requestingNode
+                               0,         // securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);        // loadFlags
     do_check_true(chan.contentLength < 0);
     chan.asyncOpen(new Listener(function(l) {
         do_check_true(chan.contentLength > 0);
@@ -99,7 +106,14 @@ if (!inChild) {
    */
   add_test(function testSync() {
       var uri = jarBase + "/inner40.zip";
-      var chan = ios.newChannel(uri, null, null);
+      var chan = ios.newChannel2(uri,
+                                 null,
+                                 null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
       var stream = chan.open();
       do_check_true(chan.contentLength > 0);
       do_check_eq(stream.available(), chan.contentLength);
@@ -115,7 +129,14 @@ if (!inChild) {
    */
   add_test(function testSyncNested() {
       var uri = "jar:" + jarBase + "/inner40.zip!/foo";
-      var chan = ios.newChannel(uri, null, null);
+      var chan = ios.newChannel2(uri,
+                                 null,
+                                 null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
       var stream = chan.open();
       do_check_true(chan.contentLength > 0);
       do_check_eq(stream.available(), chan.contentLength);
@@ -130,7 +151,14 @@ if (!inChild) {
    */
   add_test(function testAsyncNested(next) {
       var uri = "jar:" + jarBase + "/inner40.zip!/foo";
-      var chan = ios.newChannel(uri, null, null);
+      var chan = ios.newChannel2(uri,
+                                 null,
+                                 null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
       chan.asyncOpen(new Listener(function(l) {
           do_check_true(chan.contentLength > 0);
           do_check_true(l.gotStartRequest);
@@ -151,7 +179,14 @@ if (!inChild) {
       file.copyTo(copy.parent, copy.leafName);
 
       var uri = "jar:" + ios.newFileURI(copy).spec + "!/inner40.zip";
-      var chan = ios.newChannel(uri, null, null);
+      var chan = ios.newChannel2(uri,
+                                 null,
+                                 null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
       var stream = chan.open();
       do_check_true(chan.contentLength > 0);
       stream.close();
@@ -179,7 +214,14 @@ if (!inChild) {
       file.copyTo(copy.parent, copy.leafName);
 
       var uri = "jar:" + ios.newFileURI(copy).spec + "!/inner40.zip";
-      var chan = ios.newChannel(uri, null, null);
+      var chan = ios.newChannel2(uri,
+                                 null,
+                                 null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
       chan.asyncOpen(new Listener(function (l) {
           do_check_true(chan.contentLength > 0);
 

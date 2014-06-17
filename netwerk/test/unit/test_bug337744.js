@@ -18,7 +18,14 @@ function check_for_exception(spec)
     getService(Ci.nsIIOService);
 
   try {
-    var channel = ios.newChannel(spec, null, null);
+    var channel = ios.newChannel2(spec,
+                                  null,
+                                  null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,      // requestingNode
+                                  0,         // securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0);        // loadFlags
   }
   catch (e) {
     return;

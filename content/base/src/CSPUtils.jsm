@@ -491,7 +491,14 @@ CSPRep.fromString = function(aStr, self, reportOnly, docRequest, csp,
       // suspend the parent document request while we fetch the policy-uri
       try {
         docRequest.suspend();
-        var chan = gIoService.newChannel(uri.asciiSpec, null, null);
+        var chan = gIoService.newChannel2(uri.asciiSpec,
+                                          null,
+                                          null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,      // requestingNode
+                                          0,         // securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);        // loadFlags
         // make request anonymous (no cookies, etc.) so the request for the
         // policy-uri can't be abused for CSRF
         chan.loadFlags |= Ci.nsIChannel.LOAD_ANONYMOUS;
@@ -748,7 +755,14 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
       // suspend the parent document request while we fetch the policy-uri
       try {
         docRequest.suspend();
-        var chan = gIoService.newChannel(uri.asciiSpec, null, null);
+        var chan = gIoService.newChannel2(uri.asciiSpec,
+                                          null,
+                                          null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,      // requestingNode
+                                          0,         // securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);        // loadFlags
         // make request anonymous (no cookies, etc.) so the request for the
         // policy-uri can't be abused for CSRF
         chan.loadFlags |= Components.interfaces.nsIChannel.LOAD_ANONYMOUS;

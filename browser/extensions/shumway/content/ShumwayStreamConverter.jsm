@@ -940,7 +940,14 @@ ShumwayStreamConverterBase.prototype = {
     var viewerUrl = isSimpleMode ?
                     'resource://shumway/web/simple.html' :
                     'resource://shumway/web/viewer.html';
-    var channel = Services.io.newChannel(viewerUrl, null, null);
+    var channel = Services.io.newChannel2(viewerUrl,
+                                          null,
+                                          null,
+                                          Services.scriptSecurityManager.getSystemPrincipal(),
+                                          null,      // requestingNode
+                                          0,         // securityFlags
+                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                          0);        // loadFlags
 
     var converter = this;
     var listener = this.listener;

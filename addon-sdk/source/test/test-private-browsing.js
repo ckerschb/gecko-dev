@@ -84,7 +84,14 @@ exports.testIsPrivateBrowsingFalseDefault = function(assert) {
 };
 
 exports.testNSIPrivateBrowsingChannel = function(assert) {
-  let channel = Services.io.newChannel("about:blank", null, null);
+  let channel = Services.io.newChannel2("about:blank",
+                                        null,
+                                        null,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
   channel.QueryInterface(Ci.nsIPrivateBrowsingChannel);
   assert.equal(isPrivate(channel), false, 'isPrivate detects non-private channels');
   channel.setPrivate(true);

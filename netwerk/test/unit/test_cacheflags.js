@@ -40,7 +40,14 @@ PrivateBrowsingLoadContext = new LoadContext(true);
 function make_channel(url, flags, usePrivateBrowsing) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
     getService(Ci.nsIIOService);
-  var req = ios.newChannel(url, null, null);
+  var req = ios.newChannel2(url,
+                            null,
+                            null,
+                            Services.scriptSecurityManager.getSystemPrincipal(),
+                            null,      // requestingNode
+                            0,         // securityFlags
+                            Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                            0);        // loadFlags
   req.loadFlags = flags;
   if (usePrivateBrowsing) {
     req.notificationCallbacks = PrivateBrowsingLoadContext;    

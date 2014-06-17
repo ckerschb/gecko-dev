@@ -5220,7 +5220,12 @@ AddonInstall.prototype = {
       let requireBuiltIn = Prefs.getBoolPref(PREF_INSTALL_REQUIREBUILTINCERTS, true);
       this.badCertHandler = new BadCertHandler(!requireBuiltIn);
 
-      this.channel = NetUtil.newChannel(this.sourceURI);
+      this.channel = NetUtil.newChannel2(this.sourceURI,
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null,      // requestingNode
+                                         0,         // securityFlags
+                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                         0);        // loadFlags
       this.channel.notificationCallbacks = this;
       if (this.channel instanceof Ci.nsIHttpChannelInternal)
         this.channel.forceAllowThirdPartyCookie = true;

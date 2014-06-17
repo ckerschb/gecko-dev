@@ -9,7 +9,14 @@ XPCOMUtils.defineLazyGetter(this, "uri", function() {
 function make_channel(url) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
-  return ios.newChannel(url, "", null);
+  return ios.newChannel2(url,
+                         "",
+                         null,
+                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         null,      // requestingNode
+                         0,         // securityFlags
+                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                         0);        // loadFlags
 }
 
 var multipartBody = "--boundary\r\n"+
@@ -34,7 +41,14 @@ var multipartBody = "--boundary\r\n"+
 function make_channel(url) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
-  return ios.newChannel(url, "", null);
+  return ios.newChannel2(url,
+                         "",
+                         null,
+                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         null,      // requestingNode
+                         0,         // securityFlags
+                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                         0);        // loadFlags
 }
 
 function contentHandler(metadata, response)

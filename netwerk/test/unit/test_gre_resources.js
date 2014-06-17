@@ -12,7 +12,14 @@ function wrapInputStream(input)
 }
 
 function check_file(file) {
-  var channel = ios.newChannel("resource://gre-resources/"+file, null, null);
+  var channel = ios.newChannel2("resource://gre-resources/"+file,
+                                null,
+                                null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,      // requestingNode
+                                0,         // securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0);        // loadFlags
   try {
     let instr = wrapInputStream(channel.open());
     do_check_true(instr.read(1024).length > 0)

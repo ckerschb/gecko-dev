@@ -70,7 +70,14 @@ function read(url) {
   let scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"]
     .getService(Ci.nsIScriptableInputStream);
 
-  let channel = Services.io.newChannel(url, null, null);
+  let channel = Services.io.newChannel2(url,
+                                        null,
+                                        null,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
   let input = channel.open();
   scriptableStream.init(input);
 

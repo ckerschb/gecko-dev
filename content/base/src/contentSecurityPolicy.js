@@ -561,7 +561,14 @@ ContentSecurityPolicy.prototype = {
           continue;
 
         try {
-          var chan = Services.io.newChannel(uris[i], null, null);
+          var chan = Services.io.newChannel2(uris[i],
+                                             null,
+                                             null,
+                                             Services.scriptSecurityManager.getSystemPrincipal(),
+                                             null,      // requestingNode
+                                             0,         // securityFlags
+                                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                             0);        // loadFlags
           if (!chan) {
             CSPdebug("Error creating channel for " + uris[i]);
             continue;

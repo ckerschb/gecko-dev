@@ -51,7 +51,14 @@ exports.getFaviconURIForLocation = getFaviconURIForLocation;
  * @returns {String}
  */
 function getChromeURIContent(chromeURI) {
-  let channel = IOService.newChannel(chromeURI, null, null);
+  let channel = IOService.newChannel2(chromeURI,
+                                      null,
+                                      null,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
   let input = channel.open();
   let stream = Cc["@mozilla.org/binaryinputstream;1"].
                 createInstance(Ci.nsIBinaryInputStream);

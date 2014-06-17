@@ -14,8 +14,22 @@ function run_test() {
   var outerJarBase = "jar:" + ios.newFileURI(file).spec + "!/";
   var goodSpec = "jar:" + outerJarBase + "inner.jar!/hello";
   var badSpec = "jar:" + outerJarBase + "jar_that_isnt_in_the.jar!/hello";
-  var goodChannel = ios.newChannel(goodSpec, null, null);
-  var badChannel = ios.newChannel(badSpec, null, null);
+  var goodChannel = ios.newChannel2(goodSpec,
+                                    null,
+                                    null,
+                                    Services.scriptSecurityManager.getSystemPrincipal(),
+                                    null,      // requestingNode
+                                    0,         // securityFlags
+                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                    0);        // loadFlags
+  var badChannel = ios.newChannel2(badSpec,
+                                   null,
+                                   null,
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                   null,      // requestingNode
+                                   0,         // securityFlags
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   0);        // loadFlags
 
   try {
     instr = goodChannel.open();

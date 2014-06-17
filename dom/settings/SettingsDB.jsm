@@ -59,7 +59,12 @@ SettingsDB.prototype = {
       }
     }
 
-    let chan = NetUtil.newChannel(settingsFile);
+    let chan = NetUtil.newChannel2(settingsFile,
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                   null,      // requestingNode
+                                   0,         // securityFlags
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   0);        // loadFlags
     let stream = chan.open();
     // Obtain a converter to read from a UTF-8 encoded input stream.
     let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]

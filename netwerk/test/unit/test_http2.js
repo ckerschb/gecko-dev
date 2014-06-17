@@ -190,7 +190,14 @@ Http2PostListener.prototype.onDataAvailable = function(request, ctx, stream, off
 
 function makeChan(url) {
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var chan = ios.newChannel(url, null, null).QueryInterface(Ci.nsIHttpChannel);
+  var chan = ios.newChannel2(url,
+                             null,
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,      // requestingNode
+                             0,         // securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0).QueryInterface(Ci.nsIHttpChannel);
 
   return chan;
 }

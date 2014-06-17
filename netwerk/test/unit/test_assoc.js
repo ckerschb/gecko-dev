@@ -46,7 +46,14 @@ function setupChannel(url)
 {
     var ios = Components.classes["@mozilla.org/network/io-service;1"].
                          getService(Ci.nsIIOService);
-    var chan = ios.newChannel("http://localhost:" + port + url, "", null);
+    var chan = ios.newChannel2("http://localhost:" + port + url,
+                               "",
+                               null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,      // requestingNode
+                               0,         // securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);        // loadFlags
     return chan;
 }
 

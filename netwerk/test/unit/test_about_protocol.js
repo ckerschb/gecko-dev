@@ -11,7 +11,14 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 let unsafeAboutModule = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule]),
   newChannel: function (aURI) {
-    let chan = Services.io.newChannel("about:blank", null, null);
+    let chan = Services.io.newChannel2("about:blank",
+                                       null,
+                                       null,
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null,      // requestingNode
+                                       0,         // securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0);        // loadFlags
     chan.owner = Services.scriptSecurityManager.getSystemPrincipal();
     return chan;
   },

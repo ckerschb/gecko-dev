@@ -453,7 +453,12 @@ function downloadIcon(aIconURI) {
     });
 #endif
 
-    let channel = NetUtil.newChannel(aIconURI);
+    let channel = NetUtil.newChannel2(aIconURI,
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
     let { BadCertHandler } = Cu.import("resource://gre/modules/CertUtils.jsm", {});
     // Pass true to avoid optional redirect-cert-checking behavior.
     channel.notificationCallbacks = new BadCertHandler(true);

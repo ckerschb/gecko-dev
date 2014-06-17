@@ -79,7 +79,14 @@ function webappActorRequest(request, onResponse) {
 
 
 function downloadURL(url, file) {
-  let channel = Services.io.newChannel(url, null, null);
+  let channel = Services.io.newChannel2(url,
+                                        null,
+                                        null,
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        null,      // requestingNode
+                                        0,         // securityFlags
+                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        0);        // loadFlags
   let istream = channel.open();
   let bstream = Cc["@mozilla.org/binaryinputstream;1"]
                   .createInstance(Ci.nsIBinaryInputStream);

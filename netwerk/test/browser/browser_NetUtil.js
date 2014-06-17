@@ -49,7 +49,12 @@ function test_asyncFetchBadCert() {
     is(gCertErrorDialogShown, 0, "cert error dialog was not shown");
 
     // Now try again with a channel whose notificationCallbacks doesn't suprress errors
-    let channel = NetUtil.newChannel("https://untrusted.example.com");
+    let channel = NetUtil.newChannel2("https://untrusted.example.com",
+                                      Services.scriptSecurityManager.getSystemPrincipal(),
+                                      null,      // requestingNode
+                                      0,         // securityFlags
+                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                      0);        // loadFlags
     channel.notificationCallbacks = {
       QueryInterface: XPCOMUtils.generateQI([Ci.nsIProgressEventSink,
                                              Ci.nsIInterfaceRequestor]),

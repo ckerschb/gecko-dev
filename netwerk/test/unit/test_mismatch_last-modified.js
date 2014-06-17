@@ -121,7 +121,14 @@ function run_test() {
 
     var port = httpserver.identity.primaryPort;
 
-    var chan = ios.newChannel("http://localhost:" + port + "/test1", "", null);
+    var chan = ios.newChannel2("http://localhost:" + port + "/test1",
+                               "",
+                               null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,      // requestingNode
+                               0,         // securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);        // loadFlags
     chan.asyncOpen(listener_1, null);
 
     do_test_pending();

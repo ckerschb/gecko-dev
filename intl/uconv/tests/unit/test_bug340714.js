@@ -43,7 +43,14 @@ function testCase(withBOM, charset, charsetDec, decoder, bufferLength)
 			     "init");
 
   var ios = new IOService();
-  var channel = ios.newChannel(dataURI, "", null);
+  var channel = ios.newChannel2(dataURI,
+                                "",
+                                null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,      // requestingNode
+                                0,         // securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0);        // loadFlags
   var testInputStream = channel.open();
   var testConverter = new ConverterInputStream(testInputStream,
 					       decoder,

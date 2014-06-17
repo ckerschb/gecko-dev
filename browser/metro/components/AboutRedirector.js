@@ -74,7 +74,14 @@ AboutGeneric.prototype = {
     var ios = Cc["@mozilla.org/network/io-service;1"].
               getService(Ci.nsIIOService);
 
-    var channel = ios.newChannel(moduleInfo.uri, null, null);
+    var channel = ios.newChannel2(moduleInfo.uri,
+                                  null,
+                                  null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,      // requestingNode
+                                  0,         // securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0);        // loadFlags
 
     if (!moduleInfo.privileged) {
       // Setting the owner to null means that we'll go through the normal

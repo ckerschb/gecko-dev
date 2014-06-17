@@ -11,7 +11,14 @@ const responseBody = [0x1f, 0x8b, 0x08, 0x08, 0xef, 0x70, 0xe6, 0x4c, 0x00, 0x03
 function make_channel(url, callback, ctx) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
-  return ios.newChannel(url, "", null);
+  return ios.newChannel2(url,
+                         "",
+                         null,
+                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         null,      // requestingNode
+                         0,         // securityFlags
+                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                         0);        // loadFlags
 }
 
 var doRangeResponse = false;

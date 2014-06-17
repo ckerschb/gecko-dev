@@ -544,7 +544,12 @@ ProfilerPanel.prototype = {
    */
   loadProfile: function (file) {
     let deferred = promise.defer();
-    let ch = NetUtil.newChannel(file);
+    let ch = NetUtil.newChannel2(file,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,      // requestingNode
+                                 0,         // securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0);        // loadFlags
     ch.contentType = "application/json";
 
     NetUtil.asyncFetch(ch, (input, status) => {
