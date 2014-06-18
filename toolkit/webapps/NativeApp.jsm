@@ -463,7 +463,7 @@ function downloadIcon(aIconURI) {
     // Pass true to avoid optional redirect-cert-checking behavior.
     channel.notificationCallbacks = new BadCertHandler(true);
 
-    channel.asyncOpen(listener, null);
+    channel.asyncOpen2(listener, null);
   } catch(e) {
     deferred.reject("Failure initiating download of icon: " + e);
   }

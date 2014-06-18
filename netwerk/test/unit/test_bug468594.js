@@ -73,7 +73,7 @@ function setupChannel(suffix, value) {
 
 function triggerNextTest() {
     var channel = setupChannel(tests[index].url, tests[index].server);
-    channel.asyncOpen(new ChannelListener(checkValueAndTrigger, null),null);
+    channel.asyncOpen2(new ChannelListener(checkValueAndTrigger, null),null);
 }
 
 function checkValueAndTrigger(request, data, ctx) {

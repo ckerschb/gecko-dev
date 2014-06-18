@@ -5476,7 +5476,7 @@ function fetch(aURL, aOptions={ loadFromCache: true }) {
       channel.loadFlags = aOptions.loadFromCache
         ? channel.LOAD_FROM_CACHE
         : channel.LOAD_BYPASS_CACHE;
-      channel.asyncOpen(streamListener, null);
+      channel.asyncOpen2(streamListener, null);
       break;
   }
 

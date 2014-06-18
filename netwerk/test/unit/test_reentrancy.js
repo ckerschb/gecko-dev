@@ -92,7 +92,7 @@ function next_test()
 {
   var chan = makeChan(URL + testpath);
   chan.QueryInterface(Ci.nsIRequest);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function run_test()

@@ -133,6 +133,8 @@ interface nsIStreamingProtocolController : nsISupports
      * @param aListener The nsIStreamingProtocolListener implementation
      */
     void asyncOpen(in nsIStreamingProtocolListener aListener);
+    // Adding asyncOpen2 here.
+    void asyncOpen2(in nsIStreamingProtocolListener aListener);
 
     /*
      * Get the metadata of a track.

@@ -23,7 +23,7 @@ function run_test() {
 
   var exception = false;
   try {
-    channel.asyncOpen(null, null);
+    channel.asyncOpen2(null, null);
   }
   catch(e) {
     exception = true;

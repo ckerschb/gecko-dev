@@ -108,7 +108,7 @@ function registerPlayPreview(mimeType, targetUrl) {
                                           0,         // securityFlags
                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                           0);        // loadFlags
-      channel.asyncOpen(this.listener, aContext);
+      channel.asyncOpen2(this.listener, aContext);
     },
 
     // nsIRequestObserver::onStopRequest

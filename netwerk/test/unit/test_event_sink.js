@@ -124,7 +124,7 @@ function run_test() {
   var chan = makeChan(URL + "/redirect");
   chan.notificationCallbacks = eventsink;
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }
@@ -150,7 +150,7 @@ function run_test_continued() {
   }
 
   listener._iteration++;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }

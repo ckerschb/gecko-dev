@@ -40,7 +40,7 @@ function setupChannel(url) {
 
 function startIter() {
     var channel = setupChannel(tests[index].url);
-    channel.asyncOpen(new ChannelListener(completeIter, channel, tests[index].flags), null);
+    channel.asyncOpen2(new ChannelListener(completeIter, channel, tests[index].flags), null);
 }
 
 function completeIter(request, data, ctx) {

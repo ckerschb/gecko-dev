@@ -99,7 +99,7 @@ function run_test() {
   httpserver.registerPathHandler(testpath, serverHandler);
   httpserver.start(-1);
   var channel = setupChannel(testpath);
-  channel.asyncOpen(progressCallback, null);
+  channel.asyncOpen2(progressCallback, null);
   do_test_pending();
 }
 

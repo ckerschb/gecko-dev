@@ -29,7 +29,7 @@ function run_test() {
   chan.loadFlags = Ci.nsIRequest.LOAD_FRESH_CONNECTION |
 	           Ci.nsIChannel.LOAD_INITIAL_DOCUMENT_URI;
   chan.QueryInterface(Ci.nsIHttpChannel);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
   do_test_pending();
 }
 

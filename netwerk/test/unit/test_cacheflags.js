@@ -108,7 +108,7 @@ Test.prototype = {
          "\n  " + this.hitServer + "\n");
     gHitServer = false;
     var channel = make_channel(this.path, this.flags, this.usePrivateBrowsing);
-    channel.asyncOpen(this, null);
+    channel.asyncOpen2(this, null);
   }
 };
 

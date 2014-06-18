@@ -140,7 +140,7 @@ function test_CSPRep_fromPolicyURI() {
 
   // simulates the request for the parent document
   var docChan = makeChan(DOCUMENT_URI);
-  docChan.asyncOpen(new listener(csp, cspr_static), null);
+  docChan.asyncOpen2(new listener(csp, cspr_static), null);
 
   // the resulting policy here can be discarded, since it's going to be
   // "allow *"; when the policy-uri fetching call-back happens, the *real*
@@ -160,7 +160,7 @@ function test_CSPRep_fromRelativePolicyURI() {
 
   // simulates the request for the parent document
   var docChan = makeChan(DOCUMENT_URI);
-  docChan.asyncOpen(new listener(csp, cspr_static), null);
+  docChan.asyncOpen2(new listener(csp, cspr_static), null);
 
   // the resulting policy here can be discarded, since it's going to be
   // "allow *"; when the policy-uri fetching call-back happens, the *real*

@@ -43,7 +43,7 @@ function firstTimeThrough(request, buffer)
 {
   do_check_eq(buffer, responseBody);
   var chan = make_channel(randomURI);
-  chan.asyncOpen(new ChannelListener(finish_test, null), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null), null);
 }
 
 function finish_test(request, buffer)
@@ -60,6 +60,6 @@ function run_test()
   httpServer.start(-1);
 
   var chan = make_channel(randomURI);
-  chan.asyncOpen(new ChannelListener(firstTimeThrough, null), null);
+  chan.asyncOpen2(new ChannelListener(firstTimeThrough, null), null);
   do_test_pending();
 }

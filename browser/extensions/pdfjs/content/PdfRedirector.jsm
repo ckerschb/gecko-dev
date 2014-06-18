@@ -134,7 +134,7 @@ PdfRedirector.prototype = {
 
     channel.loadGroup = aRequest.loadGroup;
 
-    channel.asyncOpen(this.listener, aContext);
+    channel.asyncOpen2(this.listener, aContext);
   },
 
   // nsIRequestObserver::onStopRequest

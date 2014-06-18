@@ -64,7 +64,7 @@ function testFullLoop(request, buffer)
   do_check_eq(request.status, Components.results.NS_ERROR_REDIRECT_LOOP);
 
   var chan = make_channel(relativeLoopURI);
-  chan.asyncOpen(new ChannelListener(testRelativeLoop, null, CL_EXPECT_FAILURE),
+  chan.asyncOpen2(new ChannelListener(testRelativeLoop, null, CL_EXPECT_FAILURE),
                  null);
 }
 
@@ -73,7 +73,7 @@ function testRelativeLoop(request, buffer)
   do_check_eq(request.status, Components.results.NS_ERROR_REDIRECT_LOOP);
 
   var chan = make_channel(emptyLoopURI);
-  chan.asyncOpen(new ChannelListener(testEmptyLoop, null, CL_EXPECT_FAILURE),
+  chan.asyncOpen2(new ChannelListener(testEmptyLoop, null, CL_EXPECT_FAILURE),
                  null);
 }
 
@@ -91,7 +91,7 @@ function run_test()
   httpServer.registerPathHandler(emptyLoopPath, emptyLoopHandler);
 
   var chan = make_channel(fullLoopURI);
-  chan.asyncOpen(new ChannelListener(testFullLoop, null, CL_EXPECT_FAILURE),
+  chan.asyncOpen2(new ChannelListener(testFullLoop, null, CL_EXPECT_FAILURE),
                  null);
   do_test_pending();
 }

@@ -33,7 +33,7 @@ function run_test() {
 
   channel.QueryInterface(Components.interfaces.nsIHttpChannel);
   channel.requestMethod = "POST";
-  channel.asyncOpen(new TestListener(), null);
+  channel.asyncOpen2(new TestListener(), null);
 
   do_test_pending();
 }

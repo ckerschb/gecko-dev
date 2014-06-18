@@ -53,6 +53,6 @@ function run_test()
   var chan = make_channel("http://localhost:" +
                           httpServer.identity.primaryPort + "/content");
   chan.notificationCallbacks = nc;
-  chan.asyncOpen(new ChannelListener(finish_test, null, CL_EXPECT_FAILURE), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null, CL_EXPECT_FAILURE), null);
   do_test_pending();
 }

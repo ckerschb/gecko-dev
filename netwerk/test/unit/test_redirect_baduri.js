@@ -45,7 +45,7 @@ function run_test()
   httpServer.start(-1);
 
   var chan = make_channel(BadRedirectURI);
-  chan.asyncOpen(new ChannelListener(checkFailed, null, CL_EXPECT_FAILURE),
+  chan.asyncOpen2(new ChannelListener(checkFailed, null, CL_EXPECT_FAILURE),
                  null);
   do_test_pending();
 }

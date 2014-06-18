@@ -443,7 +443,7 @@ function promiseStartExternalHelperAppServiceDownload(aSourceUrl) {
                                       0);        // loadFlags
 
     // Start the actual download process.
-    channel.asyncOpen({
+    channel.asyncOpen2({
       contentListener: null,
 
       onStartRequest: function (aRequest, aContext)

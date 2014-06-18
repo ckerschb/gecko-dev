@@ -503,7 +503,7 @@ CSPRep.fromString = function(aStr, self, reportOnly, docRequest, csp,
         // policy-uri can't be abused for CSRF
         chan.loadFlags |= Ci.nsIChannel.LOAD_ANONYMOUS;
         chan.loadGroup = docRequest.loadGroup;
-        chan.asyncOpen(new CSPPolicyURIListener(uri, docRequest, csp, reportOnly), null);
+        chan.asyncOpen2(new CSPPolicyURIListener(uri, docRequest, csp, reportOnly), null);
       }
       catch (e) {
         // resume the document request and apply most restrictive policy
@@ -767,7 +767,7 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
         // policy-uri can't be abused for CSRF
         chan.loadFlags |= Components.interfaces.nsIChannel.LOAD_ANONYMOUS;
         chan.loadGroup = docRequest.loadGroup;
-        chan.asyncOpen(new CSPPolicyURIListener(uri, docRequest, csp, reportOnly), null);
+        chan.asyncOpen2(new CSPPolicyURIListener(uri, docRequest, csp, reportOnly), null);
       }
       catch (e) {
         // resume the document request and apply most restrictive policy

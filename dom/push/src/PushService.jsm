@@ -647,7 +647,7 @@ this.PushService = {
     debug("serverURL: " + uri.spec);
     this._wsListener = new PushWebSocketListener(this);
     this._ws.protocol = "push-notification";
-    this._ws.asyncOpen(uri, serverURL, this._wsListener, null);
+    this._ws.asyncOpen2(uri, serverURL, this._wsListener, null);
     this._currentState = STATE_WAITING_FOR_WS_START;
   },
 

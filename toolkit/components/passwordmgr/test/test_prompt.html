@@ -167,7 +167,7 @@ var resolveCallback = SpecialPowers.wrapCallbackObject({
                                          0,         // securityFlags
                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                          0);        // loadFlags
-    proxyChannel.asyncOpen(SpecialPowers.wrapCallbackObject(new proxyChannelListener()), null);
+    proxyChannel.asyncOpen2(SpecialPowers.wrapCallbackObject(new proxyChannelListener()), null);
   }
 });
 

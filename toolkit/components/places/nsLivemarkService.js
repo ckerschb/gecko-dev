@@ -674,7 +674,7 @@ Livemark.prototype = {
       // Stream the result to the feed parser with this listener
       let listener = new LivemarkLoadListener(this);
       channel.notificationCallbacks = listener;
-      channel.asyncOpen(listener, null);
+      channel.asyncOpen2(listener, null);
 
       this.loadGroup = loadgroup;
     }

@@ -2980,7 +2980,7 @@ this.DOMApplicationRegistry = {
         deferred.resolve(zipFile);
       }
     });
-    aRequestChannel.asyncOpen(listener, null);
+    aRequestChannel.asyncOpen2(listener, null);
 
     // send a first progress event to correctly set the DOM object's properties
     this._sendDownloadProgressEvent(aNewApp, 0);

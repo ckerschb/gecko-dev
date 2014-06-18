@@ -80,7 +80,7 @@ function testAsync() {
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                0);        // loadFlags
     do_check_true(chan.contentLength < 0);
-    chan.asyncOpen(new Listener(function(l) {
+    chan.asyncOpen2(new Listener(function(l) {
         do_check_true(chan.contentLength > 0);
         do_check_true(l.gotStartRequest);
         do_check_true(l.gotStopRequest);
@@ -159,7 +159,7 @@ if (!inChild) {
                                  0,         // securityFlags
                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                  0);        // loadFlags
-      chan.asyncOpen(new Listener(function(l) {
+      chan.asyncOpen2(new Listener(function(l) {
           do_check_true(chan.contentLength > 0);
           do_check_true(l.gotStartRequest);
           do_check_true(l.gotStopRequest);
@@ -222,7 +222,7 @@ if (!inChild) {
                                  0,         // securityFlags
                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                  0);        // loadFlags
-      chan.asyncOpen(new Listener(function (l) {
+      chan.asyncOpen2(new Listener(function (l) {
           do_check_true(chan.contentLength > 0);
 
           // Drop any jar caches

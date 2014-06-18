@@ -614,7 +614,7 @@ ContentSecurityPolicy.prototype = {
           }
 
           //send data (and set up error notifications)
-          chan.asyncOpen(new CSPViolationReportListener(uris[i]), null);
+          chan.asyncOpen2(new CSPViolationReportListener(uris[i]), null);
           CSPdebug("Sent violation report to " + uris[i]);
         } catch(e) {
           // it's possible that the URI was invalid, just log a

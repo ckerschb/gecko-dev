@@ -59,7 +59,7 @@ function run_test() {
   downloader.init(listener, targetFile);
 
   // Start download
-  channel.asyncOpen(downloader, null);
+  channel.asyncOpen2(downloader, null);
 
   do_test_pending();
 }

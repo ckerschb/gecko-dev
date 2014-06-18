@@ -203,7 +203,7 @@ function makeChan(url) {
 function test_spdy_basic() {
   var chan = makeChan("https://localhost:4443/");
   var listener = new SpdyCheckListener();
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Support for making sure XHR works over SPDY
@@ -234,8 +234,8 @@ function test_spdy_multiplex() {
   var chan2 = makeChan("https://localhost:4443/multiplex2");
   var listener1 = new SpdyMultiplexListener();
   var listener2 = new SpdyMultiplexListener();
-  chan1.asyncOpen(listener1, null);
-  chan2.asyncOpen(listener2, null);
+  chan1.asyncOpen2(listener1, null);
+  chan2.asyncOpen2(listener2, null);
 }
 
 // Test to make sure we gateway non-standard headers properly
@@ -244,42 +244,42 @@ function test_spdy_header() {
   var hvalue = "Headers are fun";
   var listener = new SpdyHeaderListener(hvalue);
   chan.setRequestHeader("X-Test-Header", hvalue, false);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function test_spdy_push1() {
   var chan = makeChan("https://localhost:4443/push");
   chan.loadGroup = loadGroup;
   var listener = new SpdyPushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_spdy_push2() {
   var chan = makeChan("https://localhost:4443/push.js");
   chan.loadGroup = loadGroup;
   var listener = new SpdyPushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_spdy_push3() {
   var chan = makeChan("https://localhost:4443/push2");
   chan.loadGroup = loadGroup;
   var listener = new SpdyPushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_spdy_push4() {
   var chan = makeChan("https://localhost:4443/push2.js");
   chan.loadGroup = loadGroup;
   var listener = new SpdyPushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 // Make sure we handle GETs that cover more than 2 frames properly
 function test_spdy_big() {
   var chan = makeChan("https://localhost:4443/big");
   var listener = new SpdyBigListener();
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Support for doing a POST
@@ -293,7 +293,7 @@ function do_post(content, chan, listener) {
 
   chan.requestMethod = "POST";
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Make sure we can do a simple POST

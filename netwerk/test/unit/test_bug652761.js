@@ -18,7 +18,7 @@ function run_test()
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                0);        // loadFlags
     var httpChan = chan.QueryInterface(Components.interfaces.nsIHttpChannel);
-    httpChan.asyncOpen(new ChannelListener(completeTest,
+    httpChan.asyncOpen2(new ChannelListener(completeTest,
                                            httpChan, CL_EXPECT_FAILURE), null);
     do_test_pending();
 }

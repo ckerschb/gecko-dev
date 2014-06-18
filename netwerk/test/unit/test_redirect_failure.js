@@ -48,6 +48,6 @@ function run_test()
   httpServer.start(-1);
 
   var chan = make_channel(randomURI);
-  chan.asyncOpen(new ChannelListener(finish_test, null, CL_EXPECT_FAILURE), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null, CL_EXPECT_FAILURE), null);
   do_test_pending();
 }

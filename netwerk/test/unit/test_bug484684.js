@@ -93,7 +93,7 @@ function storeData(status, entry) {
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
-  channel.asyncOpen(new ChannelListener(checkData, null, CL_ALLOW_UNKNOWN_CL), null);
+  channel.asyncOpen2(new ChannelListener(checkData, null, CL_ALLOW_UNKNOWN_CL), null);
 }
 
 function next_test() {

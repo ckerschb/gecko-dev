@@ -5229,7 +5229,7 @@ AddonInstall.prototype = {
       this.channel.notificationCallbacks = this;
       if (this.channel instanceof Ci.nsIHttpChannelInternal)
         this.channel.forceAllowThirdPartyCookie = true;
-      this.channel.asyncOpen(listener, null);
+      this.channel.asyncOpen2(listener, null);
 
       Services.obs.addObserver(this, "network:offline-about-to-go-offline", false);
     }

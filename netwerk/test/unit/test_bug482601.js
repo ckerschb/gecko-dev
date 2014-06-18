@@ -112,7 +112,7 @@ function test_nocache() {
 
   var chan = makeChan("http://localhost:" + httpserv.identity.primaryPort +
                       "/bug482601/nocache");
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function test_partial() {
@@ -138,7 +138,7 @@ function test_partial2(status, entry) {
 
   var chan = makeChan("http://localhost:" + httpserv.identity.primaryPort +
                       "/bug482601/partial");
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function test_cached() {
@@ -165,7 +165,7 @@ function test_cached2(status, entry) {
   var chan = makeChan("http://localhost:" + httpserv.identity.primaryPort +
                       "/bug482601/cached");
   chan.loadFlags = Ci.nsIRequest.VALIDATE_ALWAYS;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function test_only_from_cache() {
@@ -192,7 +192,7 @@ function test_only_from_cache2(status, entry) {
   var chan = makeChan("http://localhost:" + httpserv.identity.primaryPort +
                       "/bug482601/only_from_cache");
   chan.loadFlags = Ci.nsICachingChannel.LOAD_ONLY_FROM_CACHE;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 

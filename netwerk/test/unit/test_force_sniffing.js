@@ -90,7 +90,7 @@ function run_test() {
                                              snifferContract, false, true);
 
   var chan = makeChan(url);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }

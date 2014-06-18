@@ -137,7 +137,7 @@ function handler_2(metadata, response) {
 function received_partial_2(request, data) {
   do_check_eq(data, undefined);
   var chan = make_channel("http://localhost:" + port + "/test_2");
-  chan.asyncOpen(new ChannelListener(received_cleartext, null), null);
+  chan.asyncOpen2(new ChannelListener(received_cleartext, null), null);
 }
 
 var case_3_request_no = 0;
@@ -165,7 +165,7 @@ function handler_3(metadata, response) {
 function received_partial_3(request, data) {
   do_check_eq(partial_data_length, data.length);
   var chan = make_channel("http://localhost:" + port + "/test_3");
-  chan.asyncOpen(new ChannelListener(received_cleartext, null), null);
+  chan.asyncOpen2(new ChannelListener(received_cleartext, null), null);
 }
 
 var case_4_request_no = 0;
@@ -198,7 +198,7 @@ function received_partial_4(request, data) {
 // checking length does not work with encoded data
 //  do_check_eq(partial_data_length, data.length);
   var chan = make_channel("http://localhost:" + port + "/test_4");
-  chan.asyncOpen(new MyListener(received_cleartext), null);
+  chan.asyncOpen2(new MyListener(received_cleartext), null);
 }
 
 var case_5_request_no = 0;
@@ -226,7 +226,7 @@ function received_partial_5(request, data) {
   do_check_eq(partial_data_length, data.length);
   var chan = make_channel("http://localhost:" + port + "/test_5");
   chan.setRequestHeader("If-Match", "Some eTag", false);
-  chan.asyncOpen(new ChannelListener(received_cleartext, null), null);
+  chan.asyncOpen2(new ChannelListener(received_cleartext, null), null);
 }
 
 var case_6_request_no = 0;
@@ -256,7 +256,7 @@ function received_partial_6(request, data) {
 // would like to verify that the response does not have Accept-Ranges
   do_check_eq(partial_data_length, data.length);
   var chan = make_channel("http://localhost:" + port + "/test_6");
-  chan.asyncOpen(new ChannelListener(received_cleartext, null), null);
+  chan.asyncOpen2(new ChannelListener(received_cleartext, null), null);
 }
 
 const simpleBody = "0123456789";
@@ -304,7 +304,7 @@ function received_partial_7(request, data) {
   do_check_eq(4, data.length);
   // do it again to get the rest
   var chan = make_channel("http://localhost:" + port + "/test_7");
-  chan.asyncOpen(new ChannelListener(received_simple, null), null);
+  chan.asyncOpen2(new ChannelListener(received_simple, null), null);
 }
 
 var case_8_request_no = 0;
@@ -343,7 +343,7 @@ function received_partial_8(request, data) {
   do_check_eq(4, data.length);
   // do it again to get the rest
   var chan = make_channel("http://localhost:" + port + "/test_8");
-  chan.asyncOpen(new FailedChannelListener(testFinished, null, CL_EXPECT_LATE_FAILURE), null);
+  chan.asyncOpen2(new FailedChannelListener(testFinished, null, CL_EXPECT_LATE_FAILURE), null);
 }
 
 // Simple mechanism to keep track of tests and stop the server
@@ -371,31 +371,31 @@ function run_test() {
 
   // Case 2: zero-length partial entry must not trigger range-request
   var chan = make_channel("http://localhost:" + port + "/test_2");
-  chan.asyncOpen(new Canceler(received_partial_2), null);
+  chan.asyncOpen2(new Canceler(received_partial_2), null);
 
   // Case 3: no-store response must not trigger range-request
   var chan = make_channel("http://localhost:" + port + "/test_3");
-  chan.asyncOpen(new MyListener(received_partial_3), null);
+  chan.asyncOpen2(new MyListener(received_partial_3), null);
 
   // Case 4: response with content-encoding must not trigger range-request
   var chan = make_channel("http://localhost:" + port + "/test_4");
-  chan.asyncOpen(new MyListener(received_partial_4), null);
+  chan.asyncOpen2(new MyListener(received_partial_4), null);
 
   // Case 5: conditional request-header set by client
   var chan = make_channel("http://localhost:" + port + "/test_5");
-  chan.asyncOpen(new MyListener(received_partial_5), null);
+  chan.asyncOpen2(new MyListener(received_partial_5), null);
 
   // Case 6: response is not resumable (drop the Accept-Ranges header)
   var chan = make_channel("http://localhost:" + port + "/test_6");
-  chan.asyncOpen(new MyListener(received_partial_6), null);
+  chan.asyncOpen2(new MyListener(received_partial_6), null);
 
   // Case 7: a basic positive test
   var chan = make_channel("http://localhost:" + port + "/test_7");
-  chan.asyncOpen(new MyListener(received_partial_7), null);
+  chan.asyncOpen2(new MyListener(received_partial_7), null);
 
   // Case 8: check that mismatched 206 and 200 sizes throw error
   var chan = make_channel("http://localhost:" + port + "/test_8");
-  chan.asyncOpen(new MyListener(received_partial_8), null);
+  chan.asyncOpen2(new MyListener(received_partial_8), null);
 
   do_test_pending();
 }

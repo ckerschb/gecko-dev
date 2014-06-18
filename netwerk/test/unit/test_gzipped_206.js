@@ -65,7 +65,7 @@ function continue_test(request, data) {
   do_check_true(17 == data.length);
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
-  chan.asyncOpen(new ChannelListener(finish_test, null, CL_EXPECT_GZIP), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null, CL_EXPECT_GZIP), null);
 }
 
 function finish_test(request, data, ctx) {
@@ -87,6 +87,6 @@ function run_test() {
 
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
-  chan.asyncOpen(new ChannelListener(continue_test, null, CL_EXPECT_GZIP), null);
+  chan.asyncOpen2(new ChannelListener(continue_test, null, CL_EXPECT_GZIP), null);
   do_test_pending();
 }

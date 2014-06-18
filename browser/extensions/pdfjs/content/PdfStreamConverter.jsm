@@ -319,7 +319,7 @@ ChromeActions.prototype = {
         }
       };
 
-      channel.asyncOpen(listener, null);
+      channel.asyncOpen2(listener, null);
     });
   },
   getLocale: function() {
@@ -971,7 +971,7 @@ PdfStreamConverter.prototype = {
                             securityManager.getNoAppCodebasePrincipal(uri) :
                             securityManager.getCodebasePrincipal(uri);
     aRequest.owner = resourcePrincipal;
-    channel.asyncOpen(proxy, aContext);
+    channel.asyncOpen2(proxy, aContext);
   },
 
   // nsIRequestObserver::onStopRequest

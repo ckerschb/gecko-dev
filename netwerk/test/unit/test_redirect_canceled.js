@@ -54,6 +54,6 @@ function run_test()
 
   var chan = make_channel(randomURI);
   chan.notificationCallbacks = new ChannelEventSink(ES_ABORT_REDIRECT);
-  chan.asyncOpen(new ChannelListener(finish_test, null), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null), null);
   do_test_pending();
 }

@@ -198,7 +198,7 @@ AppCacheUtils.prototype = {
     channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
     channel.loadFlags |= Ci.nsIRequest.INHIBIT_CACHING;
 
-    channel.asyncOpen({
+    channel.asyncOpen2({
       onStartRequest: function (request, context) {
         // This empty method is needed in order for onDataAvailable to be
         // called.

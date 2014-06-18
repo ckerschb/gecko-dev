@@ -206,7 +206,7 @@ function makeChan(url) {
 function test_http2_basic() {
   var chan = makeChan("https://localhost:6944/");
   var listener = new Http2CheckListener();
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Support for making sure XHR works over SPDY
@@ -237,8 +237,8 @@ function test_http2_multiplex() {
   var chan2 = makeChan("https://localhost:6944/multiplex2");
   var listener1 = new Http2MultiplexListener();
   var listener2 = new Http2MultiplexListener();
-  chan1.asyncOpen(listener1, null);
-  chan2.asyncOpen(listener2, null);
+  chan1.asyncOpen2(listener1, null);
+  chan2.asyncOpen2(listener2, null);
 }
 
 // Test to make sure we gateway non-standard headers properly
@@ -249,7 +249,7 @@ function test_http2_header() {
   var listener = new Http2HeaderListener("X-Received-Test-Header", function(received_hvalue) {
     do_check_eq(received_hvalue, hvalue);
   });
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Test to make sure cookies are split into separate fields before compression
@@ -268,42 +268,42 @@ function test_http2_cookie_crumbling() {
       do_check_eq(cookiesSent[index], cookieReceived)
     });
   });
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function test_http2_push1() {
   var chan = makeChan("https://localhost:6944/push");
   chan.loadGroup = loadGroup;
   var listener = new Http2PushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_http2_push2() {
   var chan = makeChan("https://localhost:6944/push.js");
   chan.loadGroup = loadGroup;
   var listener = new Http2PushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_http2_push3() {
   var chan = makeChan("https://localhost:6944/push2");
   chan.loadGroup = loadGroup;
   var listener = new Http2PushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 function test_http2_push4() {
   var chan = makeChan("https://localhost:6944/push2.js");
   chan.loadGroup = loadGroup;
   var listener = new Http2PushListener();
-  chan.asyncOpen(listener, chan);
+  chan.asyncOpen2(listener, chan);
 }
 
 // Make sure we handle GETs that cover more than 2 frames properly
 function test_http2_big() {
   var chan = makeChan("https://localhost:6944/big");
   var listener = new Http2BigListener();
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Support for doing a POST
@@ -317,7 +317,7 @@ function do_post(content, chan, listener) {
 
   chan.requestMethod = "POST";
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 // Make sure we can do a simple POST

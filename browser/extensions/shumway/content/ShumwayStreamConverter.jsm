@@ -1012,7 +1012,7 @@ ShumwayStreamConverterBase.prototype = {
     var uri = Services.io.newURI(viewerUrl, null, null);
     var resourcePrincipal = securityManager.getNoAppCodebasePrincipal(uri);
     aRequest.owner = resourcePrincipal;
-    channel.asyncOpen(proxy, aContext);
+    channel.asyncOpen2(proxy, aContext);
   },
 
   // nsIRequestObserver::onStopRequest

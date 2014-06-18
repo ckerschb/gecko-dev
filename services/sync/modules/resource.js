@@ -226,7 +226,7 @@ AsyncResource.prototype = {
                                        this._log, this.ABORT_TIMEOUT);
     channel.requestMethod = action;
     try {
-      channel.asyncOpen(listener, null);
+      channel.asyncOpen2(listener, null);
     } catch (ex) {
       // asyncOpen can throw in a bunch of cases -- e.g., a forbidden port.
       this._log.warn("Caught an error in asyncOpen: " + CommonUtils.exceptionStr(ex));

@@ -48,7 +48,7 @@ function run_test() {
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                0);        // loadFlags
     chan.contentType = "foo/bar"; // should be ignored
-    chan.asyncOpen(new ChannelListener(on_read_complete, i), null);
+    chan.asyncOpen2(new ChannelListener(on_read_complete, i), null);
   }
 }
 

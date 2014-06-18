@@ -171,7 +171,7 @@ function promiseEntityID(aUrl) {
                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                     0);        // loadFlags
 
-  channel.asyncOpen({
+  channel.asyncOpen2({
     onStartRequest: function (aRequest) {
       if (aRequest instanceof Ci.nsIResumableChannel) {
         entityID = aRequest.entityID;

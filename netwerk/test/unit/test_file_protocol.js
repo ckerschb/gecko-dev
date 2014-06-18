@@ -141,7 +141,7 @@ function test_read_file() {
   }
 
   chan.contentType = special_type;
-  chan.asyncOpen(new FileStreamListener(on_read_complete), null);
+  chan.asyncOpen2(new FileStreamListener(on_read_complete), null);
 }
 
 function do_test_read_dir(set_type, expected_type) {
@@ -163,7 +163,7 @@ function do_test_read_dir(set_type, expected_type) {
 
   if (set_type)
     chan.contentType = expected_type;
-  chan.asyncOpen(new FileStreamListener(on_read_complete), null);
+  chan.asyncOpen2(new FileStreamListener(on_read_complete), null);
 }
 
 function test_read_dir_1() {
@@ -222,7 +222,7 @@ function test_upload_file() {
   }
 
   chan.contentType = special_type;
-  chan.asyncOpen(new FileStreamListener(on_upload_complete), null);
+  chan.asyncOpen2(new FileStreamListener(on_upload_complete), null);
 }
 
 function test_load_replace() {

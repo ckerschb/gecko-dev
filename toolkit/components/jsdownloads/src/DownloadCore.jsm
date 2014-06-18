@@ -1626,7 +1626,7 @@ this.DownloadCopySaver.prototype = {
 
           // Open the channel, directing output to the background file saver.
           backgroundFileSaver.QueryInterface(Ci.nsIStreamListener);
-          channel.asyncOpen({
+          channel.asyncOpen2({
             onStartRequest: function (aRequest, aContext) {
               backgroundFileSaver.onStartRequest(aRequest, aContext);
 

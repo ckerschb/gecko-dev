@@ -676,7 +676,7 @@ function failed_script_callback(pi)
                              0,         // securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                              0);        // loadFlags
-  chan.asyncOpen(directFilterListener, chan);
+  chan.asyncOpen2(directFilterListener, chan);
 }
 
 var directFilterListener = {

@@ -40,6 +40,6 @@ function execute_test() {
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                              0);        // loadFlags
   chan.QueryInterface(Ci.nsIHttpChannel);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 

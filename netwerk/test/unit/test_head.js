@@ -57,7 +57,7 @@ function setup_test() {
   do_check_eq(setOK, "http://foo2.invalid:90/bar");
 
   // ChannelListener defined in head_channels.js
-  channel.asyncOpen(new ChannelListener(checkRequestResponse, channel), null);
+  channel.asyncOpen2(new ChannelListener(checkRequestResponse, channel), null);
 
   if (dbg) { print("============== setup_test: out"); }
 }

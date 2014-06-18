@@ -65,7 +65,7 @@ function run_test()
   httpserver.start(-1);
 
   var channel = make_channel(uri1);
-  channel.asyncOpen(new listener("text/plain", function() {
+  channel.asyncOpen2(new listener("text/plain", function() {
 	run_test2();
       }), null);
 
@@ -75,7 +75,7 @@ function run_test()
 function run_test2()
 {
   var channel = make_channel(uri2);
-  channel.asyncOpen(new listener("text/html", function() {
+  channel.asyncOpen2(new listener("text/html", function() {
 	httpserver.stop(do_test_finished);
       }), null);
 }

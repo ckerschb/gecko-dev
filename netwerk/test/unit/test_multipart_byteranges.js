@@ -129,6 +129,6 @@ function run_test()
 					 null);
 
   var chan = make_channel(uri);
-  chan.asyncOpen(conv, null);
+  chan.asyncOpen2(conv, null);
   do_test_pending();
 }

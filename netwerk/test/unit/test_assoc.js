@@ -60,7 +60,7 @@ function setupChannel(url)
 function startIter()
 {
     var channel = setupChannel(tests[currentTestIndex].url);
-    channel.asyncOpen(new ChannelListener(completeIter,
+    channel.asyncOpen2(new ChannelListener(completeIter,
                                           channel, tests[currentTestIndex].flags), null);
 }
 

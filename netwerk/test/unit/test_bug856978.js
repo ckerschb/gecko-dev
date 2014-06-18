@@ -124,7 +124,7 @@ function run_test() {
 
 function startAuthHeaderTest() {
   var chan = makeChan(authCredsURL);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }
@@ -136,7 +136,7 @@ function removeAuthHeaderTest() {
   var chan = makeChan(authURL);
   // Indicating that the request is coming from the second test.
   chan.setRequestHeader("Test", "1", false);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }

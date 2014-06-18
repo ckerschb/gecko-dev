@@ -49,7 +49,7 @@ function run_all_tests() {
   for (let test of firstTests) {
     handlers_called = 0;
     var chan = makeChan(URL, test[0], test[1]);
-    chan.asyncOpen(new ChannelListener(doneFirstLoad, test[2]), null);
+    chan.asyncOpen2(new ChannelListener(doneFirstLoad, test[2]), null);
     yield undefined;
   }
 
@@ -69,7 +69,7 @@ function run_all_tests() {
   for (let test of secondTests) {
     handlers_called = 0;
     var chan = makeChan(URL, test[0], test[1]);
-    chan.asyncOpen(new ChannelListener(doneFirstLoad, test[2]), null);
+    chan.asyncOpen2(new ChannelListener(doneFirstLoad, test[2]), null);
     yield undefined;
   }
 
@@ -83,7 +83,7 @@ function run_all_tests() {
   for (let test of thirdTests) {
     handlers_called = 0;
     var chan = makeChan(URL, test[0], test[1]);
-    chan.asyncOpen(new ChannelListener(doneFirstLoad, test[2]), null);
+    chan.asyncOpen2(new ChannelListener(doneFirstLoad, test[2]), null);
     yield undefined;
   }
 }
@@ -102,7 +102,7 @@ function run_test() {
 function doneFirstLoad(req, buffer, expected) {
   // Load it again, make sure it hits the cache
   var chan = makeChan(URL, 0, false);
-  chan.asyncOpen(new ChannelListener(doneSecondLoad, expected), null);
+  chan.asyncOpen2(new ChannelListener(doneSecondLoad, expected), null);
 }
 
 function doneSecondLoad(req, buffer, expected) {

@@ -18,11 +18,11 @@ function run_test() {
 
   // Opened channel that has no remaining references on shutdown
   local_channel = setupChannel(testpath);
-  local_channel.asyncOpen(
+  local_channel.asyncOpen2(
       new ChannelListener(checkRequest, local_channel), null);
 
   // Opened channel that has no remaining references after being opened
-  setupChannel(testpath).asyncOpen(
+  setupChannel(testpath).asyncOpen2(
       new ChannelListener(function() {}, null), null);
   
   // Unopened channel that has remaining references on shutdown
@@ -30,7 +30,7 @@ function run_test() {
 
   // Opened channel that has remaining references on shutdown
   live_channels.push(setupChannel(testpath));
-  live_channels[1].asyncOpen(
+  live_channels[1].asyncOpen2(
       new ChannelListener(checkRequestFinish, live_channels[1]), null);
 
   do_test_pending();

@@ -75,13 +75,13 @@ function finish_test() {
 function start_cache_read() {
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
-  chan.asyncOpen(new ChannelListener(finish_test, null), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null), null);
 }
 
 function start_canceler() {
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
-  chan.asyncOpen(new Canceler(start_cache_read), null);
+  chan.asyncOpen2(new Canceler(start_cache_read), null);
 }
 
 function run_test() {
@@ -91,6 +91,6 @@ function run_test() {
 
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
-  chan.asyncOpen(new ChannelListener(start_canceler, null), null);
+  chan.asyncOpen2(new ChannelListener(start_canceler, null), null);
   do_test_pending();
 }

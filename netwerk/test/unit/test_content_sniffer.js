@@ -132,7 +132,7 @@ function run_test_iteration(index) {
   var chan = makeChan(urls[index - 1]);
 
   listener._iteration++;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }
