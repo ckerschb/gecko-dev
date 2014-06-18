@@ -63,14 +63,19 @@ function run_test() {
          .setUploadStream(mime, "", mime.available());
   channel.requestMethod = "POST";
 
-  channel.asyncOpen(new ChannelListener(checkRequest, channel), null);
+  channel.asyncOpen2(new ChannelListener(checkRequest, channel), null);
 
   do_test_pending();
 }
 
 function setupChannel(path) {
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  return chan = ios.newChannel(URL + path, "", null)
+  return chan = ios.newChannel2(URL + path, "", null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,   //requestingNode
+                                0,      //securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0)      //loadFlags
                    .QueryInterface(Ci.nsIHttpChannel);
 }
 

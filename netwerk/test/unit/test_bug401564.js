@@ -35,15 +35,20 @@ function run_test()
   prefs.setBoolPref("network.http.prompt-temp-redirect", false);
 
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var chan = ios.newChannel("http://localhost:" +
-                            httpserver.identity.primaryPort + "/redirect",
-                            "",
-                            null);
+  var chan = ios.newChannel2("http://localhost:" +
+                             httpserver.identity.primaryPort + "/redirect",
+                             "",
+                             null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0);      //loadFlags
 
   chan.QueryInterface(Ci.nsIHttpChannel);
   chan.setRequestHeader("Accept", acceptType, false);
 
-  chan.asyncOpen(new ChannelListener(dummyHandler, null), null);
+  chan.asyncOpen2(new ChannelListener(dummyHandler, null), null);
 
   do_test_pending();
 }

@@ -55,7 +55,12 @@ function run_test()
   // the channel both to set a cookie (since nsICookieService::setCookieString
   // requires such a channel in order to successfully set a cookie) and then
   // to load the pre-redirect URI.
-  var chan = ioService.newChannel(preRedirectURL, "", null).
+  var chan = ioService.newChannel2(preRedirectURL, "", null,
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                   null,   //requestingNode
+                                   0,      //securityFlags
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   0).      //loadFlags
              QueryInterface(Ci.nsIHttpChannel).
              QueryInterface(Ci.nsIHttpChannelInternal);
   chan.forceAllowThirdPartyCookie = true;
@@ -68,7 +73,7 @@ function run_test()
     setCookieString(postRedirectURI, null, sentCookieVal, chan);
 
   // Load the pre-redirect URI.
-  chan.asyncOpen(new ChannelListener(finish_test, null), null);
+  chan.asyncOpen2(new ChannelListener(finish_test, null), null);
   do_test_pending();
 }
 

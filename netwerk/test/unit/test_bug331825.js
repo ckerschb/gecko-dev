@@ -26,12 +26,16 @@ function run_test() {
   var channel =
       Components.classes["@mozilla.org/network/io-service;1"].
       getService(Components.interfaces.nsIIOService).
-      newChannel("http://localhost:" + server.identity.primaryPort + "/bug" +
-                 BUGID, null, null);
-
+      newChannel2("http://localhost:" + server.identity.primaryPort + "/bug" +
+                  BUGID, null, null,
+                  Services.scriptSecurityManager.getSystemPrincipal(),
+                  null,   //requestingNode
+                  0,      //securityFlags
+                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                  0);      //loadFlags
   channel.QueryInterface(Components.interfaces.nsIHttpChannel);
   channel.setRequestHeader("If-None-Match", "foobar", false);
-  channel.asyncOpen(new TestListener(), null);
+  channel.asyncOpen2(new TestListener(), null);
 
   do_test_pending();
 }
