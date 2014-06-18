@@ -32,8 +32,13 @@ function run_test() {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);
 
-  var channel = ios.newChannel("jar:http://test.invalid/test.jar!/index.html",
-                               null, null);
-  channel.asyncOpen(listener, null);
+  var channel = ios.newChannel2("jar:http://test.invalid/test.jar!/index.html",
+                                null, null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,   //requestingNode
+                                0,      //securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0);      //loadFlags
+  channel.asyncOpen2(listener, null);
   do_test_pending();
 }

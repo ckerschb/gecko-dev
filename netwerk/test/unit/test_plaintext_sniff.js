@@ -76,8 +76,13 @@ function makeChan(headerIdx, bodyIdx) {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
   var chan =
-    ios.newChannel("http://localhost:" + httpserv.identity.primaryPort +
-                   "/" + headerIdx + "/" + bodyIdx, null, null)
+    ios.newChannel2("http://localhost:" + httpserv.identity.primaryPort +
+                    "/" + headerIdx + "/" + bodyIdx, null, null,
+                     Services.scriptSecurityManager.getSystemPrincipal(),
+                     null,   //requestingNode
+                     0,      //securityFlags
+                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                     0)      //loadFlags
        .QueryInterface(Components.interfaces.nsIHttpChannel);
 
   chan.loadFlags |=
@@ -149,7 +154,7 @@ function doTest(headerIdx, bodyIdx) {
 
   var listener = makeListener(headerIdx, bodyIdx);
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();    
 }

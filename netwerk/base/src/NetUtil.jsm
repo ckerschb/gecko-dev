@@ -224,11 +224,11 @@ this.NetUtil = {
         }
 
         return this.ioService.newChannelFromURI2(uri,
-                                                Services.scriptSecurityManager.getSystemPrincipal(),
-                                                null,    //requestingNode
-                                                0,       //securityFlags
-                                                Ci.nsIContentPolicy.TYPE_OTHER,
-                                                0);      //loadFlags
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null,    //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0);      //loadFlags
 
     },
 

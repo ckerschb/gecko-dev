@@ -18,7 +18,12 @@ var httpserv;
 function setupChannel(path) {
     var ios =
         Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-    return chan = ios.newChannel(path, "", null)
+    return chan = ios.newChannel2(path, "", null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,   //requestingNode
+                                  0,      //securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0)      //loadFlags
                                 .QueryInterface(Ci.nsIHttpChannel);
 }
 
@@ -32,7 +37,7 @@ InitialListener.prototype = {
             var channel = setupChannel("http://localhost:" +
                                        httpserv.identity.primaryPort + "/post");
             channel.requestMethod = "POST";
-            channel.asyncOpen(new RedirectingListener(), null);
+            channel.asyncOpen2(new RedirectingListener(), null);
         });
     }
 };
@@ -47,7 +52,7 @@ RedirectingListener.prototype = {
             var channel = setupChannel("http://localhost:" +
                                        httpserv.identity.primaryPort + "/post");
             channel.requestMethod = "POST";
-            channel.asyncOpen(new VerifyingListener(), null);
+            channel.asyncOpen22(new VerifyingListener(), null);
         });
     }
 };
@@ -61,7 +66,7 @@ VerifyingListener.prototype = {
         do_check_eq(2, numberOfHandlerCalls);
         var channel = setupChannel("http://localhost:" +
                                    httpserv.identity.primaryPort + "/cl");
-        channel.asyncOpen(new FinalListener(), null);
+        channel.asyncOpen2(new FinalListener(), null);
     }
 };
 
@@ -89,7 +94,7 @@ function run_test() {
   // Load Content-Location URI into cache and start the chain of loads
   var channel = setupChannel("http://localhost:" +
                              httpserv.identity.primaryPort + "/cl");
-  channel.asyncOpen(new InitialListener(), null);
+  channel.asyncOpen2(new InitialListener(), null);
 
   do_test_pending();
 }

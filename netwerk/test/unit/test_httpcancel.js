@@ -72,7 +72,12 @@ var listener = {
 };
 
 function makeChan(url) {
-  var chan = ios.newChannel(url, null, null)
+  var chan = ios.newChannel2(url, null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
                 .QueryInterface(Components.interfaces.nsIHttpChannel);
 
   // ENSURE_CALLED_BEFORE_CONNECT: set original value
@@ -92,7 +97,7 @@ function execute_test() {
   obs = obs.QueryInterface(Components.interfaces.nsIObserverService);
   obs.addObserver(observer, "http-on-modify-request", false);
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function run_test() {

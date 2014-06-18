@@ -298,8 +298,13 @@ function test_asyncFetch_with_nsIChannel()
 
   // Create our channel.
   let channel = NetUtil.ioService.
-                newChannel("http://localhost:" +
-                           server.identity.primaryPort + "/test", null, null);
+                newChannel2("http://localhost:" +
+                            server.identity.primaryPort + "/test", null, null,
+                            Services.scriptSecurityManager.getSystemPrincipal(),
+                            null,   //requestingNode
+                            0,      //securityFlags
+                            Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                            0);      //loadFlags
 
   // Open our channel asynchronously.
   NetUtil.asyncFetch(channel, function(aInputStream, aResult) {
@@ -446,7 +451,12 @@ function test_asyncFetch_does_not_block()
 {
   // Create our channel that has no data.
   let channel = NetUtil.ioService.
-                newChannel("data:text/plain,", null, null);
+                newChannel2("data:text/plain,", null, null,
+                            Services.scriptSecurityManager.getSystemPrincipal(),
+                            null,   //requestingNode
+                            0,      //securityFlags
+                            Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                            0);      //loadFlags
 
   // Open our channel asynchronously.
   NetUtil.asyncFetch(channel, function(aInputStream, aResult) {
@@ -473,7 +483,16 @@ function test_asyncFetch_does_not_block()
 function test_newChannel_no_specifier()
 {
   try {
+    // TODO - should this be changed to newChannel2 with a null uri?
     NetUtil.newChannel();
+    /*
+    NetUtil.newChannel2(null,
+                        Services.scriptSecurityManager.getSystemPrincipal(),
+                        null,   //requestingNode
+                        0,      //securityFlags
+                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                        0);      //loadFlags
+    */
     do_throw("should throw!");
   }
   catch (e) {
@@ -490,8 +509,18 @@ function test_newChannel_with_string()
   // Check that we get the same URI back from channel the IO service creates and
   // the channel the utility method creates.
   let ios = NetUtil.ioService;
-  let iosChannel = ios.newChannel(TEST_SPEC, null, null);
-  let NetUtilChannel = NetUtil.newChannel(TEST_SPEC);
+  let iosChannel = ios.newChannel2(TEST_SPEC, null, null,
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                   null,   //requestingNode
+                                   0,      //securityFlags
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   0);      //loadFlags
+  let NetUtilChannel = NetUtil.newChannel2(TEST_SPEC,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,   //requestingNode
+                                           0,      //securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
   do_check_true(iosChannel.URI.equals(NetUtilChannel.URI));
 
   run_next_test();
@@ -510,7 +539,12 @@ function test_newChannel_with_nsIURI()
                                                        0,       //securityFlags
                                                        Ci.nsIContentPolicy.TYPE_OTHER,
                                                        0);      //loadFlags
-  let NetUtilChannel = NetUtil.newChannel(uri);
+  let NetUtilChannel = NetUtil.newChannel2(uri,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,   //requestingNode
+                                           0,      //securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
   do_check_true(iosChannel.URI.equals(NetUtilChannel.URI));
 
   run_next_test();
@@ -532,7 +566,12 @@ function test_newChannel_with_nsIFile()
                                                        0,       //securityFlags
                                                        Ci.nsIContentPolicy.TYPE_OTHER,
                                                        0);      //loadFlags
-  let NetUtilChannel = NetUtil.newChannel(uri);
+  let NetUtilChannel = NetUtil.newChannel2(uri,
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null,   //requestingNode
+                                           0,      //securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
   do_check_true(iosChannel.URI.equals(NetUtilChannel.URI));
 
   run_next_test();

@@ -47,10 +47,15 @@ function hugeContentLength(metadata, response) {
 
 function test_hugeContentLength() {
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var chan = ios.newChannel("http://localhost:" +
-                            httpServer.identity.primaryPort + "/", null, null)
+  var chan = ios.newChannel2("http://localhost:" +
+ i                            httpServer.identity.primaryPort + "/", null, null,
+                              Services.scriptSecurityManager.getSystemPrincipal(),
+                              null,   //requestingNode
+                              0,      //securityFlags
+                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                              0)      //loadFlags
                 .QueryInterface(Ci.nsIHttpChannel);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 add_test(test_hugeContentLength);

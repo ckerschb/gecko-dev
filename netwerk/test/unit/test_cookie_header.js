@@ -58,7 +58,12 @@ var listener = {
 function makeChan() {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
-  var chan = ios.newChannel(URL, null, null)
+  var chan = ios.newChannel2(URL, null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
                 .QueryInterface(Components.interfaces.nsIHttpChannel);
 
   return chan;
@@ -78,7 +83,7 @@ function run_test() {
 
   chan.setRequestHeader("Cookie", cookieVal, false);
 
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }
@@ -97,7 +102,7 @@ function run_test_continued() {
   cookieVal = cookie2 + "; " + cookieVal;
 
   listener._iteration++;
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 
   do_test_pending();
 }
