@@ -14,7 +14,12 @@ function inChildProcess() {
 }
 function makeChan(path) {
   var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var chan = ios.newChannel("http://localhost:" + httpserver.identity.primaryPort + "/" + path, null, null)
+  var chan = ios.newChannel2("http://localhost:" + httpserver.identity.primaryPort + "/" + path, null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
                 .QueryInterface(Ci.nsIHttpChannel);
   return chan;
 }
@@ -22,7 +27,7 @@ function makeChan(path) {
 function setup_chan(path, isPrivate, callback) {
   var chan = makeChan(path);
   chan.QueryInterface(Ci.nsIPrivateBrowsingChannel).setPrivate(isPrivate);
-  chan.asyncOpen(new ChannelListener(callback), null);  
+  chan.asyncOpen2(new ChannelListener(callback), null);  
  }
 
 function set_cookie(value, callback) {

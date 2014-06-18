@@ -70,9 +70,14 @@ function run_test()
 
   // Test URI that we don't know anything about.  Will end up being the default
   // icon, so expect image/png.
-  let (channel = ios.newChannel(moz_anno_favicon_prefix + "http://mozilla.org",
-                                null, null)) {
-    channel.asyncOpen(new streamListener("image/png"), null);
+  let (channel = ios.newChannel2(moz_anno_favicon_prefix + "http://mozilla.org",
+                                 null, null,
+                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                 null,   //requestingNode
+                                 0,      //securityFlags
+                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                 0)) {      //loadFlags
+    channel.asyncOpen2(new streamListener("image/png"), null);
     do_test_pending();
   }
 
@@ -83,9 +88,14 @@ function run_test()
                                      (Date.now() + 60 * 60 * 24 * 1000) * 1000);
 
     // Open the channel
-    let channel = ios.newChannel(moz_anno_favicon_prefix + testURI.spec, null,
-                                 null);
-    channel.asyncOpen(new streamListener("image/png"), null);
+    let channel = ios.newChannel2(moz_anno_favicon_prefix + testURI.spec, null,
+                                  null,
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
+                                  null,   //requestingNode
+                                  0,      //securityFlags
+                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  0);      //loadFlags
+    channel.asyncOpen2(new streamListener("image/png"), null);
     do_test_pending();
   }
 }

@@ -23,7 +23,12 @@ var httpserv = null;
 function makeChan(url) {
   var ios = Cc["@mozilla.org/network/io-service;1"]
               .getService(Ci.nsIIOService);
-  return chan = ios.newChannel(url, null, null)
+  return chan = ios.newChannel2(url, null, null,
+                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                null,   //requestingNode
+                                0,      //securityFlags
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                0)      //loadFlags
                    .QueryInterface(Ci.nsIChannel);
 }
 

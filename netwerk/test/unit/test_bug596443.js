@@ -6,9 +6,14 @@ var expectedOnStopRequests = 3;
 function setupChannel(suffix, xRequest, flags) {
     var ios = Components.classes["@mozilla.org/network/io-service;1"]
             .getService(Ci.nsIIOService);
-    var chan = ios.newChannel("http://localhost:" +
-                              httpserver.identity.primaryPort +
-                              suffix, "", null);
+    var chan = ios.newChannel2("http://localhost:" +
+                               httpserver.identity.primaryPort +
+                               suffix, "", null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,   //requestingNode
+                               0,      //securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);      //loadFlags
     if (flags)
         chan.loadFlags |= flags;
 
@@ -59,13 +64,13 @@ function run_test() {
     evict_cache_entries();
 
     var ch0 = setupChannel("/bug596443", "Response0", Ci.nsIRequest.LOAD_BYPASS_CACHE);
-    ch0.asyncOpen(new Listener("Response0"), null);
+    ch0.asyncOpen2(new Listener("Response0"), null);
 
     var ch1 = setupChannel("/bug596443", "Response1", Ci.nsIRequest.LOAD_BYPASS_CACHE);
-    ch1.asyncOpen(new Listener("Response1"), null);
+    ch1.asyncOpen2(new Listener("Response1"), null);
 
     var ch2 = setupChannel("/bug596443", "Should not be used");
-    ch2.asyncOpen(new Listener("Response1"), null); // Note param: we expect this to come from cache
+    ch2.asyncOpen2(new Listener("Response1"), null); // Note param: we expect this to come from cache
 
     do_test_pending();
 }

@@ -132,7 +132,12 @@ function test_handler(metadata, response) {
 function make_channel(url) {
   var ios = Cc["@mozilla.org/network/io-service;1"].
     getService(Ci.nsIIOService);
-  return ios.newChannel(url, null, null).
+  return ios.newChannel2(url, null, null,
+                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         null,   //requestingNode
+                         0,      //securityFlags
+                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                         0).      //loadFlags
     QueryInterface(Components.interfaces.nsIHttpChannel);
 }
 
@@ -148,6 +153,6 @@ function run_test() {
   httpserver.registerPathHandler("/testdir", test_handler);
 
   var channel = make_channel("http://localhost:" + PORT + "/testdir");
-  channel.asyncOpen(new ChannelListener(channel_finished), null);
+  channel.asyncOpen2(new ChannelListener(channel_finished), null);
   do_test_pending();
 }

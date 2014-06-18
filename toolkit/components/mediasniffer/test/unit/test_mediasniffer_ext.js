@@ -68,8 +68,13 @@ var listener = {
 function setupChannel(url) {
   var ios = Components.classes["@mozilla.org/network/io-service;1"].
                        getService(Ci.nsIIOService);
-  var chan = ios.newChannel("http://localhost:" +
-                           httpserver.identity.primaryPort + url, "", null);
+  var chan = ios.newChannel2("http://localhost:" +
+                           httpserver.identity.primaryPort + url, "", null,
+                           Services.scriptSecurityManager.getSystemPrincipal(),
+                           null,   //requestingNode
+                           0,      //securityFlags
+                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                           0);      //loadFlags
   var httpChan = chan.QueryInterface(Components.interfaces.nsIHttpChannel);
   return httpChan;
 }
@@ -80,7 +85,7 @@ function runNext() {
     return;
   }
   var channel = setupChannel("/");
-  channel.asyncOpen(listener, channel, null);
+  channel.asyncOpen2(listener, channel, null);
 }
 
 function getFileContents(aFile) {
