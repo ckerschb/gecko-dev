@@ -69,10 +69,15 @@ XPCOMUtils.defineLazyGetter(this, "listener_2", function() {
     onStopRequest: function test_onStopR(request, ctx, status) {
 	var channel = request.QueryInterface(Ci.nsIHttpChannel);
 
-	var chan = ios.newChannel("http://localhost:" +
+	var chan = ios.newChannel2("http://localhost:" +
 				  httpserver.identity.primaryPort +
-				  "/test1", "", null);
-	chan.asyncOpen(listener_3, null);
+				  "/test1", "", null,
+          Services.scriptSecurityManager.getSystemPrincipal(),
+          null,   //requestingNode
+          0,      //securityFlags
+          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+          0);      //loadFlags
+	chan.asyncOpen2(listener_3, null);
     }
 };
 });
@@ -101,10 +106,15 @@ XPCOMUtils.defineLazyGetter(this, "listener_1", function() {
     onStopRequest: function test_onStopR(request, ctx, status) {
 	var channel = request.QueryInterface(Ci.nsIHttpChannel);
 
-	var chan = ios.newChannel("http://localhost:" +
+	var chan = ios.newChannel2("http://localhost:" +
 				  httpserver.identity.primaryPort +
-				  "/test1", "", null);
-	chan.asyncOpen(listener_2, null);
+				  "/test1", "", null,
+          Services.scriptSecurityManager.getSystemPrincipal(),
+          null,   //requestingNode
+          0,      //securityFlags
+          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+          0);      //loadFlags
+	chan.asyncOpen2(listener_2, null);
     }
 };
 });
@@ -129,7 +139,7 @@ function run_test() {
                                0,         // securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                0);        // loadFlags
-    chan.asyncOpen(listener_1, null);
+    chan.asyncOpen2(listener_1, null);
 
     do_test_pending();
 }

@@ -22,9 +22,14 @@ function repeatToLargerThan1K(data) {
 function setupChannel(suffix, value) {
     var ios = Components.classes["@mozilla.org/network/io-service;1"]
             .getService(Ci.nsIIOService);
-    var chan = ios.newChannel("http://localhost:" +
-                              httpserver.identity.primaryPort +
-                              suffix, "", null);
+    var chan = ios.newChannel2("http://localhost:" +
+                               httpserver.identity.primaryPort +
+                               suffix, "", null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,   //requestingNode
+                               0,      //securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);      //loadFlags
     var httpChan = chan.QueryInterface(Components.interfaces.nsIHttpChannel);
     httpChan.setRequestHeader("x-request", value, false);
     
@@ -101,7 +106,7 @@ function InitializeCacheDevices(memDevice, diskDevice) {
             }
         }
         var channel = setupChannel("/bug650995", "Initial value");
-        channel.asyncOpen(new ChannelListener(
+        channel.asyncOpen2(new ChannelListener(
             nextTest, null),
             null);
     }
@@ -120,14 +125,14 @@ function TestCacheEntrySize(setSizeFunc, firstRequest, secondRequest, secondExpe
     this.start = function() {
         setSizeFunc();
         var channel = setupChannel("/bug650995", firstRequest);
-        channel.asyncOpen(new ChannelListener(this.initialLoad, this), null);
+        channel.asyncOpen2(new ChannelListener(this.initialLoad, this), null);
     },
 
     this.initialLoad = function(request, data, ctx) {
         do_check_eq(firstRequest, data);
         var channel = setupChannel("/bug650995", secondRequest);
         do_execute_soon(function() {
-            channel.asyncOpen(new ChannelListener(ctx.testAndTriggerNext, ctx), null);
+            channel.asyncOpen2(new ChannelListener(ctx.testAndTriggerNext, ctx), null);
             });
     },
 

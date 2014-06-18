@@ -23,8 +23,13 @@ function run_test() {
   var channel =
       Components.classes["@mozilla.org/network/io-service;1"].
       getService(Components.interfaces.nsIIOService).
-      newChannel("http://localhost:" + httpserv.identity.primaryPort +
-                 "/bug412945", null, null);
+      newChannel2("http://localhost:" + httpserv.identity.primaryPort +
+                 "/bug412945", null, null,
+                  Services.scriptSecurityManager.getSystemPrincipal(),
+                  null,   //requestingNode
+                  0,      //securityFlags
+                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                  0);      //loadFlags
 
   channel.QueryInterface(Components.interfaces.nsIHttpChannel);
   channel.requestMethod = "POST";
