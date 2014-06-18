@@ -132,10 +132,15 @@ function testRegister(assert, text) {
         var ios = Cc["@mozilla.org/network/io-service;1"].
                   getService(Ci.nsIIOService);
 
-        var channel = ios.newChannel(
+        var channel = ios.newChannel2(
           "data:text/plain;charset=utf-8," + text,
           null,
-          null
+          null,
+          Services.scriptSecurityManager.getSystemPrincipal(),
+          null,   //requestingNode
+          0,      //securityFlags
+          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+          0      //loadFlags
         );
 
         channel.originalURI = aURI;

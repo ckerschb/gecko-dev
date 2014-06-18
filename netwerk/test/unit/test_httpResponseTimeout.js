@@ -50,10 +50,15 @@ function testTimeout(timeoutEnabled, nextTest) {
 
   var ios = Cc["@mozilla.org/network/io-service;1"]
   .getService(Ci.nsIIOService);
-  var chan = ios.newChannel(baseURL, null, null)
+  var chan = ios.newChannel2(baseURL, null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
   .QueryInterface(Ci.nsIHttpChannel);
   var listener = new TimeoutListener(timeoutEnabled, nextTest);
-  chan.asyncOpen(listener, null);
+  chan.asyncOpen2(listener, null);
 }
 
 function testTimeoutEnabled() {

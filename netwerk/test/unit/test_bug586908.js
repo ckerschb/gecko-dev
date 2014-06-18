@@ -40,9 +40,13 @@ function checkValue(request, data, ctx) {
 function makeChan(url) {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
-  var chan = ios.newChannel(url, null, null)
+  var chan = ios.newChannel2(url, null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
                 .QueryInterface(Components.interfaces.nsIHttpChannel);
-
   return chan;
 }
 
@@ -70,7 +74,7 @@ function run_test() {
 
   var chan = makeChan("http://localhost:" + httpserv.identity.primaryPort +
                       "/target");
-  chan.asyncOpen(new ChannelListener(checkValue, null), null);
+  chan.asyncOpen2(new ChannelListener(checkValue, null), null);
 
   do_test_pending();
 }

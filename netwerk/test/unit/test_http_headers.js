@@ -11,7 +11,12 @@ function check_request_header(chan, name, value) {
 function run_test() {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
-  var chan = ios.newChannel("http://www.mozilla.org/", null, null)
+  var chan = ios.newChannel2("http://www.mozilla.org/", null, null,
+                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             null,   //requestingNode
+                             0,      //securityFlags
+                             Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                             0)      //loadFlags
                 .QueryInterface(Components.interfaces.nsIHttpChannel);
 
   check_request_header(chan, "host", "www.mozilla.org");

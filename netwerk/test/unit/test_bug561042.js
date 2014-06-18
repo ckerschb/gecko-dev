@@ -33,8 +33,13 @@ function run_test() {
 
     var ios = Components.classes["@mozilla.org/network/io-service;1"]
                          .getService(Components.interfaces.nsIIOService);
-    var chan = ios.newChannel(baseURL, null, null)
+    var chan = ios.newChannel2(baseURL, null, null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,   //requestingNode
+                               0,      //securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0)      //loadFlags
                   .QueryInterface(Components.interfaces.nsIHttpChannel);
-    chan.asyncOpen(listener, null);
+    chan.asyncOpen2(listener, null);
     do_test_pending();
 }

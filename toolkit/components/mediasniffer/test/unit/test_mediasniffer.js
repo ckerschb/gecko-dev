@@ -67,8 +67,13 @@ function setupChannel(url, flags)
 {
   var ios = Components.classes["@mozilla.org/network/io-service;1"].
                        getService(Ci.nsIIOService);
-  var chan = ios.newChannel("http://localhost:" +
-                           httpserver.identity.primaryPort + url, "", null);
+  var chan = ios.newChannel2("http://localhost:" +
+                            httpserver.identity.primaryPort + url, "", null,
+                            Services.scriptSecurityManager.getSystemPrincipal(),
+                            null,   //requestingNode
+                            0,      //securityFlags
+                            Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                            0);      //loadFlags
   chan.loadFlags |= flags;
   var httpChan = chan.QueryInterface(Components.interfaces.nsIHttpChannel);
   return httpChan;
@@ -84,7 +89,7 @@ function runNext() {
     response.setHeader("Content-Type", tests[testRan].contentType, false);
     response.bodyOutputStream.write(data, data.length);
   });
-  channel.asyncOpen(listener, channel, null);
+  channel.asyncOpen2(listener, channel, null);
 }
 
 function run_test() {

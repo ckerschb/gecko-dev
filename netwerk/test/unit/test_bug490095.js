@@ -44,9 +44,14 @@ function logit(i, data) {
 function setupChannel(suffix, value) {
     var ios = Components.classes["@mozilla.org/network/io-service;1"].
                          getService(Ci.nsIIOService);
-    var chan = ios.newChannel("http://localhost:" +
-                              httpserver.identity.primaryPort +
-                              suffix, "", null);
+    var chan = ios.newChannel2("http://localhost:" +
+                               httpserver.identity.primaryPort +
+                               suffix, "", null,
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null,   //requestingNode
+                               0,      //securityFlags
+                               Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                               0);      //loadFlags
     var httpChan = chan.QueryInterface(Components.interfaces.nsIHttpChannel);
     httpChan.requestMethod = "GET";
     httpChan.setRequestHeader("x-request", value, false);
@@ -57,7 +62,7 @@ function triggerNextTest() {
     var test = tests[index];
     var channel = setupChannel(test.url, test.server);
     if (test.flags) channel.loadFlags = test.flags;
-    channel.asyncOpen(new ChannelListener(checkValueAndTrigger, null), null);
+    channel.asyncOpen2(new ChannelListener(checkValueAndTrigger, null), null);
 }
 
 function checkValueAndTrigger(request, data, ctx) {
