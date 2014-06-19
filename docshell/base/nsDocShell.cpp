@@ -322,6 +322,12 @@ CheckPingURI(nsIURI* uri, nsIContent* content)
     return false;
   }
 
+  // This is now done when SendPing calls AsyncOpen2, so commenting it out here.
+  // Eventually we should also move the CheckLoadURIWithPrincipal() call to AsyncOpen2().
+  // Also note that this call to content policies is actually wrong - we should be passing
+  // content->OwnerDoc() (the requester) instead of content (the anchor element)
+  // We should confirm this with testing.
+  /*
   // Check with contentpolicy
   int16_t shouldLoad = nsIContentPolicy::ACCEPT;
   rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_PING,
@@ -331,7 +337,8 @@ CheckPingURI(nsIURI* uri, nsIContent* content)
                                  EmptyCString(), // mime hint
                                  nullptr, //extra
                                  &shouldLoad);
-  return NS_SUCCEEDED(rv) && NS_CP_ACCEPTED(shouldLoad);
+  return NS_SUCCEEDED(rv) && NS_CP_ACCEPTED(shouldLoad);*/
+  return NS_SUCCEEDED(rv);
 }
 
 typedef void (* ForEachPingCallback)(void *closure, nsIContent *content,
@@ -554,15 +561,15 @@ SendPing(void *closure, nsIContent *content, nsIURI *uri, nsIIOService *ios)
   }
 
   nsIDocument *doc = content->OwnerDoc();
-  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
+  NS_ASSERTION(doc, "Can not create channel without a node");
   nsCOMPtr<nsIChannel> chan;
   ios->NewChannelFromURI2(uri,
-                          systemPrincipal,
-                          nullptr, // requestingNode
-                          0,       // securityFlags
-                          nsIContentPolicy::TYPE_OTHER,
-                          0,       // loadFlags
+                          doc->NodePrincipal(),
+                          doc,
+                          0,              // securityFlags
+                          nsIContentPolicy::TYPE_PING,
+                          0,              // loadFlags
                           getter_AddRefs(chan));
   if (!chan)
     return;
@@ -664,7 +671,7 @@ SendPing(void *closure, nsIContent *content, nsIURI *uri, nsIIOService *ios)
   NS_ASSERTION(callbacks, "oops");
   loadGroup->SetNotificationCallbacks(callbacks);
 
-  chan->AsyncOpen(listener, nullptr);
+  chan->AsyncOpen2(listener, nullptr);
 
   // Even if AsyncOpen failed, we still count this as a successful ping.  It's
   // possible that AsyncOpen may have failed after triggering some background
@@ -8980,6 +8987,9 @@ nsDocShell::InternalLoad(nsIURI * aURI,
                                                 getter_AddRefs(loadingPrincipal));
     }
 
+    // TODO - we need to coment out this call.
+    // Content policies will be called after open is called on the channel.
+    // But it is not clear where open is called.
     rv = NS_CheckContentLoadPolicy(contentType,
                                    aURI,
                                    loadingPrincipal,
@@ -9804,20 +9814,6 @@ nsDocShell::DoURILoad(nsIURI * aURI,
 
     bool isSrcdoc = !aSrcdoc.IsVoid();
     if (!isSrcdoc) {
-
-        // Here we compuate the requestingContext and the requestingPrincipal.  Alternatively, we could pass those in from InternalLoad to DoURILoad()
-
-        // Get the RequestingContext, the same way we get it in InternalLoad to pass into content policy
-        nsCOMPtr<Element> requestingElement;
-        // Use nsPIDOMWindow since we _want_ to cross the chrome boundary if needed
-        if (mScriptGlobal)
-          requestingElement = mScriptGlobal->GetFrameElementInternal();
-
-        nsISupports* requestingContext = requestingElement;
-        
-        if (!requestingContext) {
-          requestingContext = ToSupports(mScriptGlobal);
-        }
 
         // XXXbz would be nice to know the loading principal here... but we don't
         nsCOMPtr<nsIPrincipal> loadingPrincipal = do_QueryInterface(aOwner);
