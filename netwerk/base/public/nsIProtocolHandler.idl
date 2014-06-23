@@ -13,7 +13,7 @@ interface nsINode;
 /**
  * nsIProtocolHandler
  */
-[scriptable, uuid(f5753fec-a051-4ddc-8891-11f1f1575072)]
+[scriptable, uuid(6cd5f59f-848d-4dbc-8452-7b304aeea44b)]
 interface nsIProtocolHandler : nsISupports
 {
     /**

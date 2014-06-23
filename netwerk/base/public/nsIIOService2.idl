@@ -11,7 +11,7 @@ interface nsINode;
 /**
  * nsIIOService2 extends nsIIOService
  */
-[scriptable, uuid(9a7dc724-0b5c-4b78-9722-1037074c02de)]
+[scriptable, uuid(f38f1c7d-0ae0-4762-b956-636bc2ecba27)]
 interface nsIIOService2 : nsIIOService
 {
   /**

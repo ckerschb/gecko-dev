@@ -21,7 +21,7 @@ interface nsINode;
  * as a convenience to the programmer and in some cases to improve performance
  * by eliminating intermediate data structures and interfaces.
  */
-[scriptable, uuid(bddeda3f-9020-4d12-8c70-984ee9f7935e)]
+[scriptable, uuid(3de491bd-4ff4-4de3-b2b8-ae3ba37b115c)]
 interface nsIIOService : nsISupports
 {
     /**

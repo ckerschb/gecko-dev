@@ -115,7 +115,7 @@ interface nsIStreamingProtocolListener : nsISupports
 /**
  * Media stream controller API: control and retrieve meta data from media stream.
  */
-[uuid(a9bdd4b0-8559-11e2-9e96-0800200c9a66)]
+[uuid(7decbabe-1f86-4977-9cda-37ab0c672d14)]
 interface nsIStreamingProtocolController : nsISupports
 {
     /**

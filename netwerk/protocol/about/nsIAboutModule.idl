@@ -11,7 +11,7 @@ interface nsIChannel;
 interface nsIPrincipal;
 interface nsINode;
 
-[scriptable, uuid(9575693c-60d9-4332-b6b8-6c29289339cb)]
+[scriptable, uuid(69444cc8-f445-4e86-90b4-8fd902c56389)]
 interface nsIAboutModule : nsISupports 
 {
     /**
