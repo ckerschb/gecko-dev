@@ -136,13 +136,14 @@ private:
   }
 
   SECStatus VerifySignedData(const CERTSignedData* signedData,
-                             const CERTCertificate* cert)
+                             const SECItem& subjectPublicKeyInfo)
   {
-    return ::mozilla::pkix::VerifySignedData(signedData, cert, nullptr);
+    return ::mozilla::pkix::VerifySignedData(signedData, subjectPublicKeyInfo,
+                                             nullptr);
   }
 
-  SECStatus CheckRevocation(EndEntityOrCA, const CERTCertificate*,
-                            /*const*/ CERTCertificate*, PRTime,
+  SECStatus CheckRevocation(EndEntityOrCA, const CertID&, PRTime,
+                            /*optional*/ const SECItem*,
                             /*optional*/ const SECItem*)
   {
     return SECSuccess;
@@ -189,7 +190,7 @@ TEST_F(pkix_cert_chain_length, MaxAcceptableCertChainLength)
   ScopedCERTCertList results;
   ASSERT_SECSuccess(BuildCertChain(trustDomain, trustDomain.GetLeafeCACert(),
                                    now, EndEntityOrCA::MustBeCA,
-                                   0, // key usage
+                                   KeyUsage::noParticularKeyUsageRequired,
                                    KeyPurposeId::id_kp_serverAuth,
                                    CertPolicyId::anyPolicy,
                                    nullptr, // stapled OCSP response
@@ -204,7 +205,7 @@ TEST_F(pkix_cert_chain_length, MaxAcceptableCertChainLength)
                          trustDomain.leafCAKey.get(), privateKey, cert));
   ASSERT_SECSuccess(BuildCertChain(trustDomain, cert.get(), now,
                                    EndEntityOrCA::MustBeEndEntity,
-                                   0, // key usage
+                                   KeyUsage::noParticularKeyUsageRequired,
                                    KeyPurposeId::id_kp_serverAuth,
                                    CertPolicyId::anyPolicy,
                                    nullptr, // stapled OCSP response
@@ -226,7 +227,7 @@ TEST_F(pkix_cert_chain_length, BeyondMaxAcceptableCertChainLength)
   ASSERT_SECFailure(SEC_ERROR_UNKNOWN_ISSUER,
                     BuildCertChain(trustDomain, caCert.get(), now,
                                    EndEntityOrCA::MustBeCA,
-                                   0, // key usage
+                                   KeyUsage::noParticularKeyUsageRequired,
                                    KeyPurposeId::id_kp_serverAuth,
                                    CertPolicyId::anyPolicy,
                                    nullptr, // stapled OCSP response
@@ -242,7 +243,7 @@ TEST_F(pkix_cert_chain_length, BeyondMaxAcceptableCertChainLength)
   ASSERT_SECFailure(SEC_ERROR_UNKNOWN_ISSUER,
                     BuildCertChain(trustDomain, cert.get(), now,
                                    EndEntityOrCA::MustBeEndEntity,
-                                   0, // key usage
+                                   KeyUsage::noParticularKeyUsageRequired,
                                    KeyPurposeId::id_kp_serverAuth,
                                    CertPolicyId::anyPolicy,
                                    nullptr, // stapled OCSP response

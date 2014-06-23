@@ -163,16 +163,15 @@ AppTrustDomain::GetCertTrust(EndEntityOrCA endEntityOrCA,
 
 SECStatus
 AppTrustDomain::VerifySignedData(const CERTSignedData* signedData,
-                                  const CERTCertificate* cert)
+                                 const SECItem& subjectPublicKeyInfo)
 {
-  return ::mozilla::pkix::VerifySignedData(signedData, cert, mPinArg);
+  return ::mozilla::pkix::VerifySignedData(signedData, subjectPublicKeyInfo,
+                                           mPinArg);
 }
 
 SECStatus
-AppTrustDomain::CheckRevocation(EndEntityOrCA,
-                                const CERTCertificate*,
-                                /*const*/ CERTCertificate*,
-                                PRTime time,
+AppTrustDomain::CheckRevocation(EndEntityOrCA, const CertID&, PRTime time,
+                                /*optional*/ const SECItem*,
                                 /*optional*/ const SECItem*)
 {
   // We don't currently do revocation checking. If we need to distrust an Apps

@@ -42,6 +42,7 @@ public class ButtonToast {
 
     public enum ReasonHidden {
         CLICKED,
+        TOUCH_OUTSIDE,
         TIMEOUT,
         REPLACED,
         STARTUP
@@ -129,6 +130,11 @@ public class ButtonToast {
     }
 
     public void hide(boolean immediate, ReasonHidden reason) {
+        // There's nothing to do if the view is already hidden.
+        if (mView.getVisibility() == View.GONE) {
+            return;
+        }
+
         if (mCurrentToast != null && mCurrentToast.listener != null) {
             mCurrentToast.listener.onToastHidden(reason);
         }
@@ -149,6 +155,7 @@ public class ButtonToast {
                 // If we are showing a toast and go in the background
                 // onAnimationEnd will be called when the app is restored
                 public void onPropertyAnimationEnd() {
+                    mView.clearAnimation();
                     mView.setVisibility(View.GONE);
                 }
                 public void onPropertyAnimationStart() { }

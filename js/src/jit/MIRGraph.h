@@ -91,6 +91,9 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
     // Mark this block (and only this block) as unreachable.
     void setUnreachable() {
         JS_ASSERT(!unreachable_);
+        setUnreachableUnchecked();
+    }
+    void setUnreachableUnchecked() {
         unreachable_ = true;
     }
     bool unreachable() const {
@@ -229,6 +232,7 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
     MInstructionReverseIterator discardAt(MInstructionReverseIterator &iter);
     MDefinitionIterator discardDefAt(MDefinitionIterator &iter);
     void discardAllInstructions();
+    void discardAllInstructionsStartingAt(MInstructionIterator &iter);
     void discardAllPhiOperands();
     void discardAllPhis();
     void discardAllResumePoints(bool discardEntry = true);
@@ -275,8 +279,13 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
     MBasicBlock *getPredecessor(uint32_t i) const {
         return predecessors_[i];
     }
+#ifdef DEBUG
+    bool hasLastIns() const {
+        return !instructions_.empty() && instructions_.rbegin()->isControlInstruction();
+    }
+#endif
     MControlInstruction *lastIns() const {
-        return lastIns_;
+        return instructions_.rbegin()->toControlInstruction();
     }
     MPhiIterator phisBegin() const {
         return phis_.begin();
@@ -361,17 +370,15 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
         return mark_;
     }
     void mark() {
+        MOZ_ASSERT(!mark_, "Marking already-marked block");
+        markUnchecked();
+    }
+    void markUnchecked() {
         mark_ = true;
     }
     void unmark() {
+        MOZ_ASSERT(mark_, "Unarking unmarked block");
         mark_ = false;
-    }
-    void makeStart(MStart *start) {
-        add(start);
-        start_ = start;
-    }
-    MStart *start() const {
-        return start_;
     }
 
     MBasicBlock *immediateDominator() const {
@@ -501,12 +508,10 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
     InlineForwardList<MResumePoint> resumePoints_;
     FixedList<MDefinition *> slots_;
     uint32_t stackPosition_;
-    MControlInstruction *lastIns_;
     jsbytecode *pc_;
     uint32_t id_;
     uint32_t domIndex_; // Index in the dominator tree.
     LBlock *lir_;
-    MStart *start_;
     MResumePoint *entryResumePoint_;
     MBasicBlock *successorWithPhis_;
     uint32_t positionInPhiSuccessor_;
@@ -603,6 +608,9 @@ class MIRGraph
     PostorderIterator poBegin() {
         return blocks_.rbegin();
     }
+    PostorderIterator poBegin(MBasicBlock *at) {
+        return blocks_.rbegin(at);
+    }
     PostorderIterator poEnd() {
         return blocks_.rend();
     }
@@ -621,6 +629,11 @@ class MIRGraph
         JS_ASSERT(block->id());
         blocks_.remove(block);
         blocks_.pushBack(block);
+    }
+    void moveBlockBefore(MBasicBlock *at, MBasicBlock *block) {
+        JS_ASSERT(block->id());
+        blocks_.remove(block);
+        blocks_.insertBefore(at, block);
     }
     size_t numBlocks() const {
         return numBlocks_;

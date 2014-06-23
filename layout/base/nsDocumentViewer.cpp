@@ -21,7 +21,6 @@
 #include "nsPresContext.h"
 #include "nsIPresShell.h"
 #include "nsStyleSet.h"
-#include "nsCSSStyleSheet.h"
 #include "nsIFrame.h"
 #include "nsIWritablePropertyBag2.h"
 #include "nsSubDocumentFrame.h"
@@ -49,6 +48,7 @@
 #include "nsNetUtil.h"
 #include "nsIContentViewerEdit.h"
 #include "nsIContentViewerFile.h"
+#include "mozilla/CSSStyleSheet.h"
 #include "mozilla/css/Loader.h"
 #include "nsIMarkupDocumentViewer.h"
 #include "nsIInterfaceRequestor.h"
@@ -573,36 +573,33 @@ nsDocumentViewer::SyncParentSubDocMap()
   }
 
   nsCOMPtr<nsPIDOMWindow> pwin(docShell->GetWindow());
-  nsCOMPtr<Element> element;
-
-  if (mDocument && pwin) {
-    element = pwin->GetFrameElementInternal();
+  if (!mDocument || !pwin) {
+    return NS_OK;
   }
 
-  if (element) {
-    nsCOMPtr<nsIDocShellTreeItem> parent;
-    docShell->GetParent(getter_AddRefs(parent));
-
-    nsCOMPtr<nsIDOMWindow> parent_win = parent ? parent->GetWindow() : nullptr;
-
-    if (parent_win) {
-      nsCOMPtr<nsIDOMDocument> dom_doc;
-      parent_win->GetDocument(getter_AddRefs(dom_doc));
-
-      nsCOMPtr<nsIDocument> parent_doc(do_QueryInterface(dom_doc));
-
-      if (parent_doc) {
-        if (mDocument &&
-            parent_doc->GetSubDocumentFor(element) != mDocument) {
-          mDocument->SuppressEventHandling(nsIDocument::eEvents,
-                                           parent_doc->EventHandlingSuppressed());
-        }
-        return parent_doc->SetSubDocumentFor(element, mDocument);
-      }
-    }
+  nsCOMPtr<Element> element = pwin->GetFrameElementInternal();
+  if (!element) {
+    return NS_OK;
   }
 
-  return NS_OK;
+  nsCOMPtr<nsIDocShellTreeItem> parent;
+  docShell->GetParent(getter_AddRefs(parent));
+
+  nsCOMPtr<nsPIDOMWindow> parent_win = parent ? parent->GetWindow() : nullptr;
+  if (!parent_win) {
+    return NS_OK;
+  }
+
+  nsCOMPtr<nsIDocument> parent_doc = parent_win->GetDoc();
+  if (!parent_doc) {
+    return NS_OK;
+  }
+
+  if (mDocument && parent_doc->GetSubDocumentFor(element) != mDocument) {
+    mDocument->SuppressEventHandling(nsIDocument::eEvents,
+                                     parent_doc->EventHandlingSuppressed());
+  }
+  return parent_doc->SetSubDocumentFor(element, mDocument);
 }
 
 NS_IMETHODIMP
@@ -2218,7 +2215,7 @@ nsDocumentViewer::CreateStyleSet(nsIDocument* aDocument,
   }
 
   // Handle the user sheets.
-  nsCSSStyleSheet* sheet = nullptr;
+  CSSStyleSheet* sheet = nullptr;
   if (nsContentUtils::IsInChromeDocshell(aDocument)) {
     sheet = nsLayoutStylesheetCache::UserChromeSheet();
   }
@@ -2236,7 +2233,7 @@ nsDocumentViewer::CreateStyleSet(nsIDocument* aDocument,
   nsCOMPtr<nsIDocShell> ds(mContainer);
   nsCOMPtr<nsIDOMEventTarget> chromeHandler;
   nsCOMPtr<nsIURI> uri;
-  nsRefPtr<nsCSSStyleSheet> csssheet;
+  nsRefPtr<CSSStyleSheet> csssheet;
 
   if (ds) {
     ds->GetChromeEventHandler(getter_AddRefs(chromeHandler));
@@ -2305,8 +2302,8 @@ nsDocumentViewer::CreateStyleSet(nsIDocument* aDocument,
 
     // Make sure to clone the quirk sheet so that it can be usefully
     // enabled/disabled as needed.
-    nsRefPtr<nsCSSStyleSheet> quirkClone;
-    nsCSSStyleSheet* quirkSheet;
+    nsRefPtr<CSSStyleSheet> quirkClone;
+    CSSStyleSheet* quirkSheet;
     if (!nsLayoutStylesheetCache::UASheet() ||
         !(quirkSheet = nsLayoutStylesheetCache::QuirkSheet()) ||
         !(quirkClone = quirkSheet->Clone(nullptr, nullptr, nullptr, nullptr)) ||
@@ -2332,6 +2329,11 @@ nsDocumentViewer::CreateStyleSet(nsIDocument* aDocument,
     if (sheet) {
       // Load the minimal XUL rules for scrollbars and a few other XUL things
       // that non-XUL (typically HTML) documents commonly use.
+      styleSet->PrependStyleSheet(nsStyleSet::eAgentSheet, sheet);
+    }
+
+    sheet = nsLayoutStylesheetCache::CounterStylesSheet();
+    if (sheet) {
       styleSet->PrependStyleSheet(nsStyleSet::eAgentSheet, sheet);
     }
 

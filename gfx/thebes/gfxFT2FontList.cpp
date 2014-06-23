@@ -188,7 +188,8 @@ FT2FontEntry::CreateScaledFont(const gfxFontStyle *aStyle)
 
     // synthetic oblique by skewing via the font matrix
     bool needsOblique = !IsItalic() &&
-            (aStyle->style & (NS_FONT_STYLE_ITALIC | NS_FONT_STYLE_OBLIQUE));
+            (aStyle->style & (NS_FONT_STYLE_ITALIC | NS_FONT_STYLE_OBLIQUE)) &&
+            aStyle->allowSyntheticStyle;
 
     if (needsOblique) {
         const double kSkewFactor = 0.25;
@@ -1432,20 +1433,17 @@ gfxFT2FontList::LookupLocalFont(const gfxProxyFontEntry *aProxyEntry,
 gfxFontFamily*
 gfxFT2FontList::GetDefaultFont(const gfxFontStyle* aStyle)
 {
+    gfxFontFamily *ff = nullptr;
 #ifdef MOZ_WIDGET_GONK
-    nsAutoString resolvedName;
-    if (ResolveFontName(NS_LITERAL_STRING("Fira Sans OT"), resolvedName)) {
-        return FindFamily(resolvedName);
-    }
+    ff = FindFamily(NS_LITERAL_STRING("Fira Sans OT"));
 #elif defined(MOZ_WIDGET_ANDROID)
-    nsAutoString resolvedName;
-    if (ResolveFontName(NS_LITERAL_STRING("Roboto"), resolvedName) ||
-        ResolveFontName(NS_LITERAL_STRING("Droid Sans"), resolvedName)) {
-        return FindFamily(resolvedName);
+    ff = FindFamily(NS_LITERAL_STRING("Roboto"));
+    if (!ff) {
+        ff = FindFamily(NS_LITERAL_STRING("Droid Sans"));
     }
 #endif
     /* TODO: what about Qt or other platforms that may use this? */
-    return nullptr;
+    return ff;
 }
 
 gfxFontEntry*

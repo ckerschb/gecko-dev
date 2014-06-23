@@ -7,7 +7,9 @@
 
 #include "mozilla/MemoryReporting.h"
 
+#include "gfxHarfBuzzShaper.h"
 #include <algorithm>
+#include "gfxGraphiteShaper.h"
 #include "gfxDWriteFontList.h"
 #include "gfxContext.h"
 #include <dwrite.h>
@@ -87,7 +89,7 @@ gfxDWriteFont::gfxDWriteFont(gfxFontEntry *aFontEntry,
     nsresult rv;
     DWRITE_FONT_SIMULATIONS sims = DWRITE_FONT_SIMULATIONS_NONE;
     if ((GetStyle()->style & (NS_FONT_STYLE_ITALIC | NS_FONT_STYLE_OBLIQUE)) &&
-        !fe->IsItalic()) {
+        !fe->IsItalic() && GetStyle()->allowSyntheticStyle) {
             // For this we always use the font_matrix for uniformity. Not the
             // DWrite simulation.
             mNeedsOblique = true;
@@ -104,6 +106,14 @@ gfxDWriteFont::gfxDWriteFont(gfxFontEntry *aFontEntry,
     }
 
     ComputeMetrics(anAAOption);
+
+    if (FontCanSupportGraphite()) {
+        mGraphiteShaper = new gfxGraphiteShaper(this);
+    }
+
+    if (FontCanSupportHarfBuzz()) {
+        mHarfBuzzShaper = new gfxHarfBuzzShaper(this);
+    }
 }
 
 gfxDWriteFont::~gfxDWriteFont()
@@ -122,6 +132,32 @@ gfxDWriteFont::CopyWithAntialiasOption(AntialiasOption anAAOption)
 {
     return new gfxDWriteFont(static_cast<gfxDWriteFontEntry*>(mFontEntry.get()),
                              &mStyle, mNeedsBold, anAAOption);
+}
+
+bool
+gfxDWriteFont::ShapeText(gfxContext      *aContext,
+                         const char16_t *aText,
+                         uint32_t         aOffset,
+                         uint32_t         aLength,
+                         int32_t          aScript,
+                         gfxShapedText   *aShapedText,
+                         bool             aPreferPlatformShaping)
+{
+    bool ok = false;
+
+    if (mGraphiteShaper && gfxPlatform::GetPlatform()->UseGraphiteShaping()) {
+        ok = mGraphiteShaper->ShapeText(aContext, aText, aOffset, aLength,
+                                        aScript, aShapedText);
+    }
+
+    if (!ok && mHarfBuzzShaper) {
+        ok = mHarfBuzzShaper->ShapeText(aContext, aText, aOffset, aLength,
+                                        aScript, aShapedText);
+    }
+
+    PostShapingFixup(aContext, aText, aOffset, aLength, aShapedText);
+
+    return ok;
 }
 
 const gfxFont::Metrics&
@@ -674,7 +710,7 @@ gfxDWriteFont::AddSizeOfIncludingThis(MallocSizeOf aMallocSizeOf,
 TemporaryRef<ScaledFont>
 gfxDWriteFont::GetScaledFont(mozilla::gfx::DrawTarget *aTarget)
 {
-  bool wantCairo = aTarget->GetType() == BackendType::CAIRO;
+  bool wantCairo = aTarget->GetBackendType() == BackendType::CAIRO;
   if (mAzureScaledFont && mAzureScaledFontIsCairo == wantCairo) {
     return mAzureScaledFont;
   }

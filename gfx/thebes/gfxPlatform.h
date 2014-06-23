@@ -13,6 +13,8 @@
 #include "nsAutoPtr.h"
 
 #include "gfxTypes.h"
+#include "gfxFontFamilyList.h"
+#include "gfxBlur.h"
 #include "nsRect.h"
 
 #include "qcms.h"
@@ -153,7 +155,10 @@ GetBackendName(mozilla::gfx::BackendType aBackend)
 
 class gfxPlatform {
 public:
+    typedef mozilla::gfx::DataSourceSurface DataSourceSurface;
+    typedef mozilla::gfx::DrawTarget DrawTarget;
     typedef mozilla::gfx::IntSize IntSize;
+    typedef mozilla::gfx::SourceSurface SourceSurface;
 
     /**
      * Return a pointer to the current active platform.
@@ -169,6 +174,9 @@ public:
      */
     static void Shutdown();
 
+    static void InitLayersIPC();
+    static void ShutdownLayersIPC();
+
     /**
      * Create an offscreen surface of the given dimensions
      * and image format.
@@ -176,9 +184,6 @@ public:
     virtual already_AddRefed<gfxASurface>
       CreateOffscreenSurface(const IntSize& size,
                              gfxContentType contentType) = 0;
-
-    virtual already_AddRefed<gfxASurface> OptimizeImage(gfxImageSurface *aSurface,
-                                                        gfxImageFormat format);
 
     /**
      * Beware that these methods may return DrawTargets which are not fully supported
@@ -188,10 +193,10 @@ public:
      * support the DrawTarget we get back.
      * See SupportsAzureContentForDrawTarget.
      */
-    virtual mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    virtual mozilla::TemporaryRef<DrawTarget>
       CreateDrawTargetForSurface(gfxASurface *aSurface, const mozilla::gfx::IntSize& aSize);
 
-    virtual mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    virtual mozilla::TemporaryRef<DrawTarget>
       CreateDrawTargetForUpdateSurface(gfxASurface *aSurface, const mozilla::gfx::IntSize& aSize);
 
     /*
@@ -201,13 +206,17 @@ public:
      * surface, even if aTarget changes.
      * aTarget should not keep a reference to the returned surface because that
      * will cause a cycle.
+     *
+     * This function is static so that it can be accessed from
+     * PluginInstanceChild (where we can't call gfxPlatform::GetPlatform()
+     * because the prefs service can only be accessed from the main process).
      */
-    virtual mozilla::RefPtr<mozilla::gfx::SourceSurface>
+    static mozilla::TemporaryRef<SourceSurface>
       GetSourceSurfaceForSurface(mozilla::gfx::DrawTarget *aTarget, gfxASurface *aSurface);
 
     static void ClearSourceSurfaceForSurface(gfxASurface *aSurface);
 
-    static mozilla::RefPtr<mozilla::gfx::DataSourceSurface>
+    static mozilla::TemporaryRef<DataSourceSurface>
         GetWrappedDataSourceSurface(gfxASurface *aSurface);
 
     virtual mozilla::TemporaryRef<mozilla::gfx::ScaledFont>
@@ -216,13 +225,13 @@ public:
     virtual already_AddRefed<gfxASurface>
       GetThebesSurfaceForDrawTarget(mozilla::gfx::DrawTarget *aTarget);
 
-    mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    mozilla::TemporaryRef<DrawTarget>
       CreateOffscreenContentDrawTarget(const mozilla::gfx::IntSize& aSize, mozilla::gfx::SurfaceFormat aFormat);
 
-    mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    mozilla::TemporaryRef<DrawTarget>
       CreateOffscreenCanvasDrawTarget(const mozilla::gfx::IntSize& aSize, mozilla::gfx::SurfaceFormat aFormat);
 
-    virtual mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    virtual mozilla::TemporaryRef<DrawTarget>
       CreateDrawTargetForData(unsigned char* aData, const mozilla::gfx::IntSize& aSize, 
                               int32_t aStride, mozilla::gfx::SurfaceFormat aFormat);
 
@@ -288,19 +297,6 @@ public:
     }
 
     /**
-     * Font name resolver, this returns actual font name(s) by the callback
-     * function. If the font doesn't exist, the callback function is not called.
-     * If the callback function returns false, the aAborted value is set to
-     * true, otherwise, false.
-     */
-    typedef bool (*FontResolverCallback) (const nsAString& aName,
-                                            void *aClosure);
-    virtual nsresult ResolveFontName(const nsAString& aFontName,
-                                     FontResolverCallback aCallback,
-                                     void *aClosure,
-                                     bool& aAborted) = 0;
-
-    /**
      * Resolving a font name to family name. The result MUST be in the result of GetFontList().
      * If the name doesn't in the system, aFamilyName will be empty string, but not failed.
      */
@@ -309,9 +305,10 @@ public:
     /**
      * Create the appropriate platform font group
      */
-    virtual gfxFontGroup *CreateFontGroup(const nsAString& aFamilies,
-                                          const gfxFontStyle *aStyle,
-                                          gfxUserFontSet *aUserFontSet) = 0;
+    virtual gfxFontGroup
+    *CreateFontGroup(const mozilla::FontFamilyList& aFontFamilyList,
+                     const gfxFontStyle *aStyle,
+                     gfxUserFontSet *aUserFontSet) = 0;
                                           
                                           
     /**
@@ -392,6 +389,13 @@ public:
      */
     bool UseGraphiteShaping();
 
+    /**
+     * Whether to use the harfbuzz shaper (depending on script complexity).
+     *
+     * This allows harfbuzz to be enabled selectively via the preferences.
+     */
+    bool UseHarfBuzzForScript(int32_t aScriptCode);
+
     // check whether format is supported on a platform or not (if unclear, returns true)
     virtual bool IsFontFormatSupported(nsIURI *aFontURI, uint32_t aFormatFlags) { return false; }
 
@@ -440,15 +444,8 @@ public:
 
     static bool OffMainThreadCompositingEnabled();
 
-    /** Use gfxPlatform::GetPref* methods instead of direct calls to Preferences
-     * to get the values for layers preferences.  These will only be evaluated
-     * only once, and remain the same until restart.
-     */
-    static bool GetPrefLayersOffMainThreadCompositionEnabled();
     static bool CanUseDirect3D9();
     static bool CanUseDirect3D11();
-
-    static bool OffMainThreadCompositionRequired();
 
     /**
      * Is it possible to use buffer rotation.  Note that these
@@ -543,18 +540,12 @@ public:
       return nsIntRect(0, 0, bits * sizeOfBit, sizeOfBit);
     }
 
-    /**
-     * Returns true if we should use raw memory to send data to the compositor
-     * rather than using shmems.
-     *
-     * This method should not be called from the compositor thread.
-     */
-    bool PreferMemoryOverShmem() const;
-
     mozilla::gl::SkiaGLGlue* GetSkiaGLGlue();
     void PurgeSkiaCache();
 
     virtual bool IsInGonkEmulator() const { return false; }
+
+    static bool UsesOffMainThreadCompositing();
 
 protected:
     gfxPlatform();
@@ -567,7 +558,7 @@ protected:
      * Helper method, creates a draw target for a specific Azure backend.
      * Used by CreateOffscreenDrawTarget.
      */
-    mozilla::RefPtr<mozilla::gfx::DrawTarget>
+    mozilla::TemporaryRef<DrawTarget>
       CreateDrawTargetForBackend(mozilla::gfx::BackendType aBackend,
                                  const mozilla::gfx::IntSize& aSize,
                                  mozilla::gfx::SurfaceFormat aFormat);
@@ -619,6 +610,9 @@ protected:
     // when doing system font fallback
     int8_t  mFallbackUsesCmaps;
 
+    // which scripts should be shaped with harfbuzz
+    int32_t mUseHarfBuzzScripts;
+
     // max character limit for words in word cache
     int32_t mWordCacheCharLimit;
 
@@ -639,8 +633,6 @@ private:
 
     virtual void GetPlatformCMSOutputProfile(void *&mem, size_t &size);
 
-    virtual bool SupportsOffMainThreadCompositing() { return true; }
-
     nsRefPtr<gfxASurface> mScreenReferenceSurface;
     mozilla::RefPtr<mozilla::gfx::DrawTarget> mScreenReferenceDrawTarget;
     nsTArray<uint32_t> mCJKPrefLangs;
@@ -660,7 +652,6 @@ private:
     mozilla::widget::GfxInfoCollector<gfxPlatform> mAzureCanvasBackendCollector;
 
     mozilla::RefPtr<mozilla::gfx::DrawEventRecorder> mRecorder;
-    bool mLayersPreferMemoryOverShmem;
     mozilla::RefPtr<mozilla::gl::SkiaGLGlue> mSkiaGlue;
 };
 

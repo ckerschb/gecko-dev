@@ -352,9 +352,10 @@ AtomizeAndtake(ExclusiveContext *cx, jschar *tbchars, size_t length, InternBehav
 }
 
 /* |tbchars| must not point into an inline or short string. */
+template <typename CharT>
 MOZ_ALWAYS_INLINE
 static JSAtom *
-AtomizeAndCopyChars(ExclusiveContext *cx, const jschar *tbchars, size_t length, InternBehavior ib)
+AtomizeAndCopyChars(ExclusiveContext *cx, const CharT *tbchars, size_t length, InternBehavior ib)
 {
     if (JSAtom *s = cx->staticStrings().lookup(tbchars, length))
          return s;
@@ -364,13 +365,6 @@ AtomizeAndCopyChars(ExclusiveContext *cx, const jschar *tbchars, size_t length, 
     AtomSet::Ptr pp = cx->permanentAtoms().readonlyThreadsafeLookup(lookup);
     if (pp)
         return pp->asPtr();
-
-    /*
-     * If a GC occurs at js_NewStringCopy then |p| will still have the correct
-     * hash, allowing us to avoid rehashing it. Even though the hash is
-     * unchanged, we need to re-lookup the table position because a last-ditch
-     * GC will potentially free some table entries.
-     */
 
     AutoLockForExclusiveAccess lock(cx);
 
@@ -392,13 +386,22 @@ AtomizeAndCopyChars(ExclusiveContext *cx, const jschar *tbchars, size_t length, 
 
     JSAtom *atom = flat->morphAtomizedStringIntoAtom();
 
-    if (!atoms.relookupOrAdd(p, lookup, AtomStateEntry(atom, bool(ib)))) {
+    // We have held the lock since looking up p, and the operations we've done
+    // since then can't GC; therefore the atoms table has not been modified and
+    // p is still valid.
+    if (!atoms.add(p, AtomStateEntry(atom, bool(ib)))) {
         js_ReportOutOfMemory(cx); /* SystemAllocPolicy does not report OOM. */
         return nullptr;
     }
 
     return atom;
 }
+
+template JSAtom *
+AtomizeAndCopyChars(ExclusiveContext *cx, const jschar *tbchars, size_t length, InternBehavior ib);
+
+template JSAtom *
+AtomizeAndCopyChars(ExclusiveContext *cx, const Latin1Char *tbchars, size_t length, InternBehavior ib);
 
 JSAtom *
 js::AtomizeString(ExclusiveContext *cx, JSString *str,
@@ -427,11 +430,14 @@ js::AtomizeString(ExclusiveContext *cx, JSString *str,
         return &atom;
     }
 
-    const jschar *chars = str->getChars(cx);
-    if (!chars)
+    JSLinearString *linear = str->ensureLinear(cx);
+    if (!linear)
         return nullptr;
 
-    return AtomizeAndCopyChars(cx, chars, str->length(), ib);
+    JS::AutoCheckCannotGC nogc;
+    return linear->hasLatin1Chars()
+           ? AtomizeAndCopyChars(cx, linear->latin1Chars(nogc), linear->length(), ib)
+           : AtomizeAndCopyChars(cx, linear->twoByteChars(nogc), linear->length(), ib);
 }
 
 JSAtom *
@@ -462,8 +468,9 @@ js::Atomize(ExclusiveContext *cx, const char *bytes, size_t length, InternBehavi
     return AtomizeAndtake(cx, tbcharsZ, length, ib);
 }
 
+template <typename CharT>
 JSAtom *
-js::AtomizeChars(ExclusiveContext *cx, const jschar *chars, size_t length, InternBehavior ib)
+js::AtomizeChars(ExclusiveContext *cx, const CharT *chars, size_t length, InternBehavior ib)
 {
     CHECK_REQUEST(cx);
 
@@ -472,6 +479,12 @@ js::AtomizeChars(ExclusiveContext *cx, const jschar *chars, size_t length, Inter
 
     return AtomizeAndCopyChars(cx, chars, length, ib);
 }
+
+template JSAtom *
+js::AtomizeChars(ExclusiveContext *cx, const Latin1Char *chars, size_t length, InternBehavior ib);
+
+template JSAtom *
+js::AtomizeChars(ExclusiveContext *cx, const jschar *chars, size_t length, InternBehavior ib);
 
 bool
 js::IndexToIdSlow(ExclusiveContext *cx, uint32_t index, MutableHandleId idp)
