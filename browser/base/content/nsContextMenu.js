@@ -1215,7 +1215,7 @@ nsContextMenu.prototype = {
     // set up a channel to do the saving
     var ioService = Cc["@mozilla.org/network/io-service;1"].
                     getService(Ci.nsIIOService);
-    var channel = ioService.newChannelFromURI2(makeURI(linkURL)
+    var channel = ioService.newChannelFromURI2(makeURI(linkURL),
                                               Services.scriptSecurityManager.getSystemPrincipal(),
                                               null, //requestingNode
                                               0,       //securityFlags

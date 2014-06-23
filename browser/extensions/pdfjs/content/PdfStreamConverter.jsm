@@ -913,7 +913,6 @@ PdfStreamConverter.prototype = {
                     0,         // securityFlags
                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                     0);        // loadFlags
-);
 
     var listener = this.listener;
     var dataListener = this.dataListener;
