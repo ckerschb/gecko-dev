@@ -135,7 +135,7 @@ moz_gdk_pixbuf_to_channel(GdkPixbuf* aPixbuf, nsIURI *aURI,
                                  NS_LITERAL_CSTRING(IMAGE_ICON_MS),
                                  systemPrincipal,
                                  nullptr,
-                                 nsIContentPolicyType::TYPE_IMAGE);
+                                 nsIContentPolicy::TYPE_IMAGE);
   return rv;
 }
 
