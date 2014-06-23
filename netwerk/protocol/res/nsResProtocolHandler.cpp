@@ -276,6 +276,7 @@ nsResProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsResProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
+    NS_WARNING("Deprecated, you should use nsResProtocolHandler::NewChannel2");
     NS_ENSURE_ARG_POINTER(uri);
     nsresult rv;
     nsAutoCString spec;
@@ -301,13 +302,26 @@ nsResProtocolHandler::NewChannel2(nsIURI* aURI,
                                   uint32_t aLoadFlags,
                                   nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
+    NS_ENSURE_ARG_POINTER(aURI);
+    nsresult rv;
+    nsAutoCString spec;
+
+    rv = ResolveURI(aURI, spec);
+    if (NS_FAILED(rv)) return rv;
+
+    rv = mIOService->NewChannel2(spec, nullptr, nullptr,
+                                 aRequestingPrincipal,
+                                 aRequestingNode,
+                                 aSecurityFlags,
+                                 aContentPolicyType,
+                                 aLoadFlags,
+                                 outChannel);
+
+    if (NS_FAILED(rv)) return rv;
+
+    return NS_OK;
 }
 
 NS_IMETHODIMP 

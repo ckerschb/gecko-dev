@@ -59,6 +59,7 @@
 		//qaWebBrowser->AddWebBrowserListener(thisListener, NS_GET_IID(nsIStreamListener));
 
 		// this calls nsIStreamListener::OnDataAvailable()
+		// TODO - replace with AsyncOpen2
 		rv = theChannel->AsyncOpen(listener, nullptr);
 
 		nsCOMPtr<nsIRequest> theRequest = do_QueryInterface(theChannel);

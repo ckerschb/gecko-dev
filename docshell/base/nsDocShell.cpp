@@ -9832,6 +9832,7 @@ nsDocShell::DoURILoad(nsIURI * aURI,
        mscriptglobal->getframelemeentinternal is an Element.  We can get the owner doc and then get the node from it.
        In the case that we have a requestingElement, we are in an iframe.  Note that here we will get the outer window, even though we have agreed we want the inner window.
        For compataiblity, I'm not going to change this right now, since we currently use the outer window.
+       Note - there is a potential problem here with window.open().  window.open() from one origin gives the opened window a requesting system principal instead of the opener.
     */
     nsCOMPtr<nsINode> requestingNode;
     if (mScriptGlobal) {
