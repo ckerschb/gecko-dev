@@ -2229,6 +2229,14 @@ public:
   NS_IMETHOD GetAppId(uint32_t*) NO_IMPL
   NS_IMETHOD GetUseRemoteTabs(bool*) NO_IMPL
   NS_IMETHOD SetRemoteTabs(bool) NO_IMPL
+  NS_IMETHOD GetContentPolicyType(nsContentPolicyType*) NO_IMPL
+  NS_IMETHOD SetContentPolicyType(nsContentPolicyType) NO_IMPL
+  NS_IMETHOD GetRequestingContext(nsISupports**) NO_IMPL
+  NS_IMETHOD SetRequestingContext(nsISupports*) NO_IMPL
+  NS_IMETHOD GetRequestingPrincipal(nsIPrincipal**) NO_IMPL
+  NS_IMETHOD SetRequestingPrincipal(nsIPrincipal*) NO_IMPL
+  NS_IMETHOD Open2(nsIInputStream**) NO_IMPL
+  NS_IMETHOD AsyncOpen2(nsIStreamListener*, nsISupports*) NO_IMPL
 #undef NO_IMPL
 
 protected:

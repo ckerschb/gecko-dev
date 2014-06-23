@@ -391,24 +391,11 @@ nsDOMFileReader::ReadFileContent(JSContext* aCx,
 
   nsresult rv;
 
-<<<<<<< HEAD
-    aRv = NS_NewChannel2(getter_AddRefs(mChannel),
-                         uri,
-                         nullptr, // ioService
-                         loadGroup,
-                         nullptr, // callbacks
-                         nsIRequest::LOAD_BACKGROUND,
-                         nullptr, // channelPolicy
-                         nsIContentPolicy::TYPE_OTHER,
-                         mPrincipal);
-    NS_ENSURE_SUCCESS_VOID(aRv.ErrorCode());
-=======
   nsCOMPtr<nsIStreamTransportService> sts =
     do_GetService(kStreamTransportServiceCID, &rv);
   if (NS_WARN_IF(NS_FAILED(rv))) {
     aRv.Throw(rv);
     return;
->>>>>>> master
   }
 
   nsCOMPtr<nsIInputStream> stream;
@@ -446,16 +433,11 @@ nsDOMFileReader::ReadFileContent(JSContext* aCx,
   mTotal = mozilla::dom::kUnknownSize;
   mFile->GetSize(&mTotal);
 
-<<<<<<< HEAD
-  aRv = mChannel->AsyncOpen2(this, nullptr);
-  NS_ENSURE_SUCCESS_VOID(aRv.ErrorCode());
-=======
   rv = DoAsyncWait(mAsyncStream);
   if (NS_WARN_IF(NS_FAILED(rv))) {
     aRv.Throw(rv);
     return;
   }
->>>>>>> master
 
   //FileReader should be in loading state here
   mReadyState = nsIDOMFileReader::LOADING;
