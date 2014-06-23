@@ -128,7 +128,7 @@
 #include "nsIMemoryReporter.h"
 #include "nsIMIMEService.h"
 #include "nsINode.h"
-#include "nsINodeInfo.h"
+#include "mozilla/dom/NodeInfo.h"
 #include "nsIObjectLoadingContent.h"
 #include "nsIObserver.h"
 #include "nsIObserverService.h"
@@ -237,6 +237,7 @@ bool nsContentUtils::sTrustedFullScreenOnly = true;
 bool nsContentUtils::sFullscreenApiIsContentOnly = false;
 bool nsContentUtils::sIsPerformanceTimingEnabled = false;
 bool nsContentUtils::sIsResourceTimingEnabled = false;
+bool nsContentUtils::sIsExperimentalAutocompleteEnabled = false;
 
 uint32_t nsContentUtils::sHandlingInputTimeout = 1000;
 
@@ -248,6 +249,161 @@ bool nsContentUtils::sFragmentParsingActive = false;
 #if !(defined(DEBUG) || defined(MOZ_ENABLE_JS_DUMP))
 bool nsContentUtils::sDOMWindowDumpEnabled;
 #endif
+
+// Subset of http://www.whatwg.org/specs/web-apps/current-work/#autofill-field-name
+enum AutocompleteFieldName
+{
+  eAutocompleteFieldName_OFF,
+  eAutocompleteFieldName_ON,
+
+  // Name types
+  eAutocompleteFieldName_NAME,
+  //eAutocompleteFieldName_HONORIFIC_PREFIX,
+  eAutocompleteFieldName_GIVEN_NAME,
+  eAutocompleteFieldName_ADDITIONAL_NAME,
+  eAutocompleteFieldName_FAMILY_NAME,
+  //eAutocompleteFieldName_HONORIFIC_SUFFIX,
+  //eAutocompleteFieldName_NICKNAME,
+  //eAutocompleteFieldName_ORGANIZATION_TITLE,
+
+  // Login types
+  eAutocompleteFieldName_USERNAME,
+  eAutocompleteFieldName_NEW_PASSWORD,
+  eAutocompleteFieldName_CURRENT_PASSWORD,
+
+  // Address types
+  eAutocompleteFieldName_ORGANIZATION,
+  eAutocompleteFieldName_STREET_ADDRESS,
+  eAutocompleteFieldName_ADDRESS_LINE1,
+  eAutocompleteFieldName_ADDRESS_LINE2,
+  eAutocompleteFieldName_ADDRESS_LINE3,
+  eAutocompleteFieldName_ADDRESS_LEVEL4,
+  eAutocompleteFieldName_ADDRESS_LEVEL3,
+  eAutocompleteFieldName_ADDRESS_LEVEL2,
+  eAutocompleteFieldName_ADDRESS_LEVEL1,
+  eAutocompleteFieldName_COUNTRY,
+  eAutocompleteFieldName_COUNTRY_NAME,
+  eAutocompleteFieldName_POSTAL_CODE,
+
+  // Credit card types
+  /*
+  eAutocompleteFieldName_CC_NAME,
+  eAutocompleteFieldName_CC_GIVEN_NAME,
+  eAutocompleteFieldName_CC_ADDITIONAL_NAME,
+  eAutocompleteFieldName_CC_FAMILY_NAME,
+  eAutocompleteFieldName_CC_NUMBER,
+  eAutocompleteFieldName_CC_EXP,
+  eAutocompleteFieldName_CC_EXP_MONTH,
+  eAutocompleteFieldName_CC_EXP_YEAR,
+  eAutocompleteFieldName_CC_CSC,
+  eAutocompleteFieldName_CC_TYPE
+  */
+
+  // Additional field types
+  /*
+  eAutocompleteFieldName_LANGUAGE,
+  eAutocompleteFieldName_BDAY,
+  eAutocompleteFieldName_BDAY_DAY,
+  eAutocompleteFieldName_BDAY_MONTH,
+  eAutocompleteFieldName_BDAY_YEAR,
+  eAutocompleteFieldName_SEX,
+  eAutocompleteFieldName_URL,
+  eAutocompleteFieldName_PHOTO,
+  */
+
+  // Contact category types
+  eAutocompleteFieldName_TEL,
+  eAutocompleteFieldName_TEL_COUNTRY_CODE,
+  eAutocompleteFieldName_TEL_NATIONAL,
+  eAutocompleteFieldName_TEL_AREA_CODE,
+  eAutocompleteFieldName_TEL_LOCAL,
+  eAutocompleteFieldName_TEL_LOCAL_PREFIX,
+  eAutocompleteFieldName_TEL_LOCAL_SUFFIX,
+  eAutocompleteFieldName_TEL_EXTENSION,
+  eAutocompleteFieldName_EMAIL,
+  //eAutocompleteFieldName_IMPP,
+
+  eAutocompleteFieldName_last, // Dummy to check table sizes
+};
+
+enum AutocompleteFieldHint
+{
+  eAutocompleteFieldHint_SHIPPING,
+  eAutocompleteFieldHint_BILLING,
+  eAutocompleteFieldHint_last, // Dummy to check table sizes
+};
+
+enum AutocompleteFieldContactHint
+{
+  eAutocompleteFieldContactHint_HOME,
+  eAutocompleteFieldContactHint_WORK,
+  eAutocompleteFieldContactHint_MOBILE,
+  eAutocompleteFieldContactHint_FAX,
+  //eAutocompleteFieldContactHint_PAGER,
+  eAutocompleteFieldContactHint_last, // Dummy to check table sizes
+};
+
+enum AutocompleteCategory
+{
+  eAutocompleteCategory_NORMAL,
+  eAutocompleteCategory_CONTACT,
+};
+
+static const nsAttrValue::EnumTable kAutocompleteFieldNameTable[] = {
+  { "off", eAutocompleteFieldName_OFF },
+  { "on", eAutocompleteFieldName_ON },
+
+  { "name", eAutocompleteFieldName_NAME },
+  { "given-name", eAutocompleteFieldName_GIVEN_NAME },
+  { "additional-name", eAutocompleteFieldName_ADDITIONAL_NAME },
+  { "family-name", eAutocompleteFieldName_FAMILY_NAME },
+
+  { "username", eAutocompleteFieldName_USERNAME },
+  { "new-password", eAutocompleteFieldName_NEW_PASSWORD },
+  { "current-password", eAutocompleteFieldName_CURRENT_PASSWORD },
+
+  { "organization", eAutocompleteFieldName_ORGANIZATION },
+  { "street-address", eAutocompleteFieldName_STREET_ADDRESS },
+  { "address-line1", eAutocompleteFieldName_ADDRESS_LINE1 },
+  { "address-line2", eAutocompleteFieldName_ADDRESS_LINE2 },
+  { "address-line3", eAutocompleteFieldName_ADDRESS_LINE3 },
+  { "address-level4", eAutocompleteFieldName_ADDRESS_LEVEL4 },
+  { "address-level3", eAutocompleteFieldName_ADDRESS_LEVEL3 },
+  { "address-level2", eAutocompleteFieldName_ADDRESS_LEVEL2 },
+  { "address-level1", eAutocompleteFieldName_ADDRESS_LEVEL1 },
+  { "country", eAutocompleteFieldName_COUNTRY },
+  { "country-name", eAutocompleteFieldName_COUNTRY_NAME },
+  { "postal-code", eAutocompleteFieldName_POSTAL_CODE },
+  { 0 }
+};
+
+static const nsAttrValue::EnumTable kAutocompleteContactFieldNameTable[] = {
+  { "tel", eAutocompleteFieldName_TEL },
+  { "tel-country-code", eAutocompleteFieldName_TEL_COUNTRY_CODE },
+  { "tel-national", eAutocompleteFieldName_TEL_NATIONAL },
+  { "tel-area-code", eAutocompleteFieldName_TEL_AREA_CODE },
+  { "tel-local", eAutocompleteFieldName_TEL_LOCAL },
+  { "tel-local-prefix", eAutocompleteFieldName_TEL_LOCAL_PREFIX },
+  { "tel-local-suffix", eAutocompleteFieldName_TEL_LOCAL_SUFFIX },
+  { "tel-extension", eAutocompleteFieldName_TEL_EXTENSION },
+
+  { "email", eAutocompleteFieldName_EMAIL },
+  { 0 }
+};
+
+static const nsAttrValue::EnumTable kAutocompleteFieldHintTable[] = {
+  { "shipping", eAutocompleteFieldHint_SHIPPING },
+  { "billing", eAutocompleteFieldHint_BILLING },
+  { 0 }
+};
+
+static const nsAttrValue::EnumTable kAutocompleteContactFieldHintTable[] = {
+  { "home", eAutocompleteFieldContactHint_HOME },
+  { "work", eAutocompleteFieldContactHint_WORK },
+  { "mobile", eAutocompleteFieldContactHint_MOBILE },
+  { "fax", eAutocompleteFieldContactHint_FAX },
+  { 0 }
+};
 
 namespace {
 
@@ -264,7 +420,7 @@ public:
   NS_DECL_ISUPPORTS
 
   NS_IMETHOD CollectReports(nsIHandleReportCallback* aHandleReport,
-                            nsISupports* aData)
+                            nsISupports* aData, bool aAnonymize)
   {
     // We don't measure the |EventListenerManager| objects pointed to by the
     // entries because those references are non-owning.
@@ -368,6 +524,12 @@ nsContentUtils::Init()
     return NS_OK;
   }
 
+  // Check that all the entries in the autocomplete enums are handled in EnumTables
+  MOZ_ASSERT(eAutocompleteFieldName_last == ArrayLength(kAutocompleteFieldNameTable)
+             + ArrayLength(kAutocompleteContactFieldNameTable) - 2);
+  MOZ_ASSERT(eAutocompleteFieldHint_last == ArrayLength(kAutocompleteFieldHintTable) - 1);
+  MOZ_ASSERT(eAutocompleteFieldContactHint_last == ArrayLength(kAutocompleteContactFieldHintTable) - 1);
+
   sNameSpaceManager = nsNameSpaceManager::GetInstance();
   NS_ENSURE_TRUE(sNameSpaceManager, NS_ERROR_OUT_OF_MEMORY);
 
@@ -439,6 +601,9 @@ nsContentUtils::Init()
 
   Preferences::AddBoolVarCache(&sIsResourceTimingEnabled,
                                "dom.enable_resource_timing", true);
+
+  Preferences::AddBoolVarCache(&sIsExperimentalAutocompleteEnabled,
+                               "dom.forms.autocomplete.experimental", false);
 
   Preferences::AddUintVarCache(&sHandlingInputTimeout,
                                "dom.event.handling-user-input-time-limit",
@@ -685,7 +850,122 @@ nsContentUtils::IsAutocompleteEnabled(nsIDOMHTMLInputElement* aInput)
     form->GetAutocomplete(autocomplete);
   }
 
-  return autocomplete.EqualsLiteral("on");
+  return !autocomplete.EqualsLiteral("off");
+}
+
+nsContentUtils::AutocompleteAttrState
+nsContentUtils::SerializeAutocompleteAttribute(const nsAttrValue* aAttr,
+                                           nsAString& aResult)
+{
+  AutocompleteAttrState state = InternalSerializeAutocompleteAttribute(aAttr, aResult);
+  if (state == eAutocompleteAttrState_Valid) {
+    ASCIIToLower(aResult);
+  } else {
+    aResult.Truncate();
+  }
+  return state;
+}
+
+/**
+ * Helper to validate the @autocomplete tokens.
+ *
+ * @return {AutocompleteAttrState} The state of the attribute (invalid/valid).
+ */
+nsContentUtils::AutocompleteAttrState
+nsContentUtils::InternalSerializeAutocompleteAttribute(const nsAttrValue* aAttrVal,
+                                                   nsAString& aResult)
+{
+  // No sandbox attribute so we are done
+  if (!aAttrVal) {
+    return eAutocompleteAttrState_Invalid;
+  }
+
+  uint32_t numTokens = aAttrVal->GetAtomCount();
+  if (!numTokens) {
+    return eAutocompleteAttrState_Invalid;
+  }
+
+  uint32_t index = numTokens - 1;
+  nsString tokenString = nsDependentAtomString(aAttrVal->AtomAt(index));
+  AutocompleteCategory category;
+  nsAttrValue enumValue;
+
+  bool result = enumValue.ParseEnumValue(tokenString, kAutocompleteFieldNameTable, false);
+  if (result) {
+    // Off/Automatic/Normal categories.
+    if (enumValue.Equals(NS_LITERAL_STRING("off"), eIgnoreCase) ||
+        enumValue.Equals(NS_LITERAL_STRING("on"), eIgnoreCase)) {
+      if (numTokens > 1) {
+        return eAutocompleteAttrState_Invalid;
+      }
+      enumValue.ToString(aResult);
+      return eAutocompleteAttrState_Valid;
+    }
+
+    // Only allow on/off if experimental @autocomplete values aren't enabled.
+    if (!sIsExperimentalAutocompleteEnabled) {
+      return eAutocompleteAttrState_Invalid;
+    }
+
+    // Normal category
+    if (numTokens > 2) {
+      return eAutocompleteAttrState_Invalid;
+    }
+    category = eAutocompleteCategory_NORMAL;
+  } else { // Check if the last token is of the contact category instead.
+    // Only allow on/off if experimental @autocomplete values aren't enabled.
+    if (!sIsExperimentalAutocompleteEnabled) {
+      return eAutocompleteAttrState_Invalid;
+    }
+
+    result = enumValue.ParseEnumValue(tokenString, kAutocompleteContactFieldNameTable, false);
+    if (!result || numTokens > 3) {
+      return eAutocompleteAttrState_Invalid;
+    }
+
+    category = eAutocompleteCategory_CONTACT;
+  }
+
+  enumValue.ToString(aResult);
+
+  // We are done if this was the only token.
+  if (numTokens == 1) {
+    return eAutocompleteAttrState_Valid;
+  }
+
+  --index;
+  tokenString = nsDependentAtomString(aAttrVal->AtomAt(index));
+
+  if (category == eAutocompleteCategory_CONTACT) {
+    nsAttrValue contactFieldHint;
+    result = contactFieldHint.ParseEnumValue(tokenString, kAutocompleteContactFieldHintTable, false);
+    if (result) {
+      aResult.Insert(' ', 0);
+      nsAutoString contactFieldHintString;
+      contactFieldHint.ToString(contactFieldHintString);
+      aResult.Insert(contactFieldHintString, 0);
+      if (index == 0) {
+        return eAutocompleteAttrState_Valid;
+      }
+      --index;
+      tokenString = nsDependentAtomString(aAttrVal->AtomAt(index));
+    }
+  }
+
+  // Check for billing/shipping tokens
+  nsAttrValue fieldHint;
+  if (fieldHint.ParseEnumValue(tokenString, kAutocompleteFieldHintTable, false)) {
+    aResult.Insert(' ', 0);
+    nsString fieldHintString;
+    fieldHint.ToString(fieldHintString);
+    aResult.Insert(fieldHintString, 0);
+    if (index == 0) {
+      return eAutocompleteAttrState_Valid;
+    }
+    --index;
+  }
+
+  return eAutocompleteAttrState_Invalid;
 }
 
 #define SKIP_WHITESPACE(iter, end_iter, end_res)                 \
@@ -2481,7 +2761,7 @@ nsContentUtils::GetNodeInfoFromQName(const nsAString& aNamespaceURI,
                                      const nsAString& aQualifiedName,
                                      nsNodeInfoManager* aNodeInfoManager,
                                      uint16_t aNodeType,
-                                     nsINodeInfo** aNodeInfo)
+                                     mozilla::dom::NodeInfo** aNodeInfo)
 {
   const nsAFlatString& qName = PromiseFlatString(aQualifiedName);
   const char16_t* colon;
@@ -2851,8 +3131,8 @@ nsContentUtils::IsDraggableLink(const nsIContent* aContent) {
 
 // static
 nsresult
-nsContentUtils::NameChanged(nsINodeInfo* aNodeInfo, nsIAtom* aName,
-                            nsINodeInfo** aResult)
+nsContentUtils::NameChanged(mozilla::dom::NodeInfo* aNodeInfo, nsIAtom* aName,
+                            mozilla::dom::NodeInfo** aResult)
 {
   nsNodeInfoManager *niMgr = aNodeInfo->NodeInfoManager();
 
@@ -3911,7 +4191,7 @@ nsContentUtils::CreateContextualFragment(nsINode* aContextNode,
     }
 
     if (!setDefaultNamespace) {
-      nsINodeInfo* info = content->NodeInfo();
+      mozilla::dom::NodeInfo* info = content->NodeInfo();
       if (!info->GetPrefixAtom() &&
           info->NamespaceID() != kNameSpaceID_None) {
         // We have no namespace prefix, but have a namespace ID.  Push
@@ -6137,15 +6417,12 @@ nsContentUtils::IsPatternMatching(nsAString& aValue, nsAString& aPattern,
                                   nsIDocument* aDocument)
 {
   NS_ASSERTION(aDocument, "aDocument should be a valid pointer (not null)");
-  nsCOMPtr<nsIGlobalObject> globalObject =
-    do_QueryInterface(aDocument->GetWindow());
-  if (NS_WARN_IF(!globalObject)) {
-    return true;
-  }
 
   AutoJSAPI jsapi;
+  if (NS_WARN_IF(!jsapi.InitUsingWin(aDocument->GetWindow()))) {
+    return true;
+  }
   JSContext* cx = jsapi.cx();
-  JSAutoCompartment ac(cx, globalObject->GetGlobalJSObject());
 
   // The pattern has to match the entire value.
   aPattern.Insert(NS_LITERAL_STRING("^(?:"), 0);
@@ -6293,12 +6570,13 @@ nsContentUtils::HaveEqualPrincipals(nsIDocument* aDoc1, nsIDocument* aDoc2)
 }
 
 static void
-CheckForWindowedPlugins(nsIContent* aContent, void* aResult)
+CheckForWindowedPlugins(nsISupports* aSupports, void* aResult)
 {
-  if (!aContent->IsInDoc()) {
+  nsCOMPtr<nsIContent> content(do_QueryInterface(aSupports));
+  if (!content || !content->IsInDoc()) {
     return;
   }
-  nsCOMPtr<nsIObjectLoadingContent> olc(do_QueryInterface(aContent));
+  nsCOMPtr<nsIObjectLoadingContent> olc(do_QueryInterface(content));
   if (!olc) {
     return;
   }
@@ -6318,7 +6596,7 @@ static bool
 DocTreeContainsWindowedPlugins(nsIDocument* aDoc, void* aResult)
 {
   if (!nsContentUtils::IsChromeDoc(aDoc)) {
-    aDoc->EnumerateFreezableElements(CheckForWindowedPlugins, aResult);
+    aDoc->EnumerateActivityObservers(CheckForWindowedPlugins, aResult);
   }
   if (*static_cast<bool*>(aResult)) {
     // Return false to stop iteration, we found a windowed plugin.

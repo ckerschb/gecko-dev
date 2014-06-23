@@ -5,6 +5,7 @@ const { emit } = require("sdk/event/core");
 const promise = require("projecteditor/helpers/promise");
 var { registerPlugin, Plugin } = require("projecteditor/plugins/core");
 const { AppProjectEditor } = require("./app-project-editor");
+const OPTION_URL = "chrome://browser/skin/devtools/tool-options.svg";
 
 var AppManagerRenderer = Class({
   extends: Plugin,
@@ -17,6 +18,35 @@ var AppManagerRenderer = Class({
       return AppProjectEditor;
     }
   },
+  getUI: function(parent) {
+    let doc = parent.ownerDocument;
+    if (parent.childElementCount == 0) {
+      let image = doc.createElement("image");
+      let optionImage = doc.createElement("image");
+      let flexElement = doc.createElement("div");
+      let nameLabel = doc.createElement("span");
+      let statusElement = doc.createElement("div");
+
+      image.className = "project-image";
+      optionImage.className = "project-options";
+      optionImage.setAttribute("src", OPTION_URL);
+      nameLabel.className = "project-name-label";
+      statusElement.className = "project-status";
+      flexElement.className = "project-flex";
+
+      parent.appendChild(image);
+      parent.appendChild(nameLabel);
+      parent.appendChild(flexElement);
+      parent.appendChild(statusElement);
+      parent.appendChild(optionImage);
+    }
+
+    return {
+      image: parent.querySelector(".project-image"),
+      nameLabel: parent.querySelector(".project-name-label"),
+      statusElement: parent.querySelector(".project-status")
+    };
+  },
   onAnnotate: function(resource, editor, elt) {
     if (resource.parent || !this.isAppManagerProject()) {
       return;
@@ -24,21 +54,16 @@ var AppManagerRenderer = Class({
 
     let {appManagerOpts} = this.host.project;
     let doc = elt.ownerDocument;
-    let image = doc.createElement("image");
-    let label = doc.createElement("label");
 
-    label.className = "project-name-label";
-    image.className = "project-image";
-
+    let {image,nameLabel,statusElement} = this.getUI(elt);
     let name = appManagerOpts.name || resource.basename;
     let url = appManagerOpts.iconUrl || "icon-sample.png";
+    let status = appManagerOpts.validationStatus || "unknown";
 
-    label.textContent = name;
+    nameLabel.textContent = name;
     image.setAttribute("src", url);
+    statusElement.setAttribute("status", status);
 
-    elt.innerHTML = "";
-    elt.appendChild(image);
-    elt.appendChild(label);
     return true;
   }
 });

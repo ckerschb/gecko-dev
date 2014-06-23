@@ -28,7 +28,6 @@ function cachedHandler(metadata, response) {
   response.setHeader("Content-Encoding", "gzip", false);
   response.setHeader("ETag", "Just testing");
   response.setHeader("Cache-Control", "max-age=3600000"); // avoid validation
-  response.setHeader("Content-Length", "" + responseBody.length);
 
   var body = responseBody;
 
@@ -43,10 +42,13 @@ function cachedHandler(metadata, response) {
       return;
     }
     body = body.slice(from, to + 1);
+    response.setHeader("Content-Length", "" + (to + 1 - from));
     // always respond to successful range requests with 206
     response.setStatusLine(metadata.httpVersion, 206, "Partial Content");
     response.setHeader("Content-Range", from + "-" + to + "/" + responseBody.length, false);
   } else {
+    // This response will get cut off prematurely
+    response.setHeader("Content-Length", "" + responseBody.length);
     response.setHeader("Accept-Ranges", "bytes");
     body = body.slice(0, 17); // slice off a piece to send first
     doRangeResponse = true;
@@ -62,7 +64,7 @@ function cachedHandler(metadata, response) {
 }
 
 function continue_test(request, data) {
-  do_check_true(17 == data.length);
+  do_check_eq(17, data.length);
   var chan = make_channel("http://localhost:" +
                           httpserver.identity.primaryPort + "/cached/test.gz");
   chan.asyncOpen2(new ChannelListener(finish_test, null, CL_EXPECT_GZIP), null);

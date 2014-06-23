@@ -512,18 +512,6 @@ JS_GetFunctionNative(JSContext *cx, JSFunction *fun)
     return fun->maybeNative();
 }
 
-JS_PUBLIC_API(JSPrincipals *)
-JS_GetScriptPrincipals(JSScript *script)
-{
-    return script->principals();
-}
-
-JS_PUBLIC_API(JSPrincipals *)
-JS_GetScriptOriginPrincipals(JSScript *script)
-{
-    return script->originPrincipals();
-}
-
 /************************************************************************/
 
 JS_PUBLIC_API(JSFunction *)
@@ -1349,7 +1337,7 @@ JSAbstractFramePtr::evaluateUCInStackFrame(JSContext *cx,
     RootedValue thisv(cx, frame.thisValue());
 
     js::AutoCompartment ac(cx, env);
-    return EvaluateInEnv(cx, env, thisv, frame, ConstTwoByteChars(chars, length), length,
+    return EvaluateInEnv(cx, env, thisv, frame, mozilla::Range<const jschar>(chars, length),
                          filename, lineno, rval);
 }
 

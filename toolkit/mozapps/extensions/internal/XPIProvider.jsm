@@ -1682,6 +1682,9 @@ this.XPIProvider = {
   _addURIMapping: function XPI__addURIMapping(aID, aFile) {
     logger.info("Mapping " + aID + " to " + aFile.path);
     this._addonFileMap.set(aID, aFile.path);
+
+    let service = Cc["@mozilla.org/addon-path-service;1"].getService(Ci.amIAddonPathService);
+    service.insertPath(aFile.path, aID);
   },
 
   /**
@@ -4143,6 +4146,7 @@ this.XPIProvider = {
       this.bootstrapScopes[aId] =
         new Cu.Sandbox(principal, { sandboxName: aFile.path,
                                     wantGlobalProperties: ["indexedDB"],
+                                    addonId: aId,
                                     metadata: { addonID: aId } });
       logger.error("Attempted to load bootstrap scope from missing directory " + aFile.path);
       return;
@@ -4155,6 +4159,7 @@ this.XPIProvider = {
     this.bootstrapScopes[aId] =
       new Cu.Sandbox(principal, { sandboxName: uri,
                                   wantGlobalProperties: ["indexedDB"],
+                                  addonId: aId,
                                   metadata: { addonID: aId, URI: uri } });
 
     let loader = Cc["@mozilla.org/moz/jssubscript-loader;1"].

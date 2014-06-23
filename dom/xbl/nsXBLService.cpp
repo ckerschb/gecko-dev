@@ -878,7 +878,7 @@ nsXBLService::LoadBindingDocumentInfo(nsIContent* aBoundElement,
       }
     }
 
-    nsINodeInfo *ni = nullptr;
+    NodeInfo *ni = nullptr;
     if (aBoundElement)
       ni = aBoundElement->NodeInfo();
 

@@ -374,7 +374,7 @@ class LNewPar : public LInstructionHelper<1, 1, 2>
     }
 };
 
-class LNewDenseArrayPar : public LCallInstructionHelper<1, 2, 3>
+class LNewDenseArrayPar : public LInstructionHelper<1, 2, 3>
 {
   public:
     LIR_HEADER(NewDenseArrayPar);
@@ -569,12 +569,6 @@ class LNewStringObject : public LInstructionHelper<1, 1, 1>
     MNewStringObject *mir() const {
         return mir_->toNewStringObject();
     }
-};
-
-class LAbortPar : public LInstructionHelper<0, 0, 0>
-{
-  public:
-    LIR_HEADER(AbortPar);
 };
 
 class LInitElem : public LCallInstructionHelper<0, 1 + 2*BOX_PIECES, 0>
@@ -1203,6 +1197,12 @@ class LBail : public LInstructionHelper<0, 0, 0>
 {
   public:
     LIR_HEADER(Bail)
+};
+
+class LUnreachable : public LControlInstructionHelper<0, 0, 0>
+{
+  public:
+    LIR_HEADER(Unreachable)
 };
 
 template <size_t defs, size_t ops>
@@ -3676,6 +3676,25 @@ class LTypedArrayElements : public LInstructionHelper<1, 1, 0>
     }
 };
 
+// Load a typed object's prototype, which is guaranteed to be a
+// TypedProto object.
+class LTypedObjectProto : public LCallInstructionHelper<1, 1, 1>
+{
+  public:
+    LIR_HEADER(TypedObjectProto)
+
+    LTypedObjectProto(const LAllocation &object, const LDefinition &temp1) {
+        setOperand(0, object);
+        setTemp(0, temp1);
+    }
+    const LAllocation *object() {
+        return getOperand(0);
+    }
+    const LDefinition *temp() {
+        return getTemp(0);
+    }
+};
+
 // Load a typed array's elements vector.
 class LTypedObjectElements : public LInstructionHelper<1, 1, 0>
 {
@@ -5361,7 +5380,7 @@ class LRest : public LCallInstructionHelper<1, 1, 3>
     }
 };
 
-class LRestPar : public LCallInstructionHelper<1, 2, 3>
+class LRestPar : public LInstructionHelper<1, 2, 3>
 {
   public:
     LIR_HEADER(RestPar);
@@ -5735,10 +5754,6 @@ class LProfilerStackOp : public LInstructionHelper<0, 0, 1>
 
     MProfilerStackOp::Type type() {
         return mir_->toProfilerStackOp()->type();
-    }
-
-    unsigned inlineLevel() {
-        return mir_->toProfilerStackOp()->inlineLevel();
     }
 };
 

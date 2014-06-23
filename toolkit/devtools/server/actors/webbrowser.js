@@ -48,6 +48,8 @@ function allAppShellDOMWindows(aWindowType)
   }
 }
 
+exports.allAppShellDOMWindows = allAppShellDOMWindows;
+
 /**
  * Retrieve the window type of the top-level window |aWindow|.
  */
@@ -828,10 +830,12 @@ TabActor.prototype = {
    * Reload the page in this tab.
    */
   onReload: function(aRequest) {
+    let force = aRequest && aRequest.options && aRequest.options.force;
     // Wait a tick so that the response packet can be dispatched before the
     // subsequent navigation event packet.
     Services.tm.currentThread.dispatch(DevToolsUtils.makeInfallible(() => {
-      this.window.location.reload();
+      this.webNavigation.reload(force ? Ci.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE
+                                      : Ci.nsIWebNavigation.LOAD_FLAGS_NONE);
     }, "TabActor.prototype.onReload's delayed body"), 0);
     return {};
   },

@@ -20,6 +20,8 @@
 #include "nsIProgressEventSink.h"
 #include "nsITransport.h"
 #include "nsIAsyncVerifyRedirectCallback.h"
+#include "nsIThreadRetargetableRequest.h"
+#include "nsIThreadRetargetableStreamListener.h"
 #include "PrivateBrowsingChannel.h"
 #include "nsThreadUtils.h"
 #include "nsNetUtil.h"
@@ -42,11 +44,13 @@ class nsIInputStream;
 
 class nsBaseChannel : public nsHashPropertyBag
                     , public nsIChannel
+                    , public nsIThreadRetargetableRequest
                     , public nsIInterfaceRequestor
                     , public nsITransportEventSink
                     , public nsIAsyncVerifyRedirectCallback
                     , public mozilla::net::PrivateBrowsingChannel<nsBaseChannel>
                     , protected nsIStreamListener
+                    , protected nsIThreadRetargetableStreamListener
 {
 public:
   NS_DECL_ISUPPORTS_INHERITED
@@ -55,6 +59,8 @@ public:
   NS_DECL_NSIINTERFACEREQUESTOR
   NS_DECL_NSITRANSPORTEVENTSINK
   NS_DECL_NSIASYNCVERIFYREDIRECTCALLBACK
+  NS_DECL_NSITHREADRETARGETABLEREQUEST
+  NS_DECL_NSITHREADRETARGETABLESTREAMLISTENER
 
   nsBaseChannel(); 
 
@@ -205,6 +211,11 @@ public:
                                bool invalidatesContentLength = true,
                                nsIStreamListener **converter = nullptr);
 
+protected:
+  void DisallowThreadRetargeting() {
+    mAllowThreadRetargeting = false;
+  }
+
 private:
   NS_DECL_NSISTREAMLISTENER
   NS_DECL_NSIREQUESTOBSERVER
@@ -269,6 +280,7 @@ private:
   uint32_t                            mLoadFlags;
   bool                                mQueriedProgressSink;
   bool                                mSynthProgressEvents;
+  bool                                mAllowThreadRetargeting;
   bool                                mWasOpened;
   bool                                mWaitingOnAsyncRedirect;
   bool                                mOpenRedirectChannel;

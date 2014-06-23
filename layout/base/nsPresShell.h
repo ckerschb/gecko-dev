@@ -39,7 +39,6 @@
 
 class nsRange;
 class nsIDragService;
-class nsCSSStyleSheet;
 
 struct RangePaintInfo;
 struct nsCallbackEventRequest;
@@ -49,6 +48,10 @@ class ReflowCountMgr;
 
 class nsPresShellEventCB;
 class nsAutoCauseReflowNotifier;
+
+namespace mozilla {
+class CSSStyleSheet;
+} // namespace mozilla
 
 // 250ms.  This is actually pref-controlled, but we use this value if we fail
 // to get the pref for any reason.
@@ -159,6 +162,7 @@ public:
   virtual already_AddRefed<nsIContent> GetEventTargetContent(
                                                      mozilla::WidgetEvent* aEvent) MOZ_OVERRIDE;
 
+  virtual void NotifyCounterStylesAreDirty();
 
   virtual nsresult ReconstructFrames(void) MOZ_OVERRIDE;
   virtual void Freeze() MOZ_OVERRIDE;
@@ -357,7 +361,8 @@ public:
 
   virtual void ScheduleImageVisibilityUpdate() MOZ_OVERRIDE;
 
-  virtual void RebuildImageVisibility(const nsDisplayList& aList) MOZ_OVERRIDE;
+  virtual void RebuildImageVisibilityDisplayList(const nsDisplayList& aList) MOZ_OVERRIDE;
+  virtual void RebuildImageVisibility(nsRect* aRect = nullptr) MOZ_OVERRIDE;
 
   virtual void EnsureImageInVisibleList(nsIImageLoadingContent* aImage) MOZ_OVERRIDE;
 
@@ -365,7 +370,7 @@ public:
 
   virtual bool AssumeAllImagesVisible() MOZ_OVERRIDE;
 
-  virtual void RestyleShadowRoot(mozilla::dom::ShadowRoot* aShadowRoot);
+  virtual void RecordShadowStyleChange(mozilla::dom::ShadowRoot* aShadowRoot);
 
   void SetNextPaintCompressed() { mNextPaintCompressed = true; }
 
@@ -723,6 +728,7 @@ protected:
   void ClearVisibleImagesList();
   static void ClearImageVisibilityVisited(nsView* aView, bool aClear);
   static void MarkImagesInListVisible(const nsDisplayList& aList);
+  void MarkImagesInSubtreeVisible(nsIFrame* aFrame, const nsRect& aRect);
 
   void EvictTouches();
 
@@ -751,7 +757,7 @@ protected:
   nsPoint                   mMouseLocation;
 
   // mStyleSet owns it but we maintain a ref, may be null
-  nsRefPtr<nsCSSStyleSheet> mPrefStyleSheet;
+  nsRefPtr<mozilla::CSSStyleSheet> mPrefStyleSheet;
 
   // Set of frames that we should mark with NS_FRAME_HAS_DIRTY_CHILDREN after
   // we finish reflowing mCurrentReflowRoot.
