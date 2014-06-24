@@ -31,6 +31,8 @@ class WebSocketChannelChild : public BaseWebSocketChannel,
   //
   NS_IMETHOD AsyncOpen(nsIURI *aURI, const nsACString &aOrigin,
                        nsIWebSocketListener *aListener, nsISupports *aContext);
+  NS_IMETHOD AsyncOpen2(nsIURI *aURI, const nsACString &aOrigin,
+                        nsIWebSocketListener *aListener, nsISupports *aContext);
   NS_IMETHOD Close(uint16_t code, const nsACString & reason);
   NS_IMETHOD SendMsg(const nsACString &aMsg);
   NS_IMETHOD SendBinaryMsg(const nsACString &aMsg);
@@ -61,6 +63,7 @@ class WebSocketChannelChild : public BaseWebSocketChannel,
 
   nsRefPtr<ChannelEventQueue> mEventQ;
   bool mIPCOpen;
+  bool mUsesNewAPI;
 
   friend class StartEvent;
   friend class StopEvent;

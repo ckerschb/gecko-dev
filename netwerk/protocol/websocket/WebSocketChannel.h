@@ -85,6 +85,10 @@ public:
                        const nsACString &aOrigin,
                        nsIWebSocketListener *aListener,
                        nsISupports *aContext);
+  NS_IMETHOD AsyncOpen2(nsIURI *aURI,
+                        const nsACString &aOrigin,
+                        nsIWebSocketListener *aListener,
+                        nsISupports *aContext);
   NS_IMETHOD Close(uint16_t aCode, const nsACString & aReason);
   NS_IMETHOD SendMsg(const nsACString &aMsg);
   NS_IMETHOD SendBinaryMsg(const nsACString &aMsg);
@@ -258,6 +262,7 @@ private:
   uint32_t                        mDynamicOutputSize;
   uint8_t                        *mDynamicOutput;
   bool                            mPrivateBrowsing;
+  bool                            mUsesNewAPI;
 
   nsCOMPtr<nsIDashboardEventNotifier> mConnectionLogService;
   uint32_t mSerial;

@@ -1030,6 +1030,7 @@ WebSocketChannel::WebSocketChannel() :
   mConnectionLogService(nullptr),
   mCountRecv(0),
   mCountSent(0),
+  mUsesNewAPI(false),
   mAppId(NECKO_NO_APP_ID)
 {
   NS_ABORT_IF_FALSE(NS_IsMainThread(), "not main thread");
@@ -2848,6 +2849,16 @@ WebSocketChannel::AsyncOpen(nsIURI *aURI,
   IncrementSessionCount();
 
   return rv;
+}
+
+NS_IMETHODIMP
+WebSocketChannel::AsyncOpen2(nsIURI *aURI,
+                            const nsACString &aOrigin,
+                            nsIWebSocketListener *aListener,
+                            nsISupports *aContext)
+{
+   mUsesNewAPI = true;
+   return AsyncOpen(aURI, aOrigin, aListener, aContext);
 }
 
 NS_IMETHODIMP

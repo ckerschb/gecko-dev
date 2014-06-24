@@ -51,7 +51,8 @@ NS_INTERFACE_MAP_BEGIN(WebSocketChannelChild)
 NS_INTERFACE_MAP_END
 
 WebSocketChannelChild::WebSocketChannelChild(bool aSecure)
- : mIPCOpen(false)
+ : mIPCOpen(false),
+   mUsesNewAPI(false)
 {
   NS_ABORT_IF_FALSE(NS_IsMainThread(), "not main thread");
 
@@ -402,6 +403,16 @@ WebSocketChannelChild::AsyncOpen(nsIURI *aURI,
   mWasOpened = 1;
 
   return NS_OK;
+}
+
+NS_IMETHODIMP
+WebSocketChannelChild::AsyncOpen2(nsIURI *aURI,
+                                  const nsACString &aOrigin,
+                                  nsIWebSocketListener *aListener,
+                                  nsISupports *aContext)
+{
+  mUsesNewAPI = true;
+  return AsyncOpen(aURI, aOrigin, aListener, aContext);
 }
 
 class CloseEvent : public nsRunnable

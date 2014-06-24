@@ -80,7 +80,10 @@ interface nsIWebSocketChannel : nsISupports
                    in ACString aOrigin,
                    in nsIWebSocketListener aListener,
                    in nsISupports aContext);
-    // TODO - Do we need an asyncOpen2() here and do we need to implement it the associated c++ file?
+    void asyncOpen2(in nsIURI aURI,
+                    in ACString aOrigin,
+                    in nsIWebSocketListener aListener,
+                    in nsISupports aContext);
 
     /*
      * Close the websocket connection for writing - no more calls to sendMsg
