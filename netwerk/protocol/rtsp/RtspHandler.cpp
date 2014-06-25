@@ -91,7 +91,7 @@ RtspHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
 NS_IMETHODIMP
 RtspHandler::NewChannel2(nsIURI* aURI,
                          nsIPrincipal* aRequestingPrincipal,
-                         nsINode* aRequestingNode,
+                         /* nsINode* */ nsISupports* aRequestingNode,
                          uint32_t aSecurityFlags,
                          nsContentPolicyType aContentPolicyType,
                          uint32_t aLoadFlags,
