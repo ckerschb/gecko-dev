@@ -103,6 +103,7 @@ NS_IMETHODIMP
 nsChromeProtocolHandler::NewChannel(nsIURI* aURI,
                                     nsIChannel* *aResult)
 {
+    NS_WARNING("Deprecated, you should use nsChromeProtocolHandler::NewChannel2");
     nsresult rv;
 
     NS_ENSURE_ARG_POINTER(aURI);
@@ -149,15 +150,8 @@ nsChromeProtocolHandler::NewChannel(nsIURI* aURI,
 
     nsCOMPtr<nsIIOService> ioServ(do_GetIOService(&rv));
     NS_ENSURE_SUCCESS(rv, rv);
-    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
-    rv = ioServ->NewChannelFromURI2(resolvedURI,
-                                    systemPrincipal,
-                                    nullptr, // requestingNode
-                                    0,       // securityFlags
-                                    nsIContentPolicy::TYPE_OTHER,
-                                    0,       // loadFlags
-                                    getter_AddRefs(result));
+    rv = ioServ->NewChannelFromURI(resolvedURI, getter_AddRefs(result));
     if (NS_FAILED(rv)) return rv;
 
 #ifdef DEBUG
@@ -224,13 +218,124 @@ nsChromeProtocolHandler::NewChannel2(nsIURI* aURI,
                                      uint32_t aLoadFlags,
                                      nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
+    // Putting the NewChannel() code inline here instead of calling it, because
+    // we need the loading info to pass it to ioService->NewChannel2()
+    nsresult rv;
+
+    NS_ENSURE_ARG_POINTER(aURI);
+    NS_PRECONDITION(outChannel, "Null out param");
+
+#ifdef DEBUG
+    // Check that the uri we got is already canonified
+    nsresult debug_rv;
+    nsCOMPtr<nsIURI> debugClone;
+    debug_rv = aURI->Clone(getter_AddRefs(debugClone));
+    if (NS_SUCCEEDED(debug_rv)) {
+        nsCOMPtr<nsIURL> debugURL (do_QueryInterface(debugClone));
+        debug_rv = nsChromeRegistry::Canonify(debugURL);
+        if (NS_SUCCEEDED(debug_rv)) {
+            bool same;
+            debug_rv = aURI->Equals(debugURL, &same);
+            if (NS_SUCCEEDED(debug_rv)) {
+                NS_ASSERTION(same, "Non-canonified chrome uri passed to nsChromeProtocolHandler::NewChannel!");
+            }
+        }
+    }
+#endif
+
+    nsCOMPtr<nsIChannel> result;
+
+    if (!nsChromeRegistry::gChromeRegistry) {
+        // We don't actually want this ref, we just want the service to
+        // initialize if it hasn't already.
+        nsCOMPtr<nsIChromeRegistry> reg =
+            mozilla::services::GetChromeRegistryService();
+        NS_ENSURE_TRUE(nsChromeRegistry::gChromeRegistry, NS_ERROR_FAILURE);
+    }
+
+    nsCOMPtr<nsIURI> resolvedURI;
+    rv = nsChromeRegistry::gChromeRegistry->ConvertChromeURL(aURI, getter_AddRefs(resolvedURI));
+    if (NS_FAILED(rv)) {
+#ifdef DEBUG
+        nsAutoCString spec;
+        aURI->GetSpec(spec);
+        printf("Couldn't convert chrome URL: %s\n", spec.get());
+#endif
+        return rv;
+    }
+
+    nsCOMPtr<nsIIOService> ioServ(do_GetIOService(&rv));
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    rv = ioServ->NewChannelFromURI2(resolvedURI,
+                                    aRequestingPrincipal,
+                                    aRequestingNode,
+                                    aSecurityFlags,
+                                    aContentPolicyType,
+                                    aLoadFlags,
+                                    getter_AddRefs(result));
+    if (NS_FAILED(rv)) return rv;
+
+#ifdef DEBUG
+    nsCOMPtr<nsIFileChannel> fileChan(do_QueryInterface(result));
+    if (fileChan) {
+        nsCOMPtr<nsIFile> file;
+        fileChan->GetFile(getter_AddRefs(file));
+
+        bool exists = false;
+        file->Exists(&exists);
+        if (!exists) {
+            nsAutoCString path;
+            file->GetNativePath(path);
+            printf("Chrome file doesn't exist: %s\n", path.get());
+        }
+    }
+#endif
+
+    // Make sure that the channel remembers where it was
+    // originally loaded from.
+    nsLoadFlags loadFlags = 0;
+    result->GetLoadFlags(&loadFlags);
+    result->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
+    rv = result->SetOriginalURI(aURI);
+    if (NS_FAILED(rv)) return rv;
+
+    // Get a system principal for content files and set the owner
+    // property of the result
+    nsCOMPtr<nsIURL> url = do_QueryInterface(aURI);
+    nsAutoCString path;
+    rv = url->GetPath(path);
+    if (StringBeginsWith(path, NS_LITERAL_CSTRING("/content/")))
+    {
+        nsCOMPtr<nsIScriptSecurityManager> securityManager =
+                 do_GetService(NS_SCRIPTSECURITYMANAGER_CONTRACTID, &rv);
+        if (NS_FAILED(rv)) return rv;
+
+        nsCOMPtr<nsIPrincipal> principal;
+        rv = securityManager->GetSystemPrincipal(getter_AddRefs(principal));
+        if (NS_FAILED(rv)) return rv;
+
+        nsCOMPtr<nsISupports> owner = do_QueryInterface(principal);
+        result->SetOwner(owner);
+    }
+
+    // XXX Removed dependency-tracking code from here, because we're not
+    // tracking them anyways (with fastload we checked only in DEBUG
+    // and with startupcache not at all), but this is where we would start
+    // if we need to re-add.
+    // See bug 531886, bug 533038.
+    result->SetContentCharset(NS_LITERAL_CSTRING("UTF-8"));
+
+    *outChannel = result;
+    NS_ADDREF(*outChannel);
+
+    // These already get set in the call to NewChannelFromURI2().
+    // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    // (*outChannel)->SetRequestingContext(aRequestingNode);
+    // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    return NS_OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
