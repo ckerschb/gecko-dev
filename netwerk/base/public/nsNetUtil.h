@@ -840,7 +840,7 @@ NS_NewInputStreamChannel2(nsIChannel**                result,
 }
 
 
-/* Takes 5 parmaters - issrcdocchannel, content type but no charset, data instead of stream */
+/* Takes 5 parameters - issrcdocchannel, content type but no charset, data instead of stream */
 inline nsresult
 NS_NewInputStreamChannel(nsIChannel      **result,
                          nsIURI           *uri,
@@ -882,7 +882,7 @@ NS_NewInputStreamChannel(nsIChannel      **result,
     return NS_OK;
 }
 
-/* Takes 5 parmaters - issrcdocchannel, content type but no charset, data instead of stream -plus 3 more with loadinfo */
+/* Takes 5 parameters - issrcdocchannel, content type but no charset, data instead of stream -plus 3 more with loadinfo */
 inline nsresult
 NS_NewInputStreamChannel2(nsIChannel**                result,
                           nsIURI*                     uri,
