@@ -44,10 +44,10 @@
     let appchan = SpecialPowers.Services.io.newChannel2(gManifestURL,
                                                         null,
                                                         null,
-                                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                                        SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                                         null,      // requestingNode
                                                         0,         // securityFlags
-                                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                                        SpecialPowers.Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                                         0);        // loadFlags
 
     try {
