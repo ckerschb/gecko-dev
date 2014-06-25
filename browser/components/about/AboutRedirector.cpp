@@ -131,6 +131,7 @@ GetAboutModuleName(nsIURI *aURI)
 NS_IMETHODIMP
 AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
 {
+  NS_WARNING("Deprecated, you should use AboutRedirector::NewChannel2");
   NS_ENSURE_ARG_POINTER(aURI);
   NS_ASSERTION(result, "must not be null");
 
@@ -140,20 +141,11 @@ AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
   nsCOMPtr<nsIIOService> ioService = do_GetIOService(&rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
-
   for (int i = 0; i < kRedirTotal; i++) {
     if (!strcmp(path.get(), kRedirMap[i].id)) {
       nsCOMPtr<nsIChannel> tempChannel;
-      rv = ioService->NewChannel2(nsDependentCString(kRedirMap[i].url),
-                                  nullptr,
-                                  nullptr,
-                                  systemPrincipal,
-                                  nullptr, // requestingNode
-                                  0,       // securityFlags
-                                  nsIContentPolicy::TYPE_OTHER,
-                                  0,       // loadFlags
-                                  getter_AddRefs(tempChannel));
+      rv = ioService->NewChannel(nsDependentCString(kRedirMap[i].url),
+                                 nullptr, nullptr, getter_AddRefs(tempChannel));
       NS_ENSURE_SUCCESS(rv, rv);
 
       tempChannel->SetOriginalURI(aURI);
@@ -176,12 +168,44 @@ AboutRedirector::NewChannel2(nsIURI* aURI,
                              nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
+
+  // Putting the NewChannel() code inline here instead of calling it, because
+  // we need the loading info to pass it to ioService->NewChannel2().
+  NS_ENSURE_ARG_POINTER(aURI);
+  NS_ASSERTION(outChannel, "must not be null");
+
+  nsAutoCString path = GetAboutModuleName(aURI);
+
+  nsresult rv;
+  nsCOMPtr<nsIIOService> ioService = do_GetIOService(&rv);
   NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+
+  for (int i = 0; i < kRedirTotal; i++) {
+    if (!strcmp(path.get(), kRedirMap[i].id)) {
+      nsCOMPtr<nsIChannel> tempChannel;
+      rv = ioService->NewChannel2(nsDependentCString(kRedirMap[i].url),
+                                  nullptr,
+                                  nullptr,
+                                  aRequestingPrincipal,
+                                  aRequestingNode,
+                                  aSecurityFlags,
+                                  aContentPolicyType,
+                                  aLoadFlags,
+                                  getter_AddRefs(tempChannel));
+      NS_ENSURE_SUCCESS(rv, rv);
+
+      tempChannel->SetOriginalURI(aURI);
+
+      NS_ADDREF(*outChannel = tempChannel);
+      // These already get set on the channel in the call to ioService->NewChannel2
+      // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+      // (*outChannel)->SetRequestingContext(aRequestingNode);
+      // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+      return rv;
+    }
+  }
+
+  return NS_ERROR_ILLEGAL_VALUE;
 }
 
 NS_IMETHODIMP
