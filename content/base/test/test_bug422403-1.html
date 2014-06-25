@@ -32,10 +32,10 @@ function loadFileContent(aFile, aCharset) {
     var chann = ios.newChannel2(aFile,
                                 aCharset,
                                 baseUri,
-                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
-                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                SpecialPowers.Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
 
     var cis = SpecialPowers.Ci.nsIConverterInputStream;
