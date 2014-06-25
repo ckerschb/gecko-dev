@@ -530,7 +530,7 @@ nsHostObjectProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 NS_IMETHODIMP
 nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
                                          nsIPrincipal* aRequestingPrincipal,
-                                         nsINode* aRequestingNode,
+                                         /* nsINode* */ nsISupports* aRequestingNode,
                                          uint32_t aSecurityFlags,
                                          nsContentPolicyType aContentPolicyType,
                                          uint32_t aLoadFlags,

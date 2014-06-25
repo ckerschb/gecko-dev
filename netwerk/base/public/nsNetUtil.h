@@ -480,6 +480,7 @@ NS_NewChannel3(nsIChannel**           outResult,
                nsContentPolicyType    aType,
                nsINode*               aRequestingNode)
 {
+
   { // debug
     nsAutoCString spec;
     aURI->GetSpec(spec);
@@ -500,6 +501,7 @@ NS_NewChannel3(nsIChannel**           outResult,
     }
     fprintf(stderr, "}\n\n");
   }
+
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
 
   // TODO: Propably those channels should never be created using the nsContentPolicyType of TYPE_OTHER
@@ -752,14 +754,14 @@ NS_NewInputStreamChannel(nsIChannel      **result,
 
 /* Takes 5 parameters plus 3 more with loadinfo*/
 inline nsresult
-NS_NewInputStreamChannel2(nsIChannel           **result,
-                          nsIURI               *uri,
-                          nsIInputStream       *stream,
-                          const nsACString     &contentType,
-                          const nsACString     *contentCharset,
-                          nsIPrincipal*        aRequestingPrincipal,
-                          nsINode*             aRequestingNode,
-                          nsContentPolicyType  aContentPolicyType)
+NS_NewInputStreamChannel2(nsIChannel**                result,
+                          nsIURI*                     uri,
+                          nsIInputStream*             stream,
+                          const nsACString&           contentType,
+                          const nsACString*           contentCharset,
+                          nsIPrincipal*               aRequestingPrincipal,
+                          /* nsINode* */ nsISupports* aRequestingNode,
+                          nsContentPolicyType         aContentPolicyType)
 {
     NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 
@@ -784,13 +786,13 @@ NS_NewInputStreamChannel(nsIChannel      **result,
 
 /* Takes 4 paremeters - contenttype but no charset - plus 3 more with loadinfo */
 inline nsresult
-NS_NewInputStreamChannel2(nsIChannel           **result,
-                          nsIURI               *uri,
-                          nsIInputStream       *stream,
-                          const nsACString     &contentType   = EmptyCString(),
-                          nsIPrincipal*        aRequestingPrincipal = nullptr,
-                          nsINode*             aRequestingNode = nullptr,
-                          nsContentPolicyType  aContentPolicyType = 0)
+NS_NewInputStreamChannel2(nsIChannel**                 result,
+                          nsIURI*                      uri,
+                          nsIInputStream*              stream,
+                          const nsACString&            contentType   = EmptyCString(),
+                          nsIPrincipal*                aRequestingPrincipal = nullptr,
+                          /* nsINode* */ nsISupports*  aRequestingNode = nullptr,
+                          nsContentPolicyType          aContentPolicyType = 0)
 {
     NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 
@@ -818,14 +820,14 @@ NS_NewInputStreamChannel(nsIChannel      **result,
 
 /* Takes 5 parameters - &contentcharset instead of *charset - plus 3 more with loadinfo */
 inline nsresult
-NS_NewInputStreamChannel2(nsIChannel           **result,
-                          nsIURI               *uri,
-                          nsIInputStream       *stream,
-                          const nsACString     &contentType,
-                          const nsACString     &contentCharset,
-                          nsIPrincipal*        aRequestingPrincipal,
-                          nsINode*             aRequestingNode,
-                          nsContentPolicyType  aContentPolicyType)
+NS_NewInputStreamChannel2(nsIChannel**                result,
+                          nsIURI*                     uri,
+                          nsIInputStream*             stream,
+                          const nsACString&           contentType,
+                          const nsACString&           contentCharset,
+                          nsIPrincipal*               aRequestingPrincipal,
+                          /* nsINode* */ nsISupports* aRequestingNode,
+                          nsContentPolicyType         aContentPolicyType)
 {
     NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 
@@ -882,14 +884,14 @@ NS_NewInputStreamChannel(nsIChannel      **result,
 
 /* Takes 5 parmaters - issrcdocchannel, content type but no charset, data instead of stream -plus 3 more with loadinfo */
 inline nsresult
-NS_NewInputStreamChannel2(nsIChannel           **result,
-                          nsIURI               *uri,
-                          const nsAString      &data,
-                          const nsACString     &contentType,
-                          bool                 isSrcdocChannel = false,
-                          nsIPrincipal*        aRequestingPrincipal = nullptr,
-                          nsINode*             aRequestingNode = nullptr,
-                          nsContentPolicyType  aContentPolicyType = 0)
+NS_NewInputStreamChannel2(nsIChannel**                result,
+                          nsIURI*                     uri,
+                          const nsAString&            data,
+                          const nsACString&           contentType,
+                          bool                        isSrcdocChannel = false,
+                          nsIPrincipal*               aRequestingPrincipal = nullptr,
+                          /* nsINode* */ nsISupports* aRequestingNode = nullptr,
+                          nsContentPolicyType         aContentPolicyType = 0)
 {
     NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 

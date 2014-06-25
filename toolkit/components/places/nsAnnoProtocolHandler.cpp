@@ -293,7 +293,7 @@ nsAnnoProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **_retval)
 NS_IMETHODIMP
 nsAnnoProtocolHandler::NewChannel2(nsIURI* aURI,
                                    nsIPrincipal* aRequestingPrincipal,
-                                   nsINode* aRequestingNode,
+                                   /* nsINode* */ nsISupports* aRequestingNode,
                                    uint32_t aSecurityFlags,
                                    nsContentPolicyType aContentPolicyType,
                                    uint32_t aLoadFlags,
@@ -404,7 +404,7 @@ nsresult
 nsAnnoProtocolHandler::NewFaviconChannel2(nsIURI *aURI, nsIURI *aAnnotationURI,
                                           nsIChannel **_channel,
                                           nsIPrincipal *aRequestingPrincipal,
-                                          nsINode *aRequestingNode,
+                                          /* nsINode* */ nsISupports* aRequestingNode,
                                           nsContentPolicyType aContentPolicyType)
 {
   // Create our pipe.  This will give us our input stream and output stream

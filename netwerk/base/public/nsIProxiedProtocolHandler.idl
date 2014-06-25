@@ -36,7 +36,7 @@ interface nsIProxiedProtocolHandler : nsIProtocolHandler
                                   in unsigned long proxyResolveFlags,
                                   in nsIURI proxyURI,
                                   in nsIPrincipal aRequestingPrincipal,
-                                  in nsINode aRequestingNode,
+                                  in nsISupports aRequestingNode,
                                   in unsigned long aSecurityFlags,
                                   in nsContentPolicyType aContentPolicyType,
                                   in unsigned long aLoadFlags);

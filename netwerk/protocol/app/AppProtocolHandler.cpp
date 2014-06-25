@@ -470,7 +470,7 @@ AppProtocolHandler::NewChannel(nsIURI* aUri, nsIChannel* *aResult)
 NS_IMETHODIMP
 AppProtocolHandler::NewChannel2(nsIURI* aURI,
                                 nsIPrincipal* aRequestingPrincipal,
-                                nsINode* aRequestingNode,
+                                /* nsINode* */ nsISupports* aRequestingNode,
                                 uint32_t aSecurityFlags,
                                 nsContentPolicyType aContentPolicyType,
                                 uint32_t aLoadFlags,

@@ -136,7 +136,7 @@ nsWyciwygProtocolHandler::NewChannel(nsIURI* url, nsIChannel* *result)
 NS_IMETHODIMP
 nsWyciwygProtocolHandler::NewChannel2(nsIURI* aURI,
                                       nsIPrincipal* aRequestingPrincipal,
-                                      nsINode* aRequestingNode,
+                                      /* nsINode* */ nsISupports* aRequestingNode,
                                       uint32_t aSecurityFlags,
                                       nsContentPolicyType aContentPolicyType,
                                       uint32_t aLoadFlags,

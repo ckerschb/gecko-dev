@@ -9,7 +9,6 @@
 interface nsIURI;
 interface nsIChannel;
 interface nsIPrincipal;
-interface nsINode;
 
 [scriptable, uuid(69444cc8-f445-4e86-90b4-8fd902c56389)]
 interface nsIAboutModule : nsISupports 
@@ -23,7 +22,7 @@ interface nsIAboutModule : nsISupports
 
     nsIChannel newChannel2(in nsIURI aURI,
                            in nsIPrincipal aRequestingPrincipal,
-                           in nsINode aRequestingNode,
+                           in nsISupports aRequestingNode,
                            in unsigned long aSecurityFlags,
                            in nsContentPolicyType aContentPolicyType,
                            in unsigned long aLoadFlags);

@@ -393,7 +393,7 @@ public:
 
     nsresult Init(nsIURI *aURI,
                   nsIPrincipal* aRequestingPrincipal,
-                  nsINode* aRequestingNode,
+                  /* nsINode* */ nsISupports* aRequestingNode,
                   nsContentPolicyType aContentPolicyType);
 
     // Actually evaluate the script.
@@ -466,7 +466,7 @@ nsresult nsJSChannel::StopAll()
 
 nsresult nsJSChannel::Init(nsIURI *aURI,
                            nsIPrincipal* aRequestingPrincipal,
-                           nsINode* aRequestingNode,
+                           /* nsINode* */ nsISupports* aRequestingNode,
                            nsContentPolicyType aContentPolicyType)
 {
     nsRefPtr<nsJSURI> jsURI;
@@ -1328,7 +1328,7 @@ nsJSProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 NS_IMETHODIMP
 nsJSProtocolHandler::NewChannel2(nsIURI* aURI,
                                  nsIPrincipal* aRequestingPrincipal,
-                                 nsINode* aRequestingNode,
+                                 /* nsINode* */ nsISupports* aRequestingNode,
                                  uint32_t aSecurityFlags,
                                  nsContentPolicyType aContentPolicyType,
                                  uint32_t aLoadFlags,

@@ -8,7 +8,6 @@
 
 interface nsIURI;
 interface nsIChannel;
-interface nsINode;
 
 /**
  * nsIProtocolHandler
@@ -69,7 +68,7 @@ interface nsIProtocolHandler : nsISupports
 
     nsIChannel newChannel2(in nsIURI aURI,
                            in nsIPrincipal aRequestingPrincipal,
-                           in nsINode aRequestingNode,
+                           in nsISupports aRequestingNode,
                            in unsigned long aSecurityFlags,
                            in nsContentPolicyType aContentPolicyType,
                            in unsigned long aLoadFlags);

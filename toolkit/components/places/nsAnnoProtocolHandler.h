@@ -51,7 +51,7 @@ protected:
                               nsIURI *aAnnotationURI,
                               nsIChannel **_channel,
                               nsIPrincipal *aRequestingPrincipal,
-                              nsINode *aRequestingNode,
+                              /*nsINode* */ nsISupports* aRequestingNode,
                               nsContentPolicyType aContentPolicyType);
 };
 

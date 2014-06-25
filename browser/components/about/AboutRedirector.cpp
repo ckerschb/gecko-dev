@@ -168,12 +168,12 @@ AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
 
 NS_IMETHODIMP
 AboutRedirector::NewChannel2(nsIURI* aURI,
-                                      nsIPrincipal* aRequestingPrincipal,
-                                      nsINode* aRequestingNode,
-                                      uint32_t aSecurityFlags,
-                                      nsContentPolicyType aContentPolicyType,
-                                      uint32_t aLoadFlags,
-                                      nsIChannel** outChannel)
+                             nsIPrincipal* aRequestingPrincipal,
+                             /* nsINode* */ nsISupports* aRequestingNode,
+                             uint32_t aSecurityFlags,
+                             nsContentPolicyType aContentPolicyType,
+                             uint32_t aLoadFlags,
+                             nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
   nsresult rv = NewChannel(aURI, outChannel);

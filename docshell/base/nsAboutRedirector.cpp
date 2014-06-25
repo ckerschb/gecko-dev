@@ -126,7 +126,7 @@ nsAboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
 NS_IMETHODIMP
 nsAboutRedirector::NewChannel2(nsIURI* aURI,
                                nsIPrincipal* aRequestingPrincipal,
-                               nsINode* aRequestingNode,
+                               /* nsINode* */ nsISupports* aRequestingNode,
                                uint32_t aSecurityFlags,
                                nsContentPolicyType aContentPolicyType,
                                uint32_t aLoadFlags,

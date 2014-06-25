@@ -10,7 +10,6 @@ interface nsIProtocolHandler;
 interface nsIChannel;
 interface nsIURI;
 interface nsIFile;
-interface nsINode;
 
 /**
  * nsIIOService provides a set of network utility functions.  This interface
@@ -74,7 +73,7 @@ interface nsIIOService : nsISupports
 
     nsIChannel newChannelFromURI2(in nsIURI aURI,
                                   in nsIPrincipal aRequestingPrincipal,
-                                  in nsINode aRequestingNode,
+                                  in nsISupports aRequestingNode,
                                   in unsigned long aSecurityFlags,
                                   in nsContentPolicyType aContentPolicyType,
                                   in unsigned long aLoadFlags);
@@ -90,7 +89,7 @@ interface nsIIOService : nsISupports
                            in string aOriginCharset,
                            in nsIURI aBaseURI,
                            in nsIPrincipal aRequestingPrincipal,
-                           in nsINode aRequestingNode,
+                           in nsISupports aRequestingNode,
                            in unsigned long aSecurityFlags,
                            in nsContentPolicyType aContentPolicyType,
                            in unsigned long aLoadFlags);

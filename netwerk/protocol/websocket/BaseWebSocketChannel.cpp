@@ -246,7 +246,7 @@ BaseWebSocketChannel::AllowPort(int32_t port, const char *scheme,
 NS_IMETHODIMP
 BaseWebSocketChannel::NewChannel2(nsIURI* aURI,
                                   nsIPrincipal* aRequestingPrincipal,
-                                  nsINode* aRequestingNode,
+                                  /* nsINode* */ nsISupports* aRequestingNode,
                                   uint32_t aSecurityFlags,
                                   nsContentPolicyType aContentPolicyType,
                                   uint32_t aLoadFlags,
