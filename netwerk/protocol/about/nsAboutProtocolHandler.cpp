@@ -185,13 +185,74 @@ nsAboutProtocolHandler::NewChannel2(nsIURI* aURI,
                                     uint32_t aLoadFlags,
                                     nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
+    // Putting the NewChannel() code inline here instead of calling it, because
+    // we need the loading info to pass it to aboutMod->NewChannel2().
+    NS_ENSURE_ARG_POINTER(aURI);
+
+    // about:what you ask?
+    nsCOMPtr<nsIAboutModule> aboutMod;
+    nsresult rv = NS_GetAboutModule(aURI, getter_AddRefs(aboutMod));
+
+    nsAutoCString path;
+    nsresult rv2 = NS_GetAboutModuleName(aURI, path);
+    if (NS_SUCCEEDED(rv2) && path.EqualsLiteral("srcdoc")) {
+        // about:srcdoc is meant to be unresolvable, yet is included in the 
+        // about lookup tables so that it can pass security checks when used in
+        // a srcdoc iframe.  To ensure that it stays unresolvable, we pretend
+        // that it doesn't exist.
+      rv = NS_ERROR_FACTORY_NOT_REGISTERED;
+    }
+
+    if (NS_SUCCEEDED(rv)) {
+        // The standard return case:
+        rv = aboutMod->NewChannel2(aURI, 
+                                   aRequestingPrincipal,
+                                   aRequestingNode,
+                                   aSecurityFlags,
+                                   aContentPolicyType,
+                                   aLoadFlags,
+                                   outChannel);
+        if (NS_SUCCEEDED(rv)) {
+            // If this URI is safe for untrusted content, enforce that its
+            // principal be based on the channel's originalURI by setting the
+            // owner to null.
+            // Note: this relies on aboutMod's newChannel implementation
+            // having set the proper originalURI, which probably isn't ideal.
+            if (IsSafeForUntrustedContent(aboutMod, aURI)) {
+                (*outChannel)->SetOwner(nullptr);
+            }
+
+            nsRefPtr<nsNestedAboutURI> aboutURI;
+            nsresult rv2 = aURI->QueryInterface(kNestedAboutURICID,
+                                               getter_AddRefs(aboutURI));
+            if (NS_SUCCEEDED(rv2) && aboutURI->GetBaseURI()) {
+                nsCOMPtr<nsIWritablePropertyBag2> writableBag =
+                    do_QueryInterface(*outChannel);
+                if (writableBag) {
+                    writableBag->
+                        SetPropertyAsInterface(NS_LITERAL_STRING("baseURI"),
+                                               aboutURI->GetBaseURI());
+                }
+            }
+            // These already get set on the channel in the call to aboutMod->NewChannel2
+            // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+            // (*outChannel)->SetRequestingContext(aRequestingNode);
+            // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+        }
+        return rv;
+    }
+
+    // mumble...
+
+    if (rv == NS_ERROR_FACTORY_NOT_REGISTERED) {
+        // This looks like an about: we don't know about.  Convert
+        // this to an invalid URI error.
+        rv = NS_ERROR_MALFORMED_URI;
+    }
+
+    return rv;
 }
 
 NS_IMETHODIMP 
