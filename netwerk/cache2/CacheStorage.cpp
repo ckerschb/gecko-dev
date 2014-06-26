@@ -99,6 +99,7 @@ NS_IMETHODIMP CacheStorage::AsyncOpenURI(nsIURI *aURI,
   NS_ENSURE_SUCCESS(rv, rv);
 
   // May invoke the callback synchronously
+  // Note we do not need AsyncOpen2() for cacheentry
   entry->Entry()->AsyncOpen(aCallback, aFlags);
 
   return NS_OK;

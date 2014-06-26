@@ -386,7 +386,7 @@ RtspMediaResource::RtspMediaResource(MediaDecoder* aDecoder,
     static_cast<RtspChannelChild*>(aChannel)->GetController();
   MOZ_ASSERT(mMediaStreamController);
   mListener = new Listener(this);
-  mMediaStreamController->AsyncOpen(mListener);
+  mMediaStreamController->AsyncOpen2(mListener);
 #ifdef PR_LOGGING
   if (!gRtspMediaResourceLog) {
     gRtspMediaResourceLog = PR_NewLogModule("RtspMediaResource");

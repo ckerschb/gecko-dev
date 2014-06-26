@@ -18,6 +18,7 @@ namespace net {
 RtspChannelChild::RtspChannelChild(nsIURI *aUri)
   : mIPCOpen(false)
   , mCanceled(false)
+  , mUsesNewAPI(false)
 {
   nsBaseChannel::SetURI(aUri);
   DisallowThreadRetargeting();
@@ -105,6 +106,8 @@ private:
 NS_IMETHODIMP
 RtspChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "RtspChannelChild::AsyncOpen call did no go through new API");
+
   // Precondition checks.
   MOZ_ASSERT(aListener);
   nsCOMPtr<nsIURI> uri = nsBaseChannel::URI();
@@ -132,6 +135,13 @@ RtspChannelChild::AsyncOpen(nsIStreamListener *aListener, nsISupports *aContext)
     new CallListenerOnStartRequestEvent(mListener, this, mListenerContext));
 
   return NS_OK;
+}
+
+NS_IMETHODIMP
+RtspChannelChild::AsyncOpen2(nsIStreamListener *aListener, nsISupports *aContext)
+{
+  mUsesNewAPI = true;
+  return AsyncOpen(aListener, aContext);
 }
 
 //-----------------------------------------------------------------------------
@@ -265,7 +275,7 @@ NS_IMETHODIMP
 RtspChannelChild::CompleteRedirectSetup(nsIStreamListener *aListener,
                                         nsISupports *aContext)
 {
-  return AsyncOpen(aListener, aContext);
+  return AsyncOpen2(aListener, aContext);
 }
 
 } // namespace net

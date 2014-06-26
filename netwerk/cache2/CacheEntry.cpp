@@ -258,6 +258,7 @@ nsresult CacheEntry::HashingKey(nsCSubstring const& aStorageID,
   return NS_OK;
 }
 
+// Note we do not need AsyncOpen2 for cacheentry.
 void CacheEntry::AsyncOpen(nsICacheEntryOpenCallback* aCallback, uint32_t aFlags)
 {
   LOG(("CacheEntry::AsyncOpen [this=%p, state=%s, flags=%d, callback=%p]",
@@ -445,6 +446,7 @@ already_AddRefed<CacheEntryHandle> CacheEntry::ReopenTruncated(bool aMemoryOnly,
     if (NS_SUCCEEDED(rv)) {
       newEntry = handle->Entry();
       LOG(("  exchanged entry %p by entry %p, rv=0x%08x", this, newEntry.get(), rv));
+      // Note we do not need AsyncOpen2() for cacheentry
       newEntry->AsyncOpen(aCallback, nsICacheStorage::OPEN_TRUNCATE);
     } else {
       LOG(("  exchanged of entry %p failed, rv=0x%08x", this, rv));
