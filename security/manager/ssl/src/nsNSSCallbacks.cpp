@@ -164,7 +164,7 @@ nsHTTPDownloadEvent::Run()
 
   if (NS_SUCCEEDED(rv)) {
     mStartTime = TimeStamp::Now();
-    rv = hchan->AsyncOpen(mListener->mLoader, nullptr);
+    rv = hchan->AsyncOpen2(mListener->mLoader, nullptr);
   }
 
   if (NS_FAILED(rv)) {
