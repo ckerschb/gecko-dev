@@ -61,6 +61,7 @@ NS_INTERFACE_MAP_END
 RtspControllerChild::RtspControllerChild(nsIChannel *channel)
   : mIPCOpen(false)
   , mIPCAllowed(false)
+  , mUsesNewAPI(false)
   , mChannel(channel)
   , mTotalTracks(0)
   , mSuspendCount(0)
@@ -495,6 +496,7 @@ RtspControllerChild::Init(nsIURI *aURI)
 NS_IMETHODIMP
 RtspControllerChild::AsyncOpen(nsIStreamingProtocolListener *aListener)
 {
+  NS_ASSERTION(mUsesNewAPI, "RtspControllerChild::AsyncOpen call did no go through new API");
   LOG(("RtspControllerChild::AsyncOpen()"));
   if (!aListener) {
     LOG(("RtspControllerChild::AsyncOpen() - invalid listener"));
@@ -520,6 +522,13 @@ RtspControllerChild::AsyncOpen(nsIStreamingProtocolListener *aListener)
     return NS_ERROR_FAILURE;
   }
   return NS_OK;
+}
+
+NS_IMETHODIMP
+RtspControllerChild::AsyncOpen2(nsIStreamingProtocolListener *aListener)
+{
+  mUsesNewAPI = true;
+  return AsyncOpen2(aListener);
 }
 
 } // namespace net
