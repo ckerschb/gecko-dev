@@ -600,10 +600,7 @@ nsBaseChannel::Open(nsIInputStream **result)
 {
   // For now we are forgiving and only print a warning
   // sooner or later the warning should turn into thsi assertion:
-  // NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
-  if (!mUsesNewAPI) {
-    NS_WARNING("Open call did not go through new API");
-  }
+  NS_ASSERTION(mUsesNewAPI, "Open call did no go through new API");
 
   NS_ENSURE_TRUE(mURI, NS_ERROR_NOT_INITIALIZED);
   NS_ENSURE_TRUE(!mPump, NS_ERROR_IN_PROGRESS);
@@ -652,10 +649,7 @@ nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 {
   // Since not all channels are created setting a principal we use a warning
   // for now, which should turn in the following assertion soon:
-  // NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
-  if (!mUsesNewAPI) {
-    NS_WARNING("AsyncOpen call did no go through new API");
-  }
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
 
   NS_ENSURE_TRUE(mURI, NS_ERROR_NOT_INITIALIZED);
   NS_ENSURE_TRUE(!mPump, NS_ERROR_IN_PROGRESS);

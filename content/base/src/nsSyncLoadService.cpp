@@ -307,6 +307,18 @@ nsSyncLoadService::LoadDocument(nsIURI *aURI, nsIPrincipal *aLoaderPrincipal,
                                 nsILoadGroup *aLoadGroup, bool aForceToXML,
                                 nsIDOMDocument** aResult)
 {
+     // aLoaderPrincipal = principal of loading document. For security
+     //                    checks and referrer header. May be null if no
+     //                    security checks should be done.
+
+    nsIPrincipal* loaderPrincipal = aLoaderPrincipal;
+    if (!loaderPrincipal) {
+      nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+      if (systemPrincipal) {
+        loaderPrincipal = systemPrincipal.get();
+      }
+    }
+
     nsCOMPtr<nsIChannel> channel;
     nsresult rv = NS_NewChannel2(getter_AddRefs(channel),
                                  aURI,
@@ -316,7 +328,7 @@ nsSyncLoadService::LoadDocument(nsIURI *aURI, nsIPrincipal *aLoaderPrincipal,
                                  nsIRequest::LOAD_NORMAL,
                                  nullptr, // channelPolicy
                                  nsIContentPolicy::TYPE_OTHER,
-                                 aLoaderPrincipal);
+                                 loaderPrincipal);
     NS_ENSURE_SUCCESS(rv, rv);
 
     if (!aForceToXML) {
