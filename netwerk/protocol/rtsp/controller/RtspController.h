@@ -34,6 +34,8 @@ private:
     DISCONNECTED
   };
 
+  bool mUsesNewAPI;
+
   // RTSP URL refer to a stream or an aggregate of streams.
   nsCOMPtr<nsIURI> mURI;
   // The nsIStreamingProtocolListener implementation.

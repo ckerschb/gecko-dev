@@ -53,7 +53,8 @@ NS_IMPL_ISUPPORTS(RtspController,
                   nsIStreamingProtocolController)
 
 RtspController::RtspController(nsIChannel *channel)
-  : mState(INIT)
+  : mState(INIT),
+    mUsesNewAPI(false)
 {
   LOG(("RtspController::RtspController()"));
 }
@@ -183,6 +184,7 @@ RtspController::GetTotalTracks(uint8_t *aTracks)
 NS_IMETHODIMP
 RtspController::AsyncOpen(nsIStreamingProtocolListener *aListener)
 {
+  NS_ASSERTION(mUsesNewAPI, "RtspController::AsyncOpen call did no go through new API");
   if (!aListener) {
     LOG(("RtspController::AsyncOpen() illegal listener"));
     return NS_ERROR_NOT_INITIALIZED;
@@ -206,6 +208,13 @@ RtspController::AsyncOpen(nsIStreamingProtocolListener *aListener)
   mRtspSource->start();
 
   return NS_OK;
+}
+
+NS_IMETHODIMP
+RtspController::AsyncOpen2(nsIStreamingProtocolListener *aListener)
+{
+  mUsesNewAPI = true;
+  return AsyncOpen(aListener);
 }
 
 class SendMediaDataTask : public nsRunnable
