@@ -78,7 +78,7 @@ function read(url) {
                                         0,         // securityFlags
                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                         0);        // loadFlags
-  let input = channel.open();
+  let input = channel.open2();
   scriptableStream.init(input);
 
   let data = "";

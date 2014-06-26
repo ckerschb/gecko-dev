@@ -178,7 +178,7 @@ SpecialPowersObserverAPI.prototype = {
                                           0,         // securityFlags
                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                           0);        // loadFlags
-    var input = channel.open();
+    var input = channel.open2();
     scriptableStream.init(input);
 
     var str;

@@ -50,7 +50,7 @@ function readURI(uri) {
                                       0,         // securityFlags
                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                       0);        // loadFlags
-  let stream = channel.open();
+  let stream = channel.open2();
 
   let cstream = Cc['@mozilla.org/intl/converter-input-stream;1'].
     createInstance(Ci.nsIConverterInputStream);

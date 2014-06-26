@@ -87,7 +87,7 @@ function downloadURL(url, file) {
                                         0,         // securityFlags
                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                         0);        // loadFlags
-  let istream = channel.open();
+  let istream = channel.open2();
   let bstream = Cc["@mozilla.org/binaryinputstream;1"]
                   .createInstance(Ci.nsIBinaryInputStream);
   bstream.setInputStream(istream);

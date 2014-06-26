@@ -173,7 +173,7 @@ function testRegister(assert, text) {
                                        0,       //securityFlags
                                        Ci.nsIContentPolicy.TYPE_OTHER,
                                        0);      //loadFlags
-  var iStream = channel.open();
+  var iStream = channel.open2();
   var siStream = Cc['@mozilla.org/scriptableinputstream;1']
                  .createInstance(Ci.nsIScriptableInputStream);
   siStream.init(iStream);

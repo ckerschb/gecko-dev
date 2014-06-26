@@ -16,7 +16,7 @@ function run_test() {
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
-  instr = channel.open();
+  instr = channel.open2();
   var val;
   try {
     val = channel.contentDisposition;

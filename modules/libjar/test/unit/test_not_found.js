@@ -17,7 +17,7 @@ function run_test() {
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
   try {
-    instr = channel.open();
+    instr = channel.open2();
     do_throw("Failed to report that file doesn't exist")
   } catch (e) {
       do_check_true(e.name == "NS_ERROR_FILE_NOT_FOUND")

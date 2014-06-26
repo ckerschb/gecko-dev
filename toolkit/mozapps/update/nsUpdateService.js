@@ -1356,7 +1356,7 @@ function getLocale() {
                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                           0);        // loadFlags
     try {
-      var inputStream = channel.open();
+      var inputStream = channel.open2();
       gLocale = readStringFromInputStream(inputStream);
     } catch(e) {}
     if (gLocale)

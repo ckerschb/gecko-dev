@@ -90,7 +90,7 @@ function run_test() {
                                             0,       //securityFlags
                                             Ci.nsIContentPolicy.TYPE_OTHER,
                                             0);      //loadFlags
-  channel.open();
+  channel.open2();
 
   gServerSocket.init(-1, true, -1);
 

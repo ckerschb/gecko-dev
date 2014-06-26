@@ -10,7 +10,7 @@ function run_test() {
                                        0,       //securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                        0);      //loadFlags
-  var inp = channel.open();
+  var inp = channel.open2();
 
   var properties = Components.classes["@mozilla.org/persistent-properties;1"].
                    createInstance(Components.interfaces.nsIPersistentProperties);
@@ -59,7 +59,7 @@ function run_test() {
                                                   0,       //securityFlags
                                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                                   0);      //loadFlags
-  inp = channel.open();
+  inp = channel.open2();
 
   var properties2 = Components.classes["@mozilla.org/persistent-properties;1"].
                     createInstance(Components.interfaces.nsIPersistentProperties);

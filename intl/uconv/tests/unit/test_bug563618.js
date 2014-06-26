@@ -42,7 +42,7 @@ function testCase(testText, expectedText, bufferLength, charset)
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
-  var testInputStream = channel.open();
+  var testInputStream = channel.open2();
   var testConverter = new ConverterInputStream(testInputStream,
                                                charset,
                                                bufferLength,

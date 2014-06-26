@@ -826,7 +826,7 @@ function ReadManifest(aURL, inherited_status)
                                                0,       //securityFlags
                                                CI.nsIContentPolicy.TYPE_OTHER,
                                                0);      //loadFlags
-    var inputStream = channel.open();
+    var inputStream = channel.open2();
     if (channel instanceof Components.interfaces.nsIHttpChannel
         && channel.responseStatus != 200) {
       gDumpLog("REFTEST TEST-UNEXPECTED-FAIL | | HTTP ERROR : " +

@@ -59,7 +59,7 @@ function getChromeURIContent(chromeURI) {
                                       0,         // securityFlags
                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                       0);        // loadFlags
-  let input = channel.open();
+  let input = channel.open2();
   let stream = Cc["@mozilla.org/binaryinputstream;1"].
                 createInstance(Ci.nsIBinaryInputStream);
   stream.setInputStream(input);

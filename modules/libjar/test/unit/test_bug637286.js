@@ -19,7 +19,7 @@ function open_inner_zip(base, idx) {
                                   0,         // securityFlags
                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                   0);        // loadFlags
-    var stream = channel.open();
+    var stream = channel.open2();
 }
 
 function run_test() {

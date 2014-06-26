@@ -28,7 +28,7 @@ function GetFileAsText(file) {
                                         0,         // securityFlags
                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                         0);        // loadFlags
-  let inputStream = channel.open();
+  let inputStream = channel.open2();
   if (channel instanceof Ci.nsIHttpChannel &&
       channel.responseStatus != 200) {
     return "";

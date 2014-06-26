@@ -32,13 +32,13 @@ function run_test() {
                                    0);        // loadFlags
 
   try {
-    instr = goodChannel.open();
+    instr = goodchannel.open2();
   } catch (e) {
     do_throw("Failed to open file in inner jar");
   }
 
   try {
-    instr = badChannel.open();
+    instr = badchannel.open2();
     do_throw("Failed to report that file doesn't exist");
   } catch (e) {
     do_check_true(e.name == "NS_ERROR_FILE_NOT_FOUND");

@@ -22,7 +22,7 @@ function run_test() {
                                 0);        // loadFlags
   var failed = false;
   try {
-    var stream = channel.open();
+    var stream = channel.open2();
   } catch (e) {
     failed = true;
   }

@@ -336,7 +336,7 @@
                                      0,         // securityFlags
                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
-       var iStream = channel.open();
+       var iStream = channel.open2();
        var ciStream = Cc["@mozilla.org/intl/converter-input-stream;1"].
                       createInstance(Ci.nsIConverterInputStream);
        var bufLen = 0x8000;

@@ -149,7 +149,7 @@ exports.items = [
                                          0,         // securityFlags
                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                          0);        // loadFlags
-            let input = channel.open();
+            let input = channel.open2();
             let imgTools = Cc["@mozilla.org/image/tools;1"]
                             .getService(Ci.imgITools);
 
