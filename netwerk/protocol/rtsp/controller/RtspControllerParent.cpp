@@ -94,7 +94,7 @@ RtspControllerParent::RecvAsyncOpen(const URIParams& aURI)
 
   mController = new RtspController(nullptr);
   mController->Init(mURI);
-  nsresult rv = mController->AsyncOpen(this);
+  nsresult rv = mController->AsyncOpen2(this);
   if (NS_SUCCEEDED(rv)) return true;
 
   mController = nullptr;

@@ -43,6 +43,8 @@ public:
   NS_IMETHOD GetContentType(nsACString & aContentType) MOZ_OVERRIDE MOZ_FINAL;
   NS_IMETHOD AsyncOpen(nsIStreamListener *listener, nsISupports *aContext)
                        MOZ_OVERRIDE MOZ_FINAL;
+  NS_IMETHOD AsyncOpen2(nsIStreamListener *listener, nsISupports *aContext)
+                        MOZ_OVERRIDE MOZ_FINAL;
 
   // nsBaseChannel::nsIStreamListener::nsIRequestObserver
   NS_IMETHOD OnStartRequest(nsIRequest *aRequest, nsISupports *aContext)
@@ -79,6 +81,7 @@ public:
 private:
   bool mIPCOpen;
   bool mCanceled;
+  bool mUsesNewAPI;
   nsCOMPtr<nsIStreamingProtocolController> mMediaStreamController;
 };
 
