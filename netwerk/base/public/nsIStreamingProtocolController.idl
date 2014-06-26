@@ -133,8 +133,11 @@ interface nsIStreamingProtocolController : nsISupports
      * @param aListener The nsIStreamingProtocolListener implementation
      */
     void asyncOpen(in nsIStreamingProtocolListener aListener);
-    // Adding asyncOpen2 here.
-    void asyncOpen2(in nsIStreamingProtocolListener aListener);
+    /* Note that RtspController is the only implementer of nsIStreamingProtocolListener
+     * today.  And this interface is not scriptable, so we don't need an asyncOpen2.
+     * Spoke to sworkman
+     * void asyncOpen2(in nsIStreamingProtocolListener aListener);
+     */
 
     /*
      * Get the metadata of a track.

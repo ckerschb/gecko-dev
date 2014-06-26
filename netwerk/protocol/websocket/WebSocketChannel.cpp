@@ -1027,10 +1027,10 @@ WebSocketChannel::WebSocketChannel() :
   mDynamicOutputSize(0),
   mDynamicOutput(nullptr),
   mPrivateBrowsing(false),
+  mUsesNewAPI(false),
   mConnectionLogService(nullptr),
   mCountRecv(0),
   mCountSent(0),
-  mUsesNewAPI(false),
   mAppId(NECKO_NO_APP_ID)
 {
   NS_ABORT_IF_FALSE(NS_IsMainThread(), "not main thread");

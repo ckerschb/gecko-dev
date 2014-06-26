@@ -38,6 +38,7 @@ async protocol PRtspController
 
 parent:
   AsyncOpen(URIParams aURI);
+  // Note RtspController doesn't implement AsyncOpen2
   Play();
   Pause();
   Resume();
