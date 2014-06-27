@@ -335,14 +335,13 @@ nsLayoutUtils::HasCurrentAnimations(nsIContent* aContent,
 }
 
 static gfxSize
-GetScaleForValue(const nsStyleAnimation::Value& aValue,
-                 nsIFrame* aFrame)
+GetScaleForValue(const StyleAnimationValue& aValue, nsIFrame* aFrame)
 {
   if (!aFrame) {
     NS_WARNING("No frame.");
     return gfxSize();
   }
-  if (aValue.GetUnit() != nsStyleAnimation::eUnit_Transform) {
+  if (aValue.GetUnit() != StyleAnimationValue::eUnit_Transform) {
     NS_WARNING("Expected a transform.");
     return gfxSize();
   }
@@ -5010,6 +5009,11 @@ DrawImageInternal(nsRenderingContext*    aRenderingContext,
                   const SVGImageContext* aSVGContext,
                   uint32_t               aImageFlags)
 {
+  if (aPresContext->Type() == nsPresContext::eContext_Print) {
+    // We want vector images to be passed on as vector commands, not a raster
+    // image.
+    aImageFlags |= imgIContainer::FLAG_BYPASS_SURFACE_CACHE;
+  }
   if (aDest.Contains(aFill)) {
     aImageFlags |= imgIContainer::FLAG_CLAMP;
   }
@@ -6790,4 +6794,19 @@ MaybeSetupTransactionIdAllocator(layers::LayerManager* aManager, nsView* aView)
 }
 
 }
+}
+
+/* static */ bool
+nsLayoutUtils::IsOutlineStyleAutoEnabled()
+{
+  static bool sOutlineStyleAutoEnabled;
+  static bool sOutlineStyleAutoPrefCached = false;
+
+  if (!sOutlineStyleAutoPrefCached) {
+    sOutlineStyleAutoPrefCached = true;
+    Preferences::AddBoolVarCache(&sOutlineStyleAutoEnabled,
+                                 "layout.css.outline-style-auto.enabled",
+                                 false);
+  }
+  return sOutlineStyleAutoEnabled;
 }

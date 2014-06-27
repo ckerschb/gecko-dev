@@ -166,17 +166,17 @@ CommonAnimationManager::SizeOfIncludingThis(mozilla::MallocSizeOf aMallocSizeOf)
 CommonAnimationManager::ExtractComputedValueForTransition(
                           nsCSSProperty aProperty,
                           nsStyleContext* aStyleContext,
-                          nsStyleAnimation::Value& aComputedValue)
+                          StyleAnimationValue& aComputedValue)
 {
-  bool result =
-    nsStyleAnimation::ExtractComputedValue(aProperty, aStyleContext,
-                                           aComputedValue);
+  bool result = StyleAnimationValue::ExtractComputedValue(aProperty,
+                                                          aStyleContext,
+                                                          aComputedValue);
   if (aProperty == eCSSProperty_visibility) {
     NS_ABORT_IF_FALSE(aComputedValue.GetUnit() ==
-                        nsStyleAnimation::eUnit_Enumerated,
+                        StyleAnimationValue::eUnit_Enumerated,
                       "unexpected unit");
     aComputedValue.SetIntValue(aComputedValue.GetIntValue(),
-                               nsStyleAnimation::eUnit_Visibility);
+                               StyleAnimationValue::eUnit_Visibility);
   }
   return result;
 }
@@ -255,7 +255,7 @@ CommonAnimationManager::UpdateThrottledStyle(dom::Element* aElement,
     curRule.mLevel = ruleNode->GetLevel();
 
     if (curRule.mLevel == nsStyleSet::eAnimationSheet) {
-      ElementAnimations* ea =
+      CommonElementAnimationData* ea =
         mPresContext->AnimationManager()->GetElementAnimations(
           aElement,
           oldStyle->GetPseudoType(),
@@ -331,7 +331,7 @@ AnimValuesStyleRule::MapRuleInfoInto(nsRuleData* aRuleData)
 #ifdef DEBUG
         bool ok =
 #endif
-          nsStyleAnimation::UncomputeValue(cv.mProperty, cv.mValue, *prop);
+          StyleAnimationValue::UncomputeValue(cv.mProperty, cv.mValue, *prop);
         NS_ABORT_IF_FALSE(ok, "could not store computed value");
       }
     }
@@ -347,7 +347,7 @@ AnimValuesStyleRule::List(FILE* out, int32_t aIndent) const
   for (uint32_t i = 0, i_end = mPropertyValuePairs.Length(); i < i_end; ++i) {
     const PropertyValuePair &pair = mPropertyValuePairs[i];
     nsAutoString value;
-    nsStyleAnimation::UncomputeValue(pair.mProperty, pair.mValue, value);
+    StyleAnimationValue::UncomputeValue(pair.mProperty, pair.mValue, value);
     fprintf(out, "%s: %s; ", nsCSSProps::GetStringValue(pair.mProperty).get(),
                              NS_ConvertUTF16toUTF8(value).get());
   }
@@ -447,10 +447,20 @@ ComputedTiming
 ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
                                       const AnimationTiming& aTiming)
 {
+  const TimeDuration zeroDuration;
+
+  // Currently we expect negative durations to be picked up during CSS
+  // parsing but when we start receiving timing parameters from other sources
+  // we will need to clamp negative durations here.
+  // For now, if we're hitting this it probably means we've overflowing
+  // integer arithmetic in mozilla::TimeStamp.
+  MOZ_ASSERT(aTiming.mIterationDuration >= zeroDuration,
+             "Expecting iteration duration >= 0");
+
   // Always return the same object to benefit from return-value optimization.
   ComputedTiming result;
 
-  TimeDuration activeDuration = ActiveDuration(aTiming);
+  result.mActiveDuration = ActiveDuration(aTiming);
 
   // When we finish exactly at the end of an iteration we need to report
   // the end of the final iteration and not the start of the next iteration
@@ -459,14 +469,14 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
 
   // Get the normalized time within the active interval.
   TimeDuration activeTime;
-  if (aLocalTime >= aTiming.mDelay + activeDuration) {
+  if (aLocalTime >= aTiming.mDelay + result.mActiveDuration) {
     result.mPhase = ComputedTiming::AnimationPhase_After;
     if (!aTiming.FillsForwards()) {
       // The animation isn't active or filling at this time.
       result.mTimeFraction = ComputedTiming::kNullTimeFraction;
       return result;
     }
-    activeTime = activeDuration;
+    activeTime = result.mActiveDuration;
     // Note that infinity == floor(infinity) so this will also be true when we
     // have finished an infinitely repeating animation of zero duration.
     isEndOfFinalIteration =
@@ -481,7 +491,7 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
     }
     // activeTime is zero
   } else {
-    MOZ_ASSERT(activeDuration != TimeDuration(),
+    MOZ_ASSERT(result.mActiveDuration != zeroDuration,
                "How can we be in the middle of a zero-duration interval?");
     result.mPhase = ComputedTiming::AnimationPhase_Active;
     activeTime = aLocalTime - aTiming.mDelay;
@@ -489,7 +499,7 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
 
   // Get the position within the current iteration.
   TimeDuration iterationTime;
-  if (aTiming.mIterationDuration != TimeDuration()) {
+  if (aTiming.mIterationDuration != zeroDuration) {
     iterationTime = isEndOfFinalIteration
                     ? aTiming.mIterationDuration
                     : activeTime % aTiming.mIterationDuration;
@@ -502,7 +512,7 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
       ? UINT64_MAX // FIXME: When we return this via the API we'll need
                    // to make sure it ends up being infinity.
       : static_cast<uint64_t>(aTiming.mIterationCount) - 1;
-  } else if (activeTime == TimeDuration(0)) {
+  } else if (activeTime == zeroDuration) {
     // If the active time is zero we're either in the first iteration
     // (including filling backwards) or we have finished an animation with an
     // iteration duration of zero that is filling forwards (but we're not at
@@ -525,7 +535,7 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
                          : fmod(aTiming.mIterationCount, 1.0f);
   } else {
     // We are in the active phase so the iteration duration can't be zero.
-    MOZ_ASSERT(aTiming.mIterationDuration != TimeDuration(0),
+    MOZ_ASSERT(aTiming.mIterationDuration != zeroDuration,
                "In the active phase of a zero-duration animation?");
     result.mTimeFraction =
       aTiming.mIterationDuration == TimeDuration::Forever()
@@ -553,6 +563,21 @@ ElementAnimation::GetComputedTimingAt(TimeDuration aLocalTime,
   }
 
   return result;
+}
+
+TimeDuration
+ElementAnimation::ActiveDuration(const AnimationTiming& aTiming)
+{
+  if (aTiming.mIterationCount == mozilla::PositiveInfinity<float>()) {
+    // An animation that repeats forever has an infinite active duration
+    // unless its iteration duration is zero, in which case it has a zero
+    // active duration.
+    const TimeDuration zeroDuration;
+    return aTiming.mIterationDuration == zeroDuration
+           ? zeroDuration
+           : TimeDuration::Forever();
+  }
+  return aTiming.mIterationDuration.MultDouble(aTiming.mIterationCount);
 }
 
 namespace css {
@@ -729,6 +754,19 @@ CommonElementAnimationData::LogAsyncAnimationFailure(nsCString& aMessage,
   printf_stderr(aMessage.get());
 }
 
+/*static*/ void
+CommonElementAnimationData::PropertyDtor(void *aObject, nsIAtom *aPropertyName,
+                                         void *aPropertyValue, void *aData)
+{
+  CommonElementAnimationData* data =
+    static_cast<CommonElementAnimationData*>(aPropertyValue);
+#ifdef DEBUG
+  NS_ABORT_IF_FALSE(!data->mCalledPropertyDtor, "can't call dtor twice");
+  data->mCalledPropertyDtor = true;
+#endif
+  delete data;
+}
+
 void
 CommonElementAnimationData::EnsureStyleRuleFor(TimeStamp aRefreshTime,
                                                EnsureStyleRuleFlags aFlags)
@@ -876,15 +914,16 @@ CommonElementAnimationData::EnsureStyleRuleFor(TimeStamp aRefreshTime,
         double valuePosition =
           segment->mTimingFunction.GetValue(positionInSegment);
 
-        nsStyleAnimation::Value *val =
+        StyleAnimationValue *val =
           mStyleRule->AddEmptyValue(prop.mProperty);
 
 #ifdef DEBUG
         bool result =
 #endif
-          nsStyleAnimation::Interpolate(prop.mProperty,
-                                        segment->mFromValue, segment->mToValue,
-                                        valuePosition, *val);
+          StyleAnimationValue::Interpolate(prop.mProperty,
+                                           segment->mFromValue,
+                                           segment->mToValue,
+                                           valuePosition, *val);
         NS_ABORT_IF_FALSE(result, "interpolate must succeed now");
       }
     }

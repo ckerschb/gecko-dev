@@ -46,13 +46,13 @@
 #include "nsLayoutUtils.h"
 #include "nsComputedDOMStyle.h"
 #include "nsIPresShell.h"
-#include "nsStyleAnimation.h"
 #include "nsCSSProps.h"
 #include "nsDOMFile.h"
 #include "nsTArrayHelpers.h"
 #include "nsIDocShell.h"
 #include "nsIContentViewer.h"
 #include "nsIMarkupDocumentViewer.h"
+#include "mozilla/StyleAnimationValue.h"
 #include "mozilla/dom/DOMRect.h"
 #include <algorithm>
 
@@ -2514,20 +2514,20 @@ static bool
 ComputeAnimationValue(nsCSSProperty aProperty,
                       Element* aElement,
                       const nsAString& aInput,
-                      nsStyleAnimation::Value& aOutput)
+                      StyleAnimationValue& aOutput)
 {
 
-  if (!nsStyleAnimation::ComputeValue(aProperty, aElement, aInput,
-                                      false, aOutput)) {
+  if (!StyleAnimationValue::ComputeValue(aProperty, aElement, aInput,
+                                         false, aOutput)) {
     return false;
   }
 
   // This matches TransExtractComputedValue in nsTransitionManager.cpp.
   if (aProperty == eCSSProperty_visibility) {
-    NS_ABORT_IF_FALSE(aOutput.GetUnit() == nsStyleAnimation::eUnit_Enumerated,
-                      "unexpected unit");
+    MOZ_ASSERT(aOutput.GetUnit() == StyleAnimationValue::eUnit_Enumerated,
+               "unexpected unit");
     aOutput.SetIntValue(aOutput.GetIntValue(),
-                        nsStyleAnimation::eUnit_Visibility);
+                        StyleAnimationValue::eUnit_Visibility);
   }
 
   return true;
@@ -2660,14 +2660,14 @@ nsDOMWindowUtils::ComputeAnimationDistance(nsIDOMElement* aElement,
                     !nsCSSProps::IsShorthand(property),
                     "should not have shorthand");
 
-  nsStyleAnimation::Value v1, v2;
+  StyleAnimationValue v1, v2;
   if (property == eCSSProperty_UNKNOWN ||
       !ComputeAnimationValue(property, content->AsElement(), aValue1, v1) ||
       !ComputeAnimationValue(property, content->AsElement(), aValue2, v2)) {
     return NS_ERROR_ILLEGAL_VALUE;
   }
 
-  if (!nsStyleAnimation::ComputeDistance(property, v1, v2, *aResult)) {
+  if (!StyleAnimationValue::ComputeDistance(property, v1, v2, *aResult)) {
     return NS_ERROR_FAILURE;
   }
 
@@ -2784,7 +2784,8 @@ nsDOMWindowUtils::WrapDOMFile(nsIFile *aFile,
     return NS_ERROR_FAILURE;
   }
 
-  NS_ADDREF(*aDOMFile = new nsDOMFileFile(aFile));
+  nsRefPtr<DOMFile> file = DOMFile::CreateFromFile(aFile);
+  file.forget(aDOMFile);
   return NS_OK;
 }
 
@@ -2959,21 +2960,30 @@ GetFileOrBlob(const nsAString& aName, JS::Handle<JS::Value> aBlobParts,
   nsCOMPtr<nsISupports> file;
 
   if (aName.IsVoid()) {
-    rv = nsDOMMultipartFile::NewBlob(getter_AddRefs(file));
+    rv = DOMMultipartFileImpl::NewBlob(getter_AddRefs(file));
   }
   else {
-    rv = nsDOMMultipartFile::NewFile(aName, getter_AddRefs(file));
+    rv = DOMMultipartFileImpl::NewFile(aName, getter_AddRefs(file));
   }
   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsDOMMultipartFile* domFile =
-    static_cast<nsDOMMultipartFile*>(static_cast<nsIDOMFile*>(file.get()));
+  nsCOMPtr<nsIDOMBlob> blob = do_QueryInterface(file);
+  MOZ_ASSERT(blob);
+
+  nsRefPtr<DOMFile> domFile = static_cast<DOMFile*>(blob.get());
+
+  DOMFileImpl* fileImpl = domFile->Impl();
+  MOZ_ASSERT(fileImpl);
+
+  DOMMultipartFileImpl* domFileImpl =
+    static_cast<DOMMultipartFileImpl*>(fileImpl);
 
   JS::AutoValueArray<2> args(aCx);
   args[0].set(aBlobParts);
   args[1].set(aParameters);
 
-  rv = domFile->InitBlob(aCx, aOptionalArgCount, args.begin(), GetXPConnectNative);
+  rv = domFileImpl->InitBlob(aCx, aOptionalArgCount, args.begin(),
+                             GetXPConnectNative);
   NS_ENSURE_SUCCESS(rv, rv);
 
   file.forget(aResult);

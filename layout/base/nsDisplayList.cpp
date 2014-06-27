@@ -23,6 +23,7 @@
 #include "nsStyleStructInlines.h"
 #include "nsStyleTransformMatrix.h"
 #include "gfxMatrix.h"
+#include "gfxPrefs.h"
 #include "nsSVGIntegrationUtils.h"
 #include "nsLayoutUtils.h"
 #include "nsIScrollableFrame.h"
@@ -616,17 +617,6 @@ static void UnmarkFrameForDisplay(nsIFrame* aFrame) {
   }
 }
 
-static bool gPrintApzcTree = false;
-
-static bool GetApzcTreePrintPref() {
-  static bool initialized = false;
-  if (!initialized) {
-    Preferences::AddBoolVarCache(&gPrintApzcTree, "apz.printtree", gPrintApzcTree);
-    initialized = true;
-  }
-  return gPrintApzcTree;
-}
-
 static void RecordFrameMetrics(nsIFrame* aForFrame,
                                nsIFrame* aScrollFrame,
                                const nsIFrame* aReferenceFrame,
@@ -799,7 +789,7 @@ static void RecordFrameMetrics(nsIFrame* aForFrame,
     nsLayoutUtils::CalculateRootCompositionSize(aScrollFrame ? aScrollFrame : aForFrame,
                                                 isRootContentDocRootScrollFrame, metrics));
 
-  if (GetApzcTreePrintPref()) {
+  if (gfxPrefs::APZPrintTree()) {
     if (nsIContent* content = frameForCompositionBoundsCalculation->GetContent()) {
       nsAutoString contentDescription;
       content->Describe(contentDescription);
@@ -813,7 +803,7 @@ static void RecordFrameMetrics(nsIFrame* aForFrame,
   // in the FrameMetrics so APZ knows to provide the scroll grabbing
   // behaviour.
   if (aScrollFrame && nsContentUtils::HasScrollgrab(aScrollFrame->GetContent())) {
-    metrics.mHasScrollgrab = true;
+    metrics.SetHasScrollgrab(true);
   }
 
   aRoot->SetFrameMetrics(metrics);
@@ -4749,26 +4739,26 @@ nsDisplayTransform::ShouldPrerenderTransformedContent(nsDisplayListBuilder* aBui
   }
 
   nsSize refSize = aBuilder->RootReferenceFrame()->GetSize();
-  // Only prerender if the transformed frame's size (in the reference
-  // frames coordinate space) is <= the reference frame size (~viewport),
-  // allowing a 1/8th fuzz factor for shadows, borders, etc.
+  // Only prerender if the transformed frame's size is <= the
+  // reference frame size (~viewport), allowing a 1/8th fuzz factor
+  // for shadows, borders, etc.
   refSize += nsSize(refSize.width / 8, refSize.height / 8);
-  nsRect frameRect = aFrame->GetVisualOverflowRectRelativeToSelf();
-
-  frameRect =
-    nsLayoutUtils::TransformFrameRectToAncestor(aFrame, frameRect,
-                                                aBuilder->RootReferenceFrame());
-
-  if (frameRect.Size() <= refSize) {
-    return true;
+  nsSize frameSize = aFrame->GetVisualOverflowRectRelativeToSelf().Size();
+  if (frameSize <= refSize) {
+    // Bug 717521 - pre-render max 4096 x 4096 device pixels.
+    nscoord max = aFrame->PresContext()->DevPixelsToAppUnits(4096);
+    nsRect visual = aFrame->GetVisualOverflowRect();
+    if (visual.width <= max && visual.height <= max) {
+      return true;
+    }
   }
 
   if (aLogAnimations) {
     nsCString message;
     message.AppendLiteral("Performance warning: Async animation disabled because frame size (");
-    message.AppendInt(nsPresContext::AppUnitsToIntCSSPixels(frameRect.width));
+    message.AppendInt(nsPresContext::AppUnitsToIntCSSPixels(frameSize.width));
     message.AppendLiteral(", ");
-    message.AppendInt(nsPresContext::AppUnitsToIntCSSPixels(frameRect.height));
+    message.AppendInt(nsPresContext::AppUnitsToIntCSSPixels(frameSize.height));
     message.AppendLiteral(") is bigger than the viewport (");
     message.AppendInt(nsPresContext::AppUnitsToIntCSSPixels(refSize.width));
     message.AppendLiteral(", ");
