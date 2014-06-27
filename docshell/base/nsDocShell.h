@@ -924,11 +924,11 @@ public:
     class InterfaceRequestorProxy : public nsIInterfaceRequestor {
     public:
         InterfaceRequestorProxy(nsIInterfaceRequestor* p);
-        virtual ~InterfaceRequestorProxy();
         NS_DECL_THREADSAFE_ISUPPORTS
         NS_DECL_NSIINTERFACEREQUESTOR
  
     protected:
+        virtual ~InterfaceRequestorProxy();
         InterfaceRequestorProxy() {}
         nsWeakPtr mWeakPtr;
     };

@@ -691,16 +691,16 @@ public:
                                       false /* wants untrusted */);
   }
 
-  virtual ~VibrateWindowListener()
-  {
-  }
-
   void RemoveListener();
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIDOMEVENTLISTENER
 
 private:
+  virtual ~VibrateWindowListener()
+  {
+  }
+
   nsWeakPtr mWindow;
   nsWeakPtr mDocument;
 };
@@ -1071,6 +1071,8 @@ Navigator::GetGeolocation(ErrorResult& aRv)
 
 class BeaconStreamListener MOZ_FINAL : public nsIStreamListener
 {
+    ~BeaconStreamListener() {}
+
   public:
     BeaconStreamListener() {}
 
@@ -1273,7 +1275,7 @@ Navigator::SendBeacon(const nsAString& aUrl,
         return false;
       }
 
-      ArrayBufferView& view = aData.Value().GetAsArrayBufferView();
+      const ArrayBufferView& view = aData.Value().GetAsArrayBufferView();
       view.ComputeLengthAndData();
       rv = strStream->SetData(reinterpret_cast<char*>(view.Data()),
                               view.Length());
@@ -1581,7 +1583,7 @@ Navigator::RequestWakeLock(const nsAString &aTopic, ErrorResult& aRv)
   return pmService->NewWakeLock(aTopic, mWindow, aRv);
 }
 
-nsIDOMMozMobileMessageManager*
+MobileMessageManager*
 Navigator::GetMozMobileMessage()
 {
   if (!mMobileMessageManager) {
@@ -1589,8 +1591,8 @@ Navigator::GetMozMobileMessage()
     NS_ENSURE_TRUE(mWindow, nullptr);
     NS_ENSURE_TRUE(mWindow->GetDocShell(), nullptr);
 
-    mMobileMessageManager = new MobileMessageManager();
-    mMobileMessageManager->Init(mWindow);
+    mMobileMessageManager = new MobileMessageManager(mWindow);
+    mMobileMessageManager->Init();
   }
 
   return mMobileMessageManager;

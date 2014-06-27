@@ -169,12 +169,12 @@ void PrintTimingInformation(nsITimedChannel* channel) {
 
 class HeaderVisitor : public nsIHttpHeaderVisitor
 {
+  virtual ~HeaderVisitor() {}
 public:
   NS_DECL_ISUPPORTS
   NS_DECL_NSIHTTPHEADERVISITOR
 
   HeaderVisitor() { }
-  virtual ~HeaderVisitor() {}
 };
 NS_IMPL_ISUPPORTS(HeaderVisitor, nsIHttpHeaderVisitor)
 
@@ -193,10 +193,11 @@ HeaderVisitor::VisitHeader(const nsACString &header, const nsACString &value)
 
 class URLLoadInfo : public nsISupports
 {
+  virtual ~URLLoadInfo();
+
 public:
 
   URLLoadInfo(const char* aUrl);
-  virtual ~URLLoadInfo();
 
   // ISupports interface...
   NS_DECL_THREADSAFE_ISUPPORTS
@@ -227,12 +228,13 @@ NS_IMPL_ISUPPORTS0(URLLoadInfo)
 
 class TestChannelEventSink : public nsIChannelEventSink
 {
+  virtual ~TestChannelEventSink();
+
 public:
   NS_DECL_ISUPPORTS
   NS_DECL_NSICHANNELEVENTSINK
 
   TestChannelEventSink();
-  virtual ~TestChannelEventSink();
 };
 
 TestChannelEventSink::TestChannelEventSink()
@@ -264,12 +266,13 @@ TestChannelEventSink::AsyncOnChannelRedirect(nsIChannel *channel,
 
 class TestAuthPrompt : public nsIAuthPrompt
 {
+  virtual ~TestAuthPrompt();
+
 public:
   NS_DECL_ISUPPORTS
   NS_DECL_NSIAUTHPROMPT
 
   TestAuthPrompt();
-  virtual ~TestAuthPrompt();
 };
 
 NS_IMPL_ISUPPORTS(TestAuthPrompt, nsIAuthPrompt)
@@ -355,10 +358,11 @@ TestAuthPrompt::PromptPassword(const char16_t *dialogTitle,
 
 class InputTestConsumer : public nsIStreamListener
 {
+  virtual ~InputTestConsumer();
+
 public:
 
   InputTestConsumer();
-  virtual ~InputTestConsumer();
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIREQUESTOBSERVER
@@ -564,6 +568,9 @@ InputTestConsumer::OnStopRequest(nsIRequest *request, nsISupports* context,
 //-----------------------------------------------------------------------------
 
 class NotificationCallbacks MOZ_FINAL : public nsIInterfaceRequestor {
+
+    ~NotificationCallbacks() {}
+
 public:
     NS_DECL_ISUPPORTS
 

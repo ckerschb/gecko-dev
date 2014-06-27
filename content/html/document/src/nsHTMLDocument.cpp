@@ -1587,6 +1587,13 @@ nsHTMLDocument::Open(JSContext* cx,
 #ifdef DEBUG
     bool willReparent = mWillReparent;
     mWillReparent = true;
+
+    nsDocument* templateContentsOwner =
+      static_cast<nsDocument*>(mTemplateContentsOwner.get());
+
+    if (templateContentsOwner) {
+      templateContentsOwner->mWillReparent = true;
+    }
 #endif
 
     // Should this pass true for aForceReuseInnerWindow?
@@ -1596,6 +1603,10 @@ nsHTMLDocument::Open(JSContext* cx,
     }
 
 #ifdef DEBUG
+    if (templateContentsOwner) {
+      templateContentsOwner->mWillReparent = willReparent;
+    }
+
     mWillReparent = willReparent;
 #endif
 
@@ -1612,6 +1623,20 @@ nsHTMLDocument::Open(JSContext* cx,
       if (rv.Failed()) {
         return nullptr;
       }
+
+      // Also reparent the template contents owner document
+      // because its global is set to the same as this document.
+      if (mTemplateContentsOwner) {
+        JS::Rooted<JSObject*> contentsOwnerWrapper(cx,
+          mTemplateContentsOwner->GetWrapper());
+        if (contentsOwnerWrapper) {
+          rv = mozilla::dom::ReparentWrapper(cx, contentsOwnerWrapper);
+          if (rv.Failed()) {
+            return nullptr;
+          }
+        }
+      }
+
       nsIXPConnect *xpc = nsContentUtils::XPConnect();
       rv = xpc->RescueOrphansInScope(cx, oldScope->GetGlobalJSObject());
       if (rv.Failed()) {

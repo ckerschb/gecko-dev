@@ -45,6 +45,7 @@ parent:
   Suspend();
   Seek(uint64_t offset);
   Stop();
+  PlaybackEnded();
   __delete__();
 
 child:

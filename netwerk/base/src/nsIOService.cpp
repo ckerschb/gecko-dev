@@ -1308,6 +1308,8 @@ nsIOService::ExtractCharsetFromContentType(const nsACString &aTypeHeader,
 // nsISpeculativeConnect
 class IOServiceProxyCallback MOZ_FINAL : public nsIProtocolProxyCallback
 {
+    ~IOServiceProxyCallback() {}
+
 public:
     NS_DECL_ISUPPORTS
     NS_DECL_NSIPROTOCOLPROXYCALLBACK

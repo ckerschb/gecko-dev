@@ -38,6 +38,7 @@
 
 #include "builtin/Eval.h"
 #include "builtin/Object.h"
+#include "builtin/SymbolObject.h"
 #include "frontend/BytecodeCompiler.h"
 #include "gc/Marking.h"
 #include "jit/AsmJSModule.h"
@@ -243,6 +244,8 @@ js::InformalValueTypeName(const Value &v)
         return v.toObject().getClass()->name;
     if (v.isString())
         return "string";
+    if (v.isSymbol())
+        return "symbol";
     if (v.isNumber())
         return "number";
     if (v.isBoolean())
@@ -1113,7 +1116,7 @@ bool
 js::ReadPropertyDescriptors(JSContext *cx, HandleObject props, bool checkAccessors,
                             AutoIdVector *ids, AutoPropDescVector *descs)
 {
-    if (!GetPropertyNames(cx, props, JSITER_OWNONLY, ids))
+    if (!GetPropertyNames(cx, props, JSITER_OWNONLY | JSITER_SYMBOLS, ids))
         return false;
 
     RootedId id(cx);
@@ -1212,7 +1215,7 @@ JSObject::sealOrFreeze(JSContext *cx, HandleObject obj, ImmutabilityType it)
         return false;
 
     AutoIdVector props(cx);
-    if (!GetPropertyNames(cx, obj, JSITER_HIDDEN | JSITER_OWNONLY, &props))
+    if (!GetPropertyNames(cx, obj, JSITER_HIDDEN | JSITER_OWNONLY | JSITER_SYMBOLS, &props))
         return false;
 
     /* preventExtensions must sparsify dense objects, so we can assign to holes without checks. */
@@ -1318,7 +1321,7 @@ JSObject::isSealedOrFrozen(JSContext *cx, HandleObject obj, ImmutabilityType it,
     }
 
     AutoIdVector props(cx);
-    if (!GetPropertyNames(cx, obj, JSITER_HIDDEN | JSITER_OWNONLY, &props))
+    if (!GetPropertyNames(cx, obj, JSITER_HIDDEN | JSITER_OWNONLY | JSITER_SYMBOLS, &props))
         return false;
 
     RootedId id(cx);
@@ -1427,10 +1430,10 @@ NewObject(ExclusiveContext *cx, types::TypeObject *type_, JSObject *parent, gc::
         if (!cx->shouldBeJSContext())
             return nullptr;
         JSRuntime *rt = cx->asJSContext()->runtime();
-        rt->gc.disableIncrementalGC();
+        rt->gc.disallowIncrementalGC();
 
 #ifdef DEBUG
-        if (rt->gcMode() == JSGC_MODE_INCREMENTAL) {
+        if (rt->gc.gcMode() == JSGC_MODE_INCREMENTAL) {
             fprintf(stderr,
                     "The class %s has a trace hook but does not declare the\n"
                     "JSCLASS_IMPLEMENTS_BARRIERS flag. Please ensure that it correctly\n"
@@ -1844,8 +1847,6 @@ JS_CopyPropertyFrom(JSContext *cx, HandleId id, HandleObject target,
     RootedId wrappedId(cx, id);
     if (!cx->compartment()->wrap(cx, &desc))
         return false;
-    if (!cx->compartment()->wrapId(cx, wrappedId.address()))
-        return false;
 
     bool ignored;
     return DefineOwnProperty(cx, target, wrappedId, desc, &ignored);
@@ -1857,7 +1858,7 @@ JS_CopyPropertiesFrom(JSContext *cx, HandleObject target, HandleObject obj)
     JSAutoCompartment ac(cx, obj);
 
     AutoIdVector props(cx);
-    if (!GetPropertyNames(cx, obj, JSITER_OWNONLY | JSITER_HIDDEN, &props))
+    if (!GetPropertyNames(cx, obj, JSITER_OWNONLY | JSITER_HIDDEN | JSITER_SYMBOLS, &props))
         return false;
 
     for (size_t i = 0; i < props.length(); ++i) {
@@ -2685,8 +2686,8 @@ DefineConstructorAndPrototype(JSContext *cx, HandleObject obj, JSProtoKey key, H
             goto bad;
     }
 
-    if (!DefinePropertiesAndBrand(cx, proto, ps, fs) ||
-        (ctor != proto && !DefinePropertiesAndBrand(cx, ctor, static_ps, static_fs)))
+    if (!DefinePropertiesAndFunctions(cx, proto, ps, fs) ||
+        (ctor != proto && !DefinePropertiesAndFunctions(cx, ctor, static_ps, static_fs)))
     {
         goto bad;
     }
@@ -2835,7 +2836,7 @@ AllocateSlots(ThreadSafeContext *cx, JSObject *obj, uint32_t nslots)
 #endif
 #ifdef JSGC_FJGENERATIONAL
     if (cx->isForkJoinContext())
-        return cx->asForkJoinContext()->fjNursery().allocateSlots(obj, nslots);
+        return cx->asForkJoinContext()->nursery().allocateSlots(obj, nslots);
 #endif
     return cx->pod_malloc<HeapSlot>(nslots);
 }
@@ -2857,8 +2858,8 @@ ReallocateSlots(ThreadSafeContext *cx, JSObject *obj, HeapSlot *oldSlots,
 #endif
 #ifdef JSGC_FJGENERATIONAL
     if (cx->isForkJoinContext()) {
-        return cx->asForkJoinContext()->fjNursery().reallocateSlots(obj, oldSlots,
-                                                                    oldCount, newCount);
+        return cx->asForkJoinContext()->nursery().reallocateSlots(obj, oldSlots,
+                                                                  oldCount, newCount);
     }
 #endif
     return (HeapSlot *)cx->realloc_(oldSlots, oldCount * sizeof(HeapSlot),
@@ -2937,7 +2938,7 @@ FreeSlots(ThreadSafeContext *cx, HeapSlot *slots)
 #endif
 #ifdef JSGC_FJGENERATIONAL
     if (cx->isForkJoinContext())
-        return cx->asForkJoinContext()->fjNursery().freeSlots(slots);
+        return cx->asForkJoinContext()->nursery().freeSlots(slots);
 #endif
     js_free(slots);
 }
@@ -3165,7 +3166,7 @@ AllocateElements(ThreadSafeContext *cx, JSObject *obj, uint32_t nelems)
 #endif
 #ifdef JSGC_FJGENERATIONAL
     if (cx->isForkJoinContext())
-        return cx->asForkJoinContext()->fjNursery().allocateElements(obj, nelems);
+        return cx->asForkJoinContext()->nursery().allocateElements(obj, nelems);
 #endif
 
     return static_cast<js::ObjectElements *>(cx->malloc_(nelems * sizeof(HeapValue)));
@@ -3186,8 +3187,8 @@ ReallocateElements(ThreadSafeContext *cx, JSObject *obj, ObjectElements *oldHead
 #endif
 #ifdef JSGC_FJGENERATIONAL
     if (cx->isForkJoinContext()) {
-        return cx->asForkJoinContext()->fjNursery().reallocateElements(obj, oldHeader,
-                                                                       oldCount, newCount);
+        return cx->asForkJoinContext()->nursery().reallocateElements(obj, oldHeader,
+                                                                     oldCount, newCount);
     }
 #endif
 
@@ -4901,49 +4902,6 @@ MaybeReportUndeclaredVarAssignment(JSContext *cx, JSString *propname)
 }
 
 bool
-js::ReportIfUndeclaredVarAssignment(JSContext *cx, HandleString propname)
-{
-    {
-        jsbytecode *pc;
-        JSScript *script = cx->currentScript(&pc, JSContext::ALLOW_CROSS_COMPARTMENT);
-        if (!script)
-            return true;
-
-        // If the code is not strict and extra warnings aren't enabled, then no
-        // check is needed.
-        if (!script->strict() && !cx->options().extraWarnings())
-            return true;
-
-        /*
-         * We only need to check for bare name mutations: we shouldn't be
-         * warning, or throwing, or whatever, if we're not doing a variable
-         * access.
-         *
-         * TryConvertToGname in frontend/BytecodeEmitter.cpp checks for rather
-         * more opcodes when it does, in the normal course of events, what this
-         * method does in the abnormal course of events.  Because we're called
-         * in narrower circumstances, we only need check two.  We don't need to
-         * check for the increment/decrement opcodes because they're no-ops:
-         * the actual semantics are implemented by desugaring.  And we don't
-         * need to check name-access because this method is only supposed to be
-         * called in assignment contexts.
-         */
-        MOZ_ASSERT(*pc != JSOP_NAME);
-        MOZ_ASSERT(*pc != JSOP_GETGNAME);
-        if (*pc != JSOP_SETNAME && *pc != JSOP_SETGNAME)
-            return true;
-    }
-
-    JSAutoByteString bytes(cx, propname);
-    return !!bytes &&
-           JS_ReportErrorFlagsAndNumber(cx,
-                                        JSREPORT_WARNING | JSREPORT_STRICT |
-                                        JSREPORT_STRICT_MODE_ERROR,
-                                        js_GetErrorMessage, nullptr,
-                                        JSMSG_UNDECLARED_VAR, bytes.ptr());
-}
-
-bool
 JSObject::reportReadOnly(ThreadSafeContext *cxArg, jsid id, unsigned report)
 {
     if (cxArg->isForkJoinContext())
@@ -5642,12 +5600,13 @@ js::PrimitiveToObject(JSContext *cx, const Value &v)
     }
     if (v.isNumber())
         return NumberObject::create(cx, v.toNumber());
-
-    JS_ASSERT(v.isBoolean());
-    return BooleanObject::create(cx, v.toBoolean());
+    if (v.isBoolean())
+        return BooleanObject::create(cx, v.toBoolean());
+    JS_ASSERT(v.isSymbol());
+    return SymbolObject::create(cx, v.toSymbol());
 }
 
-/* Callers must handle the already-object case . */
+/* Callers must handle the already-object case. */
 JSObject *
 js::ToObjectSlow(JSContext *cx, HandleValue val, bool reportScanStack)
 {

@@ -178,6 +178,12 @@ interface nsIStreamingProtocolController : nsISupports
      */
     void stop();
 
+    /*
+     * Notify the streaming controller that the playback has ended.
+     * The controller might have to perform certain internal state transition.
+     */
+    void playbackEnded();
+
     /**
      * Total number of audio/video tracks.
      */

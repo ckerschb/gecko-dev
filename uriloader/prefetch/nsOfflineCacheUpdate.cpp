@@ -145,6 +145,8 @@ public:
 
 private:
 
+    ~nsManifestCheck() {}
+
     static NS_METHOD ReadManifest(nsIInputStream *aInputStream,
                                   void *aClosure,
                                   const char *aFromSegment,

@@ -193,7 +193,7 @@ CSPPolicyURIListener.prototype = {
       // send the policy we received back to the parent document's CSP
       // for parsing
       this._csp.appendPolicy(this._policy, this._docURI,
-                             this._reportOnly, this._csp._specCompliant);
+                             this._reportOnly, true);
     }
     else {
       // problem fetching policy so fail closed by appending a "block it all"
@@ -202,7 +202,7 @@ CSPPolicyURIListener.prototype = {
       this._csp.log(WARN_FLAG, CSPLocalizer.getFormatStr("errorFetchingPolicy",
                                                          [status]));
       this._csp.appendPolicy("default-src 'none'", this._docURI,
-                             this._reportOnly, this._csp._specCompliant);
+                             this._reportOnly, true);
     }
     // resume the parent document request
     this._docRequest.resume();
@@ -213,49 +213,23 @@ CSPPolicyURIListener.prototype = {
 
 /**
  * Class that represents a parsed policy structure.
- *
- * @param aSpecCompliant: true: this policy is a CSP 1.0 spec
- *                   compliant policy and should be parsed as such.
- *                   false or undefined: this is a policy using
- *                   our original implementation's CSP syntax.
  */
-this.CSPRep = function CSPRep(aSpecCompliant) {
+this.CSPRep = function CSPRep() {
   // this gets set to true when the policy is done parsing, or when a
   // URI-borne policy has finished loading.
   this._isInitialized = false;
 
   this._allowEval = false;
   this._allowInlineScripts = false;
+  this._allowInlineStyles = false;
   this._reportOnlyMode = false;
 
   // don't auto-populate _directives, so it is easier to find bugs
   this._directives = {};
-
-  // Is this a 1.0 spec compliant CSPRep ?
-  // Default to false if not specified.
-  this._specCompliant = (aSpecCompliant !== undefined) ? aSpecCompliant : false;
-
-  // Only CSP 1.0 spec compliant policies block inline styles by default.
-  this._allowInlineStyles = !aSpecCompliant;
 }
 
-// Source directives for our original CSP implementation.
-// These can be removed when the original implementation is deprecated.
-CSPRep.SRC_DIRECTIVES_OLD = {
-  DEFAULT_SRC:      "default-src",
-  SCRIPT_SRC:       "script-src",
-  STYLE_SRC:        "style-src",
-  MEDIA_SRC:        "media-src",
-  IMG_SRC:          "img-src",
-  OBJECT_SRC:       "object-src",
-  FRAME_SRC:        "frame-src",
-  FRAME_ANCESTORS:  "frame-ancestors",
-  FONT_SRC:         "font-src",
-  XHR_SRC:          "xhr-src"
-};
-
 // Source directives for our CSP 1.0 spec compliant implementation.
-CSPRep.SRC_DIRECTIVES_NEW = {
+CSPRep.SRC_DIRECTIVES = {
   DEFAULT_SRC:      "default-src",
   SCRIPT_SRC:       "script-src",
   STYLE_SRC:        "style-src",
@@ -273,14 +247,9 @@ CSPRep.URI_DIRECTIVES = {
   POLICY_URI:       "policy-uri"  /* single URI */
 };
 
-// These directives no longer exist in CSP 1.0 and
-// later and will eventually be removed when we no longer
-// support our original implementation's syntax.
-CSPRep.OPTIONS_DIRECTIVE = "options";
-CSPRep.ALLOW_DIRECTIVE   = "allow";
-
 /**
-  * Factory to create a new CSPRep, parsed from a string.
+  * Factory to create a new CSPRep, parsed from a string, compliant
+  * with the CSP 1.0 spec.
   *
   * @param aStr
   *        string rep of a CSP
@@ -301,7 +270,7 @@ CSPRep.ALLOW_DIRECTIVE   = "allow";
   */
 CSPRep.fromString = function(aStr, self, reportOnly, docRequest, csp,
                              enforceSelfChecks) {
-  var SD = CSPRep.SRC_DIRECTIVES_OLD;
+  var SD = CSPRep.SRC_DIRECTIVES;
   var UD = CSPRep.URI_DIRECTIVES;
   var aCSPR = new CSPRep();
   aCSPR._originalText = aStr;
@@ -594,7 +563,10 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
 
     var dirname = dir.split(/\s+/)[0].toLowerCase();
     var dirvalue = dir.substring(dirname.length).trim();
-    dirs[dirname] = dirvalue;
+    // skip duplicates
+    if (!dirs.hasOwnProperty(dirname)) {
+      dirs[dirname] = dirvalue;
+    }
   }
 
   // Spec compliant policies have different default behavior for inline
@@ -719,13 +691,13 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
       // POLICY_URI can only be alone
       if (aCSPR._directives.length > 0 || dirs.length > 1) {
         cspError(aCSPR, CSPLocalizer.getStr("policyURINotAlone"));
-        return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+        return CSPRep.fromString("default-src 'none'", null, reportOnly);
       }
       // if we were called without a reference to the parent document request
       // we won't be able to suspend it while we fetch the policy -> fail closed
       if (!docRequest || !csp) {
         cspError(aCSPR, CSPLocalizer.getStr("noParentRequest"));
-        return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+        return CSPRep.fromString("default-src 'none'", null, reportOnly);
       }
 
       var uri = '';
@@ -733,22 +705,22 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
         uri = gIoService.newURI(dirvalue, null, selfUri);
       } catch(e) {
         cspError(aCSPR, CSPLocalizer.getFormatStr("policyURIParseError", [dirvalue]));
-        return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+        return CSPRep.fromString("default-src 'none'", null, reportOnly);
       }
 
       // Verify that policy URI comes from the same origin
       if (selfUri) {
         if (selfUri.host !== uri.host){
           cspError(aCSPR, CSPLocalizer.getFormatStr("nonMatchingHost", [uri.host]));
-          return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+          return CSPRep.fromString("default-src 'none'", null, reportOnly);
         }
         if (selfUri.port !== uri.port){
           cspError(aCSPR, CSPLocalizer.getFormatStr("nonMatchingPort", [uri.port.toString()]));
-          return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+          return CSPRep.fromString("default-src 'none'", null, reportOnly);
         }
         if (selfUri.scheme !== uri.scheme){
           cspError(aCSPR, CSPLocalizer.getFormatStr("nonMatchingScheme", [uri.scheme]));
-          return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+          return CSPRep.fromString("default-src 'none'", null, reportOnly);
         }
       }
 
@@ -773,12 +745,12 @@ CSPRep.fromStringSpecCompliant = function(aStr, self, reportOnly, docRequest, cs
         // resume the document request and apply most restrictive policy
         docRequest.resume();
         cspError(aCSPR, CSPLocalizer.getFormatStr("errorFetchingPolicy", [e.toString()]));
-        return CSPRep.fromStringSpecCompliant("default-src 'none'", null, reportOnly);
+        return CSPRep.fromString("default-src 'none'", null, reportOnly);
       }
 
       // return a fully-open policy to be used until the contents of the
       // policy-uri come back
-      return CSPRep.fromStringSpecCompliant("default-src *", null, reportOnly);
+      return CSPRep.fromString("default-src *", null, reportOnly);
     }
 
     // UNIDENTIFIED DIRECTIVE /////////////////////////////////////////////
@@ -833,10 +805,6 @@ CSPRep.prototype = {
   function csp_toString() {
     var dirs = [];
 
-    if (!this._specCompliant && (this._allowEval || this._allowInlineScripts)) {
-      dirs.push("options" + (this._allowEval ? " eval-script" : "")
-                           + (this._allowInlineScripts ? " inline-script" : ""));
-    }
     for (var i in this._directives) {
       if (this._directives[i]) {
         dirs.push(i + " " + this._directives[i].toString());
@@ -881,7 +849,7 @@ CSPRep.prototype = {
       return true;
 
     // make sure the right directive set is used
-    let DIRS = this._specCompliant ? CSPRep.SRC_DIRECTIVES_NEW : CSPRep.SRC_DIRECTIVES_OLD;
+    let DIRS = CSPRep.SRC_DIRECTIVES;
 
     let directiveInPolicy = false;
     for (var i in DIRS) {
@@ -918,8 +886,8 @@ CSPRep.prototype = {
     }
 
     // no relevant directives present -- this means for CSP 1.0 that the load
-    // should be permitted (and for the old CSP, to block it).
-    return this._specCompliant;
+    // should be permitted.
+    return true;
   },
 
   /**
@@ -1555,7 +1523,11 @@ CSPSource.prototype = {
       s = s + this.scheme + "://";
     if (this._host)
       s = s + this._host;
-    if (this.port)
+
+    // CSP 1.0 4.11 says the report should use URI-reference from RFC 3986,
+    // 3.2.3 and indicates that the default port should be omitted.
+    // Non-default ports are included.
+    if (this.port && gIoService.getProtocolHandler(this.scheme).defaultPort != this.port)
       s = s + ":" + this.port;
     return s;
   },

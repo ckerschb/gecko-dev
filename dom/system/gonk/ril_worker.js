@@ -52,7 +52,6 @@ if (!this.debug) {
   };
 }
 
-let RIL_CELLBROADCAST_DISABLED;
 let RIL_EMERGENCY_NUMBERS;
 const DEFAULT_EMERGENCY_NUMBERS = ["112", "911"];
 
@@ -353,7 +352,6 @@ function RilObject(aContext) {
 
   // Init properties that are only initialized once.
   this.v5Legacy = RILQUIRKS_V5_LEGACY;
-  this.cellBroadcastDisabled = RIL_CELLBROADCAST_DISABLED;
 
   this.pendingMO = null;
 }
@@ -1300,6 +1298,13 @@ RilObject.prototype = {
    */
   getPreferredNetworkType: function(options) {
     this.context.Buf.simpleRequest(REQUEST_GET_PREFERRED_NETWORK_TYPE, options);
+  },
+
+  /**
+   * Request neighboring cell ids in GSM network.
+   */
+  getNeighboringCellIds: function(options) {
+    this.context.Buf.simpleRequest(REQUEST_GET_NEIGHBORING_CELL_IDS, options);
   },
 
   /**
@@ -6383,7 +6388,68 @@ RilObject.prototype[REQUEST_GET_PREFERRED_NETWORK_TYPE] = function REQUEST_GET_P
   options.type = RIL_PREFERRED_NETWORK_TYPE_TO_GECKO[networkType];
   this.sendChromeMessage(options);
 };
-RilObject.prototype[REQUEST_GET_NEIGHBORING_CELL_IDS] = null;
+RilObject.prototype[REQUEST_GET_NEIGHBORING_CELL_IDS] = function REQUEST_GET_NEIGHBORING_CELL_IDS(length, options) {
+  if (options.rilRequestError) {
+    options.errorMsg = RIL_ERROR_TO_GECKO_ERROR[options.rilRequestError];
+    this.sendChromeMessage(options);
+    return;
+  }
+
+  let radioTech = this.voiceRegistrationState.radioTech;
+  if (radioTech == undefined || radioTech == NETWORK_CREG_TECH_UNKNOWN) {
+    options.errorMsg = "RadioTechUnavailable";
+    this.sendChromeMessage(options);
+    return;
+  }
+  if (!this._isGsmTechGroup(radioTech) || radioTech == NETWORK_CREG_TECH_LTE) {
+    options.errorMsg = "UnsupportedRadioTech";
+    this.sendChromeMessage(options);
+    return;
+  }
+
+  let Buf = this.context.Buf;
+  let neighboringCellIds = [];
+  let num = Buf.readInt32();
+
+  for (let i = 0; i < num; i++) {
+    let cellId = {};
+    cellId.networkType = GECKO_RADIO_TECH[radioTech];
+    cellId.signalStrength = Buf.readInt32();
+
+    let cid = Buf.readString();
+    // pad cid string with leading "0"
+    let length = cid.length;
+    if (length > 8) {
+      continue;
+    }
+    if (length < 8) {
+      for (let j = 0; j < (8-length); j++) {
+        cid = "0" + cid;
+      }
+    }
+
+    switch (radioTech) {
+      case NETWORK_CREG_TECH_GPRS:
+      case NETWORK_CREG_TECH_EDGE:
+      case NETWORK_CREG_TECH_GSM:
+        cellId.gsmCellId = this.parseInt(cid.substring(4), -1, 16);
+        cellId.gsmLocationAreaCode = this.parseInt(cid.substring(0, 4), -1, 16);
+        break;
+      case NETWORK_CREG_TECH_UMTS:
+      case NETWORK_CREG_TECH_HSDPA:
+      case NETWORK_CREG_TECH_HSUPA:
+      case NETWORK_CREG_TECH_HSPA:
+      case NETWORK_CREG_TECH_HSPAP:
+        cellId.wcdmaPsc = this.parseInt(cid, -1, 16);
+        break;
+    }
+
+    neighboringCellIds.push(cellId);
+  }
+
+  options.result = neighboringCellIds;
+  this.sendChromeMessage(options);
+};
 RilObject.prototype[REQUEST_SET_LOCATION_UPDATES] = null;
 RilObject.prototype[REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE] = null;
 RilObject.prototype[REQUEST_CDMA_SET_ROAMING_PREFERENCE] = function REQUEST_CDMA_SET_ROAMING_PREFERENCE(length, options) {
@@ -6450,7 +6516,11 @@ RilObject.prototype[REQUEST_GSM_SET_BROADCAST_SMS_CONFIG] = function REQUEST_GSM
 };
 RilObject.prototype[REQUEST_GSM_SMS_BROADCAST_ACTIVATION] = null;
 RilObject.prototype[REQUEST_CDMA_GET_BROADCAST_SMS_CONFIG] = null;
-RilObject.prototype[REQUEST_CDMA_SET_BROADCAST_SMS_CONFIG] = null;
+RilObject.prototype[REQUEST_CDMA_SET_BROADCAST_SMS_CONFIG] = function REQUEST_CDMA_SET_BROADCAST_SMS_CONFIG(length, options) {
+  if (options.rilRequestError == ERROR_SUCCESS) {
+    this.setSmsBroadcastActivation(true);
+  }
+};
 RilObject.prototype[REQUEST_CDMA_SMS_BROADCAST_ACTIVATION] = null;
 RilObject.prototype[REQUEST_CDMA_SUBSCRIPTION] = function REQUEST_CDMA_SUBSCRIPTION(length, options) {
   if (options.rilRequestError) {
@@ -13934,8 +14004,8 @@ ICCUtilsHelperObject.prototype = {
       }
     } else {
       // GSM family display rule.
-      let operatorMnc = RIL.operator.mnc;
-      let operatorMcc = RIL.operator.mcc;
+      let operatorMnc = RIL.operator ? RIL.operator.mnc : -1;
+      let operatorMcc = RIL.operator ? RIL.operator.mcc : -1;
 
       // First detect if we are on HPLMN or one of the PLMN
       // specified by the SIM card.
@@ -14900,7 +14970,6 @@ let ContextPool = {
   setInitialOptions: function(aOptions) {
     DEBUG = DEBUG_WORKER || aOptions.debug;
     RIL_EMERGENCY_NUMBERS = aOptions.rilEmergencyNumbers;
-    RIL_CELLBROADCAST_DISABLED = aOptions.cellBroadcastDisabled;
 
     let quirks = aOptions.quirks;
     RILQUIRKS_CALLSTATE_EXTRA_UINT32 = quirks.callstateExtraUint32;

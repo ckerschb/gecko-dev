@@ -281,7 +281,7 @@ bool ForkJoin(JSContext *cx, CallArgs &args);
 //       { everything else }
 //               |
 //           Interrupt
-//           /       \
+//           /       |
 //   Unsupported   UnsupportedVM
 //           \       /
 //              None
@@ -326,6 +326,7 @@ enum ParallelBailoutCause {
 namespace jit {
 class BailoutStack;
 class JitFrameIterator;
+class IonBailoutIterator;
 class RematerializedFrame;
 }
 
@@ -397,6 +398,8 @@ class ForkJoinContext : public ThreadSafeContext
                     Allocator *allocator, ForkJoinShared *shared,
                     ParallelBailoutRecord *bailoutRecord);
 
+    bool initialize();
+
     // Get the worker id. The main thread by convention has the id of the max
     // worker thread id + 1.
     uint32_t workerId() const { return worker_->id(); }
@@ -457,7 +460,7 @@ class ForkJoinContext : public ThreadSafeContext
     static inline ForkJoinContext *current();
 
     // Initializes the thread-local state.
-    static bool initialize();
+    static bool initializeTls();
 
     // Used in inlining GetForkJoinSlice.
     static size_t offsetOfWorker() {
@@ -466,16 +469,16 @@ class ForkJoinContext : public ThreadSafeContext
 
 #ifdef JSGC_FJGENERATIONAL
     // There is already a nursery() method in ThreadSafeContext.
-    gc::ForkJoinNursery &fjNursery() { return fjNursery_; }
+    gc::ForkJoinNursery &nursery() { return nursery_; }
 
     // Evacuate live data from the per-thread nursery into the per-thread
     // tenured area.
-    void evacuateLiveData() { fjNursery_.evacuatingGC(); }
+    void evacuateLiveData() { nursery_.evacuatingGC(); }
 
     // Used in inlining nursery allocation.  Note the nursery is a
     // member of the ForkJoinContext (a substructure), not a pointer.
     static size_t offsetOfFJNursery() {
-        return offsetof(ForkJoinContext, fjNursery_);
+        return offsetof(ForkJoinContext, nursery_);
     }
 #endif
 
@@ -489,7 +492,7 @@ class ForkJoinContext : public ThreadSafeContext
 
 #ifdef JSGC_FJGENERATIONAL
     gc::ForkJoinGCShared gcShared_;
-    gc::ForkJoinNursery fjNursery_;
+    gc::ForkJoinNursery nursery_;
 #endif
 
     ThreadPoolWorker *worker_;
