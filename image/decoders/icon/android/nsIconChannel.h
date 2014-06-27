@@ -39,7 +39,6 @@ class nsIconChannel MOZ_FINAL : public nsIChannel {
      * Will always be non-null after a successful Init.
      */
     nsCOMPtr<nsIChannel> mRealChannel;
-    bool                 mUsesNewAPI;
 };
 
 #endif

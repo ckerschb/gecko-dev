@@ -80,6 +80,7 @@ nsresult nsIconChannel::Init(nsIURI* uri)
   NS_ASSERTION(uri, "no uri");
   mUrl = uri;
   mOriginalURI = uri;
+  mUsesNewAPI = false;
   nsresult rv;
   mPump = do_CreateInstance(NS_INPUTSTREAMPUMP_CONTRACTID, &rv);
   return rv;

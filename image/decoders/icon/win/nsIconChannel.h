@@ -49,6 +49,8 @@ protected:
   nsCOMPtr<nsIInputStreamPump> mPump;
   nsCOMPtr<nsIStreamListener>  mListener;
 
+  bool mUsesNewAPI;
+
   nsresult ExtractIconInfoFromUrl(nsIFile ** aLocalFile, uint32_t * aDesiredImageSize, nsCString &aContentType, nsCString &aFileExtension);
   nsresult GetHIconFromFile(HICON *hIcon);
   nsresult MakeInputStream(nsIInputStream** _retval, bool nonBlocking);

@@ -735,7 +735,7 @@ nsresult AsyncFaviconDataReady::OnFaviconDataNotAvailable(void)
   rv = NS_NewDownloader(getter_AddRefs(listener), downloadObserver, icoFile);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  return = channel->AsyncOpen2(listener, nullptr);
+  return channel->AsyncOpen2(listener, nullptr);
 }
 
 NS_IMETHODIMP

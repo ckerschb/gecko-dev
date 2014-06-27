@@ -294,7 +294,9 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
     }
 
     // b) check CSP
-    nsCOMPtr<nsIContentPolicy> csp = do_GetService(CSPSERVICE_CID);
+    // nsCOMPtr<nsIContentPolicy> csp = do_GetService(CSPSERVICE_CID);
+    nsCOMPtr<nsIContentPolicy> csp = do_GetService("@mozilla.org/cspservice;1");
+
     rv = csp->ShouldLoad(aContentPolicyType,
                          aContentLocation,
                          nullptr, // aRequestingLocation
