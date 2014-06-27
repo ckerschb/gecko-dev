@@ -71,6 +71,7 @@ HttpBaseChannel::HttpBaseChannel()
   , mHttpHandler(gHttpHandler)
   , mContentPolicyType(nsIContentPolicy::TYPE_OTHER)
   , mRedirectCount(0)
+  , mForcePending(false)
   , mUsesNewAPI(false)
 {
   LOG(("Creating HttpBaseChannel @%x\n", this));
@@ -189,7 +190,7 @@ NS_IMETHODIMP
 HttpBaseChannel::IsPending(bool *aIsPending)
 {
   NS_ENSURE_ARG_POINTER(aIsPending);
-  *aIsPending = mIsPending;
+  *aIsPending = mIsPending || mForcePending;
   return NS_OK;
 }
 
@@ -1667,6 +1668,13 @@ NS_IMETHODIMP
 HttpBaseChannel::AddRedirect(nsIPrincipal *aRedirect)
 {
   mRedirects.AppendObject(aRedirect);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+HttpBaseChannel::ForcePending(bool aForcePending)
+{
+  mForcePending = aForcePending;
   return NS_OK;
 }
 

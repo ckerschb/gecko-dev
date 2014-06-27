@@ -176,6 +176,7 @@ public:
   NS_IMETHOD GetResponseTimeoutEnabled(bool *aEnable);
   NS_IMETHOD SetResponseTimeoutEnabled(bool aEnable);
   NS_IMETHOD AddRedirect(nsIPrincipal *aRedirect);
+  NS_IMETHOD ForcePending(bool aForcePending);
 
   inline void CleanRedirectCacheChainIfNecessary()
   {
@@ -380,7 +381,8 @@ protected:
   // so that the timing can still be queried from OnStopRequest
   TimingStruct                      mTransactionTimings;
 
-  nsCOMPtr<nsIPrincipal> mPrincipal;
+  nsCOMPtr<nsIPrincipal>            mPrincipal;
+  bool                              mForcePending;
   bool mUsesNewAPI;
 };
 
@@ -424,7 +426,6 @@ nsresult HttpAsyncAborter<T>::AsyncAbort(nsresult status)
          ("HttpAsyncAborter::AsyncAbort [this=%p status=%x]\n", mThis, status));
 
   mThis->mStatus = status;
-  mThis->mIsPending = false;
 
   // if this fails?  Callers ignore our return value anyway....
   return AsyncCall(&T::HandleAsyncAbort);
