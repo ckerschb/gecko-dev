@@ -1152,13 +1152,7 @@ WebSocketChannel::BeginOpen()
   }
 #endif
 
-  // TODO: Update to AsyncOpen2 once we figure out how to set the requesting principal.
-  // localChannel is an http channel is used to bootstrap the websocket.
-  // we don't have the content policy type, requesting principal, or requesting node
-  // for websocket channels and hence don't know who what to set for these values
-  // on the http channel.  Calling AsyncOpen for now so that this won't crash the browser
-  rv = localChannel->AsyncOpen(this, mHttpChannel);
-  //rv = localChannel->AsyncOpen2(this, mHttpChannel);
+  rv = localChannel->AsyncOpen2(this, mHttpChannel);
   if (NS_FAILED(rv)) {
     LOG(("WebSocketChannel::BeginOpen: cannot async open\n"));
     AbortSession(NS_ERROR_CONNECTION_REFUSED);
@@ -2790,29 +2784,17 @@ WebSocketChannel::AsyncOpen(nsIURI *aURI,
     return rv;
   }
 
-  // TODO - Call NewChannelFromURIWithProxyFlags2 instead.
-  // Here we don't have localchannel's requestingPrincipal.
-  // We can either set it to systemPrincipal for now or switch the call to
-  // AsyncOpen2 to AsyncOpen in BeginOpen().  For now, we are calling AsyncOpen()
-  // and NewChannelFromURIWithProxyFlags.
-  rv = io2->NewChannelFromURIWithProxyFlags(
-              localURI,
-              mURI,
-              nsIProtocolProxyService::RESOLVE_PREFER_HTTPS_PROXY |
-              nsIProtocolProxyService::RESOLVE_ALWAYS_TUNNEL,
-              getter_AddRefs(localChannel));
-  /*nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
   rv = io2->NewChannelFromURIWithProxyFlags2(
               localURI,
               mURI,
               nsIProtocolProxyService::RESOLVE_PREFER_HTTPS_PROXY |
               nsIProtocolProxyService::RESOLVE_ALWAYS_TUNNEL,
-              systemPrincipal,                   //requestingPrincipal
-              nullptr,                           //requestingNode
+              mRequestingPrincipal,
+              mRequestingContext, 
               0,                                 //security flags
-              nsIContentPolicy::TYPE_WEBSOCKET,  //content policy type
+              mContentPolicyType,
               0,                                 //load flags
-              getter_AddRefs(localChannel));*/
+              getter_AddRefs(localChannel));
 
   NS_ENSURE_SUCCESS(rv, rv);
 

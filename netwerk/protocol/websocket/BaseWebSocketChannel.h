@@ -50,6 +50,12 @@ class BaseWebSocketChannel : public nsIWebSocketChannel,
   NS_IMETHOD SetPingInterval(uint32_t aSeconds);
   NS_IMETHOD GetPingTimeout(uint32_t *aSeconds);
   NS_IMETHOD SetPingTimeout(uint32_t aSeconds);
+  NS_IMETHOD GetContentPolicyType(nsContentPolicyType *aType);
+  NS_IMETHOD SetContentPolicyType(nsContentPolicyType aType);
+  NS_IMETHOD GetRequestingContext(nsISupports **aRequestingContext);
+  NS_IMETHOD SetRequestingContext(nsISupports *aRequestingContext);
+  NS_IMETHOD GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal);
+  NS_IMETHOD SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal);
 
  protected:
   nsCOMPtr<nsIURI>                mOriginalURI;
@@ -59,6 +65,10 @@ class BaseWebSocketChannel : public nsIWebSocketChannel,
   nsCOMPtr<nsIInterfaceRequestor> mCallbacks;
   nsCOMPtr<nsILoadGroup>          mLoadGroup;
   nsCOMPtr<nsIThread>             mTargetThread;
+  nsCOMPtr<nsISupports>           mRequestingContext;
+  nsCOMPtr<nsIPrincipal>          mRequestingPrincipal;
+
+  nsContentPolicyType             mContentPolicyType;
 
   nsCString                       mProtocol;
   nsCString                       mOrigin;

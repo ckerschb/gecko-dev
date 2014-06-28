@@ -709,6 +709,7 @@ WebSocket::Init(JSContext* aCx,
     AppendUTF16toUTF8(aProtocolArray[index], mRequestedProtocolList);
   }
 
+  // TODO: we need to move this out from here and into AsyncOpen2()
   // Check content policy.
   int16_t shouldLoad = nsIContentPolicy::ACCEPT;
   rv = NS_CheckContentLoadPolicy(nsIContentPolicy::TYPE_WEBSOCKET,
@@ -775,6 +776,17 @@ WebSocket::EstablishConnection()
       do_CreateInstance("@mozilla.org/network/protocol;1?name=ws", &rv);
   }
   NS_ENSURE_SUCCESS(rv, rv);
+  /* WebSocketChannels aren't created with a NewChannel method,
+   * and hence they don't have loadinfo set during creation.
+   * Setting the loadinfo here
+   */   
+  wsChannel->SetRequestingPrincipal(mPrincipal);
+  wsChannel->SetContentPolicyType(nsIContentPolicy::TYPE_WEBSOCKET);
+
+  nsIScriptContext* sc = GetContextForEventHandlers(&rv);
+  nsCOMPtr<nsIDocument> doc =
+    nsContentUtils::GetDocumentFromScriptContext(sc);
+  wsChannel->SetRequestingContext(doc);
 
   rv = wsChannel->SetNotificationCallbacks(this);
   NS_ENSURE_SUCCESS(rv, rv);
@@ -801,7 +813,7 @@ WebSocket::EstablishConnection()
 
   ToLowerCase(asciiOrigin);
 
-  rv = wsChannel->AsyncOpen(mURI, asciiOrigin, this, nullptr);
+  rv = wsChannel->AsyncOpen2(mURI, asciiOrigin, this, nullptr);
   NS_ENSURE_SUCCESS(rv, rv);
 
   mChannel = wsChannel;

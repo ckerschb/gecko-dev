@@ -73,6 +73,20 @@ WebSocketChannelParent::RecvAsyncOpen(const URIParams& aURI,
   if (NS_FAILED(rv))
     goto fail;
 
+  /* WebSocketChannels aren't created with a NewChannel method,
+   * and hence they don't have loadinfo set during creation.
+   * TODO: We need to set the load info properly here.
+   * Or do we?  See comment below about whether or not we need to
+   * call AsyncOpen2().
+   */   
+  /* mChannel->SetRequestingPrincipal(mPrincipal);
+  mChannel->SetContentPolicyType(nsIContentPolicy::TYPE_WEBSOCKET);
+
+  nsIScriptContext* sc = GetContextForEventHandlers(&rv);
+  nsCOMPtr<nsIDocument> doc =
+    nsContentUtils::GetDocumentFromScriptContext(sc);
+  mChannel->SetRequestingContext(doc); */
+
   rv = mChannel->SetNotificationCallbacks(this);
   if (NS_FAILED(rv))
     goto fail;
@@ -98,6 +112,10 @@ WebSocketChannelParent::RecvAsyncOpen(const URIParams& aURI,
     mChannel->SetPingTimeout(aPingTimeout / 1000);
   }
 
+  // TODO: Do we need to call AsyncOpen2 here?  Since this is in
+  // a RecvAsyncOpen, AsyncOpen2 and AsyncOpen were already called on the child
+  // so security checks should have already taken place on the child
+  // Do we also need to call AsyncOpen2 here and do more security checks?
   rv = mChannel->AsyncOpen(uri, aOrigin, this, nullptr);
   if (NS_FAILED(rv))
     goto fail;

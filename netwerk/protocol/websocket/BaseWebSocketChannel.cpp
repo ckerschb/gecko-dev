@@ -166,6 +166,50 @@ BaseWebSocketChannel::SetPingTimeout(uint32_t aSeconds)
   return NS_OK;
 }
 
+NS_IMETHODIMP
+BaseWebSocketChannel::GetContentPolicyType(nsContentPolicyType *aType)
+{
+  *aType = mContentPolicyType;
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+BaseWebSocketChannel::SetContentPolicyType(nsContentPolicyType aType)
+{
+  mContentPolicyType = aType;
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+BaseWebSocketChannel::GetRequestingContext(nsISupports **aRequestingContext)
+{
+  NS_ENSURE_ARG_POINTER(aRequestingContext);
+  NS_IF_ADDREF(*aRequestingContext = mRequestingContext);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+BaseWebSocketChannel::SetRequestingContext(nsISupports *aRequestingContext)
+{
+  mRequestingContext = aRequestingContext;
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+BaseWebSocketChannel::GetRequestingPrincipal(nsIPrincipal **aRequestingPrincipal)
+{
+  NS_ENSURE_ARG_POINTER(aRequestingPrincipal);
+  NS_IF_ADDREF(*aRequestingPrincipal = mRequestingPrincipal);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+BaseWebSocketChannel::SetRequestingPrincipal(nsIPrincipal *aRequestingPrincipal)
+{
+  mRequestingPrincipal = aRequestingPrincipal;
+  return NS_OK;
+}
+
 //-----------------------------------------------------------------------------
 // BaseWebSocketChannel::nsIProtocolHandler
 //-----------------------------------------------------------------------------

@@ -11,6 +11,7 @@ interface nsIWebSocketListener;
 interface nsIInputStream;
 
 #include "nsISupports.idl"
+#include "nsIContentPolicy.idl"
 
 /**
  * Low-level websocket API: handles network protocol.  
@@ -159,5 +160,28 @@ interface nsIWebSocketChannel : nsISupports
      * NS_ERROR_IN_PROGRESS is thrown.
      */
     attribute unsigned long pingTimeout;
+
+
+     /**
+      * The content policy type of the channel's content.
+      *
+      * NOTE: The content type may not be set for all requests!
+      */
+    attribute nsContentPolicyType contentPolicyType;
+
+    /**
+      * The requesting context of the channel's content.
+      *
+      * NOTE: The requesting context may not be set for all requests!
+      */
+    attribute nsISupports requestingContext;
+
+    /**
+      * The requesting principal of the channel's content.
+      *
+      * NOTE: The requesting principal may not be set for all requests!
+      */
+    attribute nsIPrincipal requestingPrincipal;
+
 
 };
