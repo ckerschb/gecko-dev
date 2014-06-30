@@ -162,7 +162,7 @@ var resolveCallback = SpecialPowers.wrapCallbackObject({
     proxyChannel = ioService.newChannel2(proxiedHost,
                                          null,
                                          null,
-                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -901,7 +901,7 @@ function doTests() {
   var channel1 = ioService.newChannel2("http://example.com",
                                        null,
                                        null,
-                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                        null,      // requestingNode
                                        0,         // securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -909,7 +909,7 @@ function doTests() {
   var channel2 = ioService.newChannel2("http://example2.com",
                                        null,
                                        null,
-                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                        null,      // requestingNode
                                        0,         // securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,

@@ -1168,7 +1168,7 @@ function runTests() {
     var channel = ioService.newChannel2("http://example.com",
                                         null,
                                         null,
-                                        Services.scriptSecurityManager.getSystemPrincipal(),
+                                        SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                         null,      // requestingNode
                                         0,         // securityFlags
                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
