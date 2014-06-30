@@ -10,6 +10,9 @@ const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, 'Services',
+  'resource://gre/modules/Services.jsm');
+
 const FEEDWRITER_CID = Components.ID("{49bb6593-3aff-4eb3-a068-2712c28bd58e}");
 const FEEDWRITER_CONTRACTID = "@mozilla.org/browser/feeds/result-writer;1";
 
