@@ -109,8 +109,6 @@ add_test(function test_safebrowsing_update() {
   var streamUpdater = Cc["@mozilla.org/url-classifier/streamupdater;1"]
                      .getService(Ci.nsIUrlClassifierStreamUpdater);
 
-  streamUpdater.updateUrl = URL + safebrowsingUpdatePath;
-
   function onSuccess() {
     run_next_test();
   }
@@ -122,7 +120,7 @@ add_test(function test_safebrowsing_update() {
   }
 
   streamUpdater.downloadUpdates("test-phish-simple,test-malware-simple", "",
-    onSuccess, onUpdateError, onDownloadError);
+    URL + safebrowsingUpdatePath, onSuccess, onUpdateError, onDownloadError);
 });
 
 add_test(function test_non_safebrowsing_cookie() {

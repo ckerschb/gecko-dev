@@ -603,6 +603,7 @@ static nsresult NewImageChannel(nsIChannel **aResult,
   // If all of the proxy requests are canceled then this request should be
   // canceled too.
   //
+  aLoadFlags |= nsIChannel::LOAD_CLASSIFY_URI;
 
   // TODO: Verify that we can not query the node here.
   nsCOMPtr<nsINode> requestingNode = do_QueryInterface(aContext);
