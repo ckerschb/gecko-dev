@@ -8,6 +8,7 @@
 
 #include "nsIProtocolHandler.h"
 #include "mozilla/Attributes.h"
+#include "nsINode.h"
 
 class nsViewSourceHandler MOZ_FINAL : public nsIProtocolHandler
 {

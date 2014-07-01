@@ -80,6 +80,7 @@ NS_CP_ResponseName(int16_t response)
     return "<Unknown Response>";
   }
 }
+#endif // defined(PR_LOGGING)
 
 /**
  * Returns a string corresponding to the name of the content type constant, or
@@ -117,8 +118,6 @@ NS_CP_ContentTypeName(uint32_t contentType)
     return "<Unknown Type>";
   }
 }
-
-#endif // defined(PR_LOGGING)
 
 #undef CASE_RETURN
 
