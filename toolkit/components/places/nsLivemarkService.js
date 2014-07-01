@@ -659,6 +659,8 @@ Livemark.prototype = {
       let loadgroup = Cc["@mozilla.org/network/load-group;1"].
                       createInstance(Ci.nsILoadGroup);
       let channel = NetUtil.newChannel2(this.feedURI.spec,
+                                        null,
+                                        null,
                                         Services.scriptSecurityManager.getSystemPrincipal(),
                                         null,      // requestingNode
                                         0,         // securityFlags

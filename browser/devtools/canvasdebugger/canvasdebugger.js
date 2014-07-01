@@ -416,6 +416,8 @@ let SnapshotsListView = Heritage.extend(WidgetMethods, {
     }
 
     let channel = NetUtil.newChannel2(fp.file,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

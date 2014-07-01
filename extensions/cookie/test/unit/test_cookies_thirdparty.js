@@ -13,12 +13,16 @@ function run_test() {
   var uri1 = NetUtil.newURI(spec1);
   var uri2 = NetUtil.newURI(spec2);
   var channel1 = NetUtil.newChannel2(uri1,
+                                     null,
+                                     null,
                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
   var channel2 = NetUtil.newChannel2(uri2,
+                                     null,
+                                     null,
                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags

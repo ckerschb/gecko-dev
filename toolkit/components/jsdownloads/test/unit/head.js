@@ -436,6 +436,8 @@ function promiseStartExternalHelperAppServiceDownload(aSourceUrl) {
     }).then(null, do_report_unexpected_exception);
 
     let channel = NetUtil.newChannel2(sourceURI,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

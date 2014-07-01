@@ -71,6 +71,8 @@ SettingsDB.prototype = {
     }
 
     let chan = NetUtil.newChannel2(settingsFile,
+                                   null,
+                                   null,
                                    Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,      // requestingNode
                                    0,         // securityFlags

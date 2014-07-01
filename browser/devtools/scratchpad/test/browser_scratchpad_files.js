@@ -92,6 +92,8 @@ function fileExported(aStatus)
   gFileContent = oldContent;
 
   let channel = NetUtil.newChannel2(gFile,
+                                    null,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags

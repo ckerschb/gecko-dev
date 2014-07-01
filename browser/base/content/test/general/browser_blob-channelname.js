@@ -6,6 +6,8 @@ function test() {
     var file = new File(new Blob(['test'], {type: 'text/plain'}), {name: 'test-name'});
     var url = URL.createObjectURL(file);
     var channel = NetUtil.newChannel2(url,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

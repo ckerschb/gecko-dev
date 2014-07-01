@@ -34,6 +34,8 @@ function test_asyncFetchBadCert() {
 
     // Now try again with a channel whose notificationCallbacks doesn't suprress errors
     let channel = NetUtil.newChannel2("https://untrusted.example.com",
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

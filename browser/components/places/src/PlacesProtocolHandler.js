@@ -31,6 +31,8 @@ PlacesProtocolHandler.prototype = {
 
   newChannel: function PPH_newChannel(aUri) {
     let chan = NetUtil.newChannel2(URL,
+                                   null,
+                                   null,
                                    Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,      // requestingNode
                                    0,         // securityFlags

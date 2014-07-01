@@ -91,6 +91,8 @@ function runNextTest()
   let channel = NetUtil.newChannel2("http://localhost:" +
                                     httpserver.identity.primaryPort +
                                     set.serverPath,
+                                    null,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,   //requestingNode
                                     0,      //securityFlags

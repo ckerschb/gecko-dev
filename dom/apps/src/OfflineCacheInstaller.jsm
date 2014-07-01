@@ -78,6 +78,8 @@ function storeCache(applicationCache, url, file, itemType) {
 
 function readFile(aFile, aCallback) {
   let channel = NetUtil.newChannel2(aFile,
+                                    null,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags

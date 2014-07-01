@@ -215,6 +215,8 @@ function writeFile(file, content, callback)
 function readFile(file, callback)
 {
   let channel = NetUtil.newChannel2(file,
+                                    null,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags

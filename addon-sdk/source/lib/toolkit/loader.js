@@ -172,6 +172,8 @@ exports.serializeStack = serializeStack;
 
 function readURI(uri) {
   let stream = NetUtil.newChannel2(uri,
+                                   'UTF-8',
+                                   null,
                                    Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,      // requestingNode
                                    0,         // securityFlags

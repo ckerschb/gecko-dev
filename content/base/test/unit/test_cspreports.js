@@ -73,6 +73,8 @@ function makeTest(id, expectedJSON, useReportOnlyPolicy, callback) {
                                ":" + REPORT_SERVER_PORT +
                                "/foo/self");
   var selfchan = NetUtil.newChannel2(selfuri,
+                                     null,
+                                     null,
                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags

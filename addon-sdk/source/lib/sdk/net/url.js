@@ -34,6 +34,8 @@ function readURI(uri, options) {
   let charset = options.charset || 'UTF-8';
 
   let channel = NetUtil.newChannel2(uri,
+                                    charset,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags
@@ -80,6 +82,8 @@ function readURISync(uri, charset) {
   charset = typeof charset === "string" ? charset : "UTF-8";
 
   let channel = NetUtil.newChannel2(uri,
+                                    charset,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags

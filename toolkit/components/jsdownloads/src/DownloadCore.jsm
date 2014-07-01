@@ -1590,7 +1590,9 @@ this.DownloadCopySaver.prototype = {
 
           // Create a channel from the source, and listen to progress
           // notifications.
-          let channel = NetUtil.newChannel2(NetUtil.newURI(download.source.url,
+          let channel = NetUtil.newChannel2(NetUtil.newURI(download.source.url),
+                                            null,
+                                            null,
                                             Services.scriptSecurityManager.getSystemPrincipal(),
                                             null,      // requestingNode
                                             0,         // securityFlags

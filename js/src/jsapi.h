@@ -3996,6 +3996,11 @@ Call(JSContext *cx, JS::HandleValue thisv, JS::HandleObject funObj, const JS::Ha
     return Call(cx, thisv, fun, args, rval);
 }
 
+extern JS_PUBLIC_API(bool)
+Construct(JSContext *cx, JS::HandleValue fun,
+          const JS::HandleValueArray& args,
+          MutableHandleValue rval);
+
 } /* namespace JS */
 
 /*
@@ -4660,10 +4665,10 @@ JS_ClearDateCaches(JSContext *cx);
 /*
  * Regular Expressions.
  */
-#define JSREG_FOLD      0x01    /* fold uppercase to lowercase */
-#define JSREG_GLOB      0x02    /* global exec, creates array of matches */
-#define JSREG_MULTILINE 0x04    /* treat ^ and $ as begin and end of line */
-#define JSREG_STICKY    0x08    /* only match starting at lastIndex */
+#define JSREG_FOLD      0x01u   /* fold uppercase to lowercase */
+#define JSREG_GLOB      0x02u   /* global exec, creates array of matches */
+#define JSREG_MULTILINE 0x04u   /* treat ^ and $ as begin and end of line */
+#define JSREG_STICKY    0x08u   /* only match starting at lastIndex */
 
 extern JS_PUBLIC_API(JSObject *)
 JS_NewRegExpObject(JSContext *cx, JS::HandleObject obj, char *bytes, size_t length,
