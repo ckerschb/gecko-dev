@@ -448,6 +448,8 @@ function downloadIcon(aIconURI) {
 #endif
 
     let channel = NetUtil.newChannel2(aIconURI,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

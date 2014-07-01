@@ -22,6 +22,11 @@ const Cu = Components.utils;
 
 const PR_UINT32_MAX = 0xffffffff;
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, 'Services',
+  'resource://gre/modules/Services.jsm');
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //// NetUtil Object
 
@@ -96,6 +101,8 @@ this.NetUtil = {
      *        2) The status code from opening the source.
      *        3) Reference to the nsIRequest.
      */
+
+     //TODO: Most likely we have to add a asyncFeth2, postponing for now
     asyncFetch: function NetUtil_asyncOpen(aSource, aCallback)
     {
         if (!aSource || !aCallback) {
@@ -136,6 +143,8 @@ this.NetUtil = {
         let channel = aSource;
         if (!(channel instanceof Ci.nsIChannel)) {
             channel = this.newChannel2(aSource,
+                                       null,
+                                       null,
                                        Services.scriptSecurityManager.getSystemPrincipal(),
                                        null,      // requestingNode
                                        0,         // securityFlags
@@ -208,6 +217,70 @@ this.NetUtil = {
     newChannel: function NetUtil_newChannel(aWhatToLoad, aOriginCharset,
                                             aBaseURI)
     {
+        let depCallException = new Components.Exception(
+          "Calling newChannel in NetUtil.jsm is deprecated, use newChannel2",
+          Cr.NS_ERROR_INVALID_ARG,
+          Components.stack.caller
+        );
+        throw depCallException;
+
+        if (!aWhatToLoad) {
+            let exception = new Components.Exception(
+                "Must have a non-null string spec, nsIURI, or nsIFile object",
+                Cr.NS_ERROR_INVALID_ARG,
+                Components.stack.caller
+            );
+            throw exception;
+        }
+
+        let uri = aWhatToLoad;
+        if (!(aWhatToLoad instanceof Ci.nsIURI)) {
+            // We either have a string or an nsIFile that we'll need a URI for.
+            uri = this.newURI(aWhatToLoad, aOriginCharset, aBaseURI);
+        }
+
+        return this.ioService.newChannelFromURI(uri);
+    },
+
+    /**
+     * Constructs a new channel for the given spec, character set, and base URI,
+     * or nsIURI, or nsIFile.
+     *
+     * @param aWhatToLoad
+     *        The string spec for the desired URI, an nsIURI, or an nsIFile.
+     * @param aOriginCharset
+     *        The character set for the URI.  Only used if aWhatToLoad is a
+     *        string.
+     * @param aBaseURI
+     *        The base URI for the spec.  Only used if aWhatToLoad is a string.
+     *
+     * @param aRequestingPrincipal
+     *        TODO
+     *
+     * @param aRequestingNode
+     *        TODO
+     *
+     * @param aSecurityFlags
+     *        TODO
+     *
+     * @param aContentPolicyType
+     *        TODO
+     *
+     * @param aLoadFlags
+     *        TODO
+     *
+     * @return an nsIChannel object.
+     */
+    newChannel2: function NetUtil_newChannel2(aWhatToLoad,
+                                              aOriginCharset,
+                                              aBaseURI,
+                                              aRequestingPrincipal,
+                                              aRequestingNode,
+                                              aSecurityFlags,
+                                              aContentPolicyType,
+                                              aLoadFlags)
+
+    {
         if (!aWhatToLoad) {
             let exception = new Components.Exception(
                 "Must have a non-null string spec, nsIURI, or nsIFile object",
@@ -224,12 +297,11 @@ this.NetUtil = {
         }
 
         return this.ioService.newChannelFromURI2(uri,
-                                                 Services.scriptSecurityManager.getSystemPrincipal(),
-                                                 null,    //requestingNode
-                                                 0,       //securityFlags
-                                                 Ci.nsIContentPolicy.TYPE_OTHER,
-                                                 0);      //loadFlags
-
+                                                 aRequestingPrincipal,
+                                                 aRequestingNode,
+                                                 aSecurityFlags,
+                                                 aContentPolicyType,
+                                                 aLoadFlags);
     },
 
     /**

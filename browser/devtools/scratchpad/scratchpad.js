@@ -1070,6 +1070,8 @@ var Scratchpad = {
   {
     // Prevent file type detection.
     let channel = NetUtil.newChannel2(aFile,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags

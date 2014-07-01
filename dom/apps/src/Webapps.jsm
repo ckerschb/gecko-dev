@@ -2884,6 +2884,8 @@ this.DOMApplicationRegistry = {
 
     if (aIsLocalFileInstall) {
       requestChannel = NetUtil.newChannel2(aFullPackagePath,
+                                           null,
+                                           null,
                                            Services.scriptSecurityManager.getSystemPrincipal(),
                                            null,      // requestingNode
                                            0,         // securityFlags
@@ -2892,6 +2894,8 @@ this.DOMApplicationRegistry = {
                               .QueryInterface(Ci.nsIFileChannel);
     } else {
       requestChannel = NetUtil.newChannel2(aFullPackagePath,
+                                           null,
+                                           null,
                                            Services.scriptSecurityManager.getSystemPrincipal(),
                                            null,      // requestingNode
                                            0,         // securityFlags

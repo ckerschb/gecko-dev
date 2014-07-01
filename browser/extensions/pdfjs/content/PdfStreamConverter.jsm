@@ -260,6 +260,8 @@ ChromeActions.prototype = {
 
     var docIsPrivate = this.isInPrivateBrowsing();
     var netChannel = NetUtil.newChannel2(blobUri,
+                                         null,
+                                         null,
                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags

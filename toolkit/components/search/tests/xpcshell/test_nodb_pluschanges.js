@@ -74,6 +74,8 @@ function run_test()
 
             // Check that the entries are placed as specified correctly
             let stream = NetUtil.newChannel2(metadata,
+                                             null,
+                                             null,
                                              Services.scriptSecurityManager.getSystemPrincipal(),
                                              null,      // requestingNode
                                              0,         // securityFlags

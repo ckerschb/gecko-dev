@@ -39,12 +39,16 @@ function run_test() {
   let uri1 = NetUtil.newURI(spec1);
   let uri2 = NetUtil.newURI(spec2);
   let channel1 = NetUtil.newChannel2(uri1,
+                                     null,
+                                     null,
                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
   let channel2 = NetUtil.newChannel2(uri2,
+                                     null,
+                                     null,
                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
@@ -57,12 +61,16 @@ function run_test() {
   let fileuri1 = NetUtil.newURI(filespec1);
   let fileuri2 = NetUtil.newURI(filespec2);
   let filechannel1 = NetUtil.newChannel2(fileuri1,
+                                         null,
+                                         null,
                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                          0);        // loadFlags
   let filechannel2 = NetUtil.newChannel2(fileuri2,
+                                         null,
+                                         null,
                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags

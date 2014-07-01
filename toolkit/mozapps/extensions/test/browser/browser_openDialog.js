@@ -23,6 +23,8 @@ let CustomChromeProtocol = {
   newChannel: function CCP_newChannel(aURI) {
     let url = "chrome:" + aURI.path;
     let ch = NetUtil.newChannel2(url,
+                                 null,
+                                 null,
                                  Services.scriptSecurityManager.getSystemPrincipal(),
                                  null,      // requestingNode
                                  0,         // securityFlags

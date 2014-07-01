@@ -483,16 +483,14 @@ function test_asyncFetch_does_not_block()
 function test_newChannel_no_specifier()
 {
   try {
-    // TODO - should this be changed to newChannel2 with a null uri?
-    NetUtil.newChannel();
-    /*
     NetUtil.newChannel2(null,
+                        null,
+                        null,
                         Services.scriptSecurityManager.getSystemPrincipal(),
                         null,   //requestingNode
                         0,      //securityFlags
                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                         0);      //loadFlags
-    */
     do_throw("should throw!");
   }
   catch (e) {
@@ -516,6 +514,8 @@ function test_newChannel_with_string()
                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                    0);      //loadFlags
   let NetUtilChannel = NetUtil.newChannel2(TEST_SPEC,
+                                           null,
+                                           null,
                                            Services.scriptSecurityManager.getSystemPrincipal(),
                                            null,   //requestingNode
                                            0,      //securityFlags
@@ -540,6 +540,8 @@ function test_newChannel_with_nsIURI()
                                                        Ci.nsIContentPolicy.TYPE_OTHER,
                                                        0);      //loadFlags
   let NetUtilChannel = NetUtil.newChannel2(uri,
+                                           null,
+                                           null,
                                            Services.scriptSecurityManager.getSystemPrincipal(),
                                            null,   //requestingNode
                                            0,      //securityFlags
@@ -567,6 +569,8 @@ function test_newChannel_with_nsIFile()
                                                        Ci.nsIContentPolicy.TYPE_OTHER,
                                                        0);      //loadFlags
   let NetUtilChannel = NetUtil.newChannel2(uri,
+                                           null,
+                                           null,
                                            Services.scriptSecurityManager.getSystemPrincipal(),
                                            null,   //requestingNode
                                            0,      //securityFlags

@@ -844,6 +844,8 @@ SessionStore.prototype = {
 
     try {
       let channel = NetUtil.newChannel2(this._sessionFileBackup,
+                                        null,
+                                        null,
                                         Services.scriptSecurityManager.getSystemPrincipal(),
                                         null,      // requestingNode
                                         0,         // securityFlags

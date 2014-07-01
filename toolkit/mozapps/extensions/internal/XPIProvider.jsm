@@ -5231,6 +5231,8 @@ AddonInstall.prototype = {
       this.badCertHandler = new BadCertHandler(!requireBuiltIn);
 
       this.channel = NetUtil.newChannel2(this.sourceURI,
+                                         null,
+                                         null,
                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags

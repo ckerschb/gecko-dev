@@ -545,6 +545,8 @@ ProfilerPanel.prototype = {
   loadProfile: function (file) {
     let deferred = promise.defer();
     let ch = NetUtil.newChannel2(file,
+                                 null,
+                                 null,
                                  Services.scriptSecurityManager.getSystemPrincipal(),
                                  null,      // requestingNode
                                  0,         // securityFlags

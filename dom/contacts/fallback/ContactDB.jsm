@@ -125,6 +125,8 @@ ContactDB.prototype = {
       }
 
       let chan = jsm.NetUtil.newChannel2(contactsFile,
+                                         null,
+                                         null,
                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags

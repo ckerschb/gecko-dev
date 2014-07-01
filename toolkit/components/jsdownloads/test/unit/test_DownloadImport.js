@@ -164,7 +164,9 @@ function promiseTableCount(aConnection) {
 function promiseEntityID(aUrl) {
   let deferred = Promise.defer();
   let entityID = "";
-  let channel = NetUtil.newChannel2(NetUtil.newURI(aUrl,
+  let channel = NetUtil.newChannel2(NetUtil.newURI(aUrl),
+                                    null,
+                                    null,
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags

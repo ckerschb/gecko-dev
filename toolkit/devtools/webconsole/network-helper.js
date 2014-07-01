@@ -273,6 +273,8 @@ let NetworkHelper = {
   loadFromCache: function NH_loadFromCache(aUrl, aCharset, aCallback)
   {
     let channel = NetUtil.newChannel2(aUrl,
+                                      null,
+                                      null,
                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                       null,      // requestingNode
                                       0,         // securityFlags
