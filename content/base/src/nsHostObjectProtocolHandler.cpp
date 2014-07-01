@@ -543,6 +543,7 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
                                          uint32_t aLoadFlags,
                                          nsIChannel** outChannel)
 {
+  printf("\n\n\nTANVI2 - in nsHostObjectProtocolHandler::NewChannel2\n\n\n");
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 
   // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
@@ -557,8 +558,8 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
   if (!info) {
     return NS_ERROR_DOM_BAD_URI;
   }
-  nsCOMPtr<nsIDOMBlob> blob = do_QueryInterface(info->mObject);
-  if (!blob) {
+  nsCOMPtr<PIDOMFileImpl> blobImpl = do_QueryInterface(info->mObject);
+  if (!blobImpl) {
     return NS_ERROR_DOM_BAD_URI;
   }
 
@@ -571,6 +572,7 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
   }
 #endif
 
+  DOMFileImpl* blob = static_cast<DOMFileImpl*>(blobImpl.get());
   nsCOMPtr<nsIInputStream> stream;
   nsresult rv = blob->GetInternalStream(getter_AddRefs(stream));
   NS_ENSURE_SUCCESS(rv, rv);
@@ -592,9 +594,9 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIDOMFile> file = do_QueryInterface(info->mObject);
-  if (file) {
+  if (blob->IsFile()) {
     nsString filename;
-    rv = file->GetName(filename);
+    rv = blob->GetName(filename);
     NS_ENSURE_SUCCESS(rv, rv);
     channel->SetContentDispositionFilename(filename);
   }
