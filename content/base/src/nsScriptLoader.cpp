@@ -286,15 +286,22 @@ nsresult
 nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
                           bool aScriptFromHead)
 {
-  // nsISupports *context = aRequest->mElement.get()
-  //                        ? static_cast<nsISupports *>(aRequest->mElement.get())
-  //                        : static_cast<nsISupports *>(mDocument);
+  nsISupports *context = aRequest->mElement.get()
+                         ? static_cast<nsISupports *>(aRequest->mElement.get())
+                         : static_cast<nsISupports *>(mDocument);
 
-  // // TODO, I guess we can eliminate the ShouldLoadScript completely
-  // nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
-  // if (NS_FAILED(rv)) {
-  //   return rv;
-  // }
+  // TODO, I guess we can eliminate the ShouldLoadScript completely
+  // We can't remove this call yet, because it also calls CheckLoadURIWithPrincipal 
+  // which we don't call in AsyncOpen2 yet.
+  // We also cannot comment out the content policy check in ShouldLoadScript because
+  // XULDocument.cpp calls it.  Although, XULDocument.cpp also calls NS_NewChannel3 and
+  // AsyncOpen2, so technically it shouldn't need the content policy check either.
+  // If we can confirm this, we can comment out the content policy check in ShouldLoadScript
+  // But for now, we are just going to do a duplicate check to content policies to get test_292789 to work.
+  nsresult rv = ShouldLoadScript(mDocument, context, aRequest->mURI, aType);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
 
   nsCOMPtr<nsILoadGroup> loadGroup = mDocument->GetDocumentLoadGroup();
 
@@ -316,7 +323,7 @@ nsScriptLoader::StartLoad(nsScriptLoadRequest *aRequest, const nsAString &aType,
   // that will be created to load the script
   nsCOMPtr<nsIChannelPolicy> channelPolicy;
   nsCOMPtr<nsIContentSecurityPolicy> csp;
-  nsresult rv = mDocument->NodePrincipal()->GetCsp(getter_AddRefs(csp));
+  rv = mDocument->NodePrincipal()->GetCsp(getter_AddRefs(csp));
   NS_ENSURE_SUCCESS(rv, rv);
   if (csp) {
     channelPolicy = do_CreateInstance("@mozilla.org/nschannelpolicy;1");

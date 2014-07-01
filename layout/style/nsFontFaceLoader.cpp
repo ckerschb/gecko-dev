@@ -254,18 +254,19 @@ nsFontFaceLoader::CheckLoadAllowed(nsIPrincipal* aSourcePrincipal,
                                    nsIURI* aTargetURI,
                                    nsISupports* aContext)
 {
-  // nsresult rv;
+  nsresult rv;
   // TODO: interesting, isn't that a problem right now???
-  // if (!aSourcePrincipal)
-  //   return NS_OK;
+  if (!aSourcePrincipal)
+    return NS_OK;
 
-  // // check with the security manager
-  // nsIScriptSecurityManager* secMan = nsContentUtils::GetSecurityManager();
-  // rv = secMan->CheckLoadURIWithPrincipal(aSourcePrincipal, aTargetURI,
-  //                                       nsIScriptSecurityManager::STANDARD);
-  // if (NS_FAILED(rv)) {
-  //   return rv;
-  // }
+  // check with the security manager
+  // TODO: Move CheckLoadURIWithPrincipal calls to AsyncOpen2()
+  nsIScriptSecurityManager* secMan = nsContentUtils::GetSecurityManager();
+  rv = secMan->CheckLoadURIWithPrincipal(aSourcePrincipal, aTargetURI,
+                                        nsIScriptSecurityManager::STANDARD);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
 
   // // check content policy
   // int16_t shouldLoad = nsIContentPolicy::ACCEPT;
