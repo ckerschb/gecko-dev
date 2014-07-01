@@ -21,20 +21,25 @@
   pointer-events: auto;
 }
 
-#action-busy {
+#action-busy-undetermined {
   height: 24px;
   width: 24px;
 }
 
 window.busy .action-button,
-window:not(.busy) #action-busy {
+window:not(.busy) #action-busy,
+window.busy-undetermined #action-busy-determined,
+window.busy-determined #action-busy-undetermined {
   display: none;
 }
 
 /* Panel buttons */
 
 .panel-button {
+  -moz-appearance: none;
   -moz-box-align: center;
+  border-width: 0;
+  background: none;
 }
 
 .panel-button-anchor {
@@ -123,6 +128,7 @@ panel > .panel-arrowcontainer > .panel-arrowcontent {
   padding: 3px 12px;
   margin: 0;
   -moz-appearance: none;
+  border-width: 0;
 }
 
 .panel-item-help {

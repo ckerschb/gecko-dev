@@ -26,6 +26,7 @@ MIRGenerator::MIRGenerator(CompileCompartment *compartment, const JitCompileOpti
     graph_(graph),
     abortReason_(AbortReason_NoAbort),
     error_(false),
+    pauseBuild_(nullptr),
     cancelBuild_(false),
     maxAsmJSStackArgBytes_(0),
     performsCall_(false),
@@ -116,6 +117,15 @@ MIRGraph::removeBlock(MBasicBlock *block)
     block->markAsDead();
     blocks_.remove(block);
     numBlocks_--;
+}
+
+void
+MIRGraph::removeBlockIncludingPhis(MBasicBlock *block)
+{
+    // removeBlock doesn't clear phis because of IonBuilder constraints. Here,
+    // we want to totally clear everything.
+    removeBlock(block);
+    block->discardAllPhis();
 }
 
 void
@@ -928,6 +938,20 @@ bool
 MBasicBlock::addImmediatelyDominatedBlock(MBasicBlock *child)
 {
     return immediatelyDominated_.append(child);
+}
+
+void
+MBasicBlock::removeImmediatelyDominatedBlock(MBasicBlock *child)
+{
+    for (size_t i = 0; ; ++i) {
+        MOZ_ASSERT(i < immediatelyDominated_.length(),
+                   "Dominated block to remove not present");
+        if (immediatelyDominated_[i] == child) {
+            immediatelyDominated_[i] = immediatelyDominated_.back();
+            immediatelyDominated_.popBack();
+            return;
+        }
+    }
 }
 
 void
