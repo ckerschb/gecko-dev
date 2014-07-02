@@ -1266,7 +1266,7 @@ Engine.prototype = {
                                                     Ci.nsIContentPolicy.TYPE_OTHER,
                                                     0);      //loadFlags
 
-    var stream = chan.open();
+    var stream = chan.open2();
     var parser = Cc["@mozilla.org/xmlextras/domparser;1"].
                  createInstance(Ci.nsIDOMParser);
     var doc = parser.parseFromStream(stream, "UTF-8", stream.available(), "text/xml");
@@ -3487,7 +3487,7 @@ SearchService.prototype = {
                                                         0);      //loadFlags
         let sis = Cc["@mozilla.org/scriptableinputstream;1"].
                   createInstance(Ci.nsIScriptableInputStream);
-        sis.init(chan.open());
+        sis.init(chan.open2());
         let list = sis.read(sis.available());
         names = list.split("\n").filter(function (n) !!n);
       } catch (ex) {
@@ -4329,7 +4329,7 @@ var engineMetadataService = {
                                                         0,       //securityFlags
                                                         Ci.nsIContentPolicy.TYPE_OTHER,
                                                         0        //loadFlags
-                                                       ).open();
+                                                       ).open2();
             this._store = parseJsonFromStream(stream);
           } catch (x) {
             LOG("metadata syncInit: could not load JSON file " + x);

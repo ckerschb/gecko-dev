@@ -114,7 +114,7 @@ if (!inChild) {
                                  0,         // securityFlags
                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                  0);        // loadFlags
-      var stream = chan.open();
+      var stream = chan.open2();
       do_check_true(chan.contentLength > 0);
       do_check_eq(stream.available(), chan.contentLength);
       stream.close();
@@ -137,7 +137,7 @@ if (!inChild) {
                                  0,         // securityFlags
                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                  0);        // loadFlags
-      var stream = chan.open();
+      var stream = chan.open2();
       do_check_true(chan.contentLength > 0);
       do_check_eq(stream.available(), chan.contentLength);
       stream.close();
@@ -187,7 +187,7 @@ if (!inChild) {
                                  0,         // securityFlags
                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                  0);        // loadFlags
-      var stream = chan.open();
+      var stream = chan.open2();
       do_check_true(chan.contentLength > 0);
       stream.close();
 

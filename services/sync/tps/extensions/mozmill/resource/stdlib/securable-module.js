@@ -321,7 +321,7 @@
                                             Ci.nsIContentPolicy.TYPE_OTHER,
                                             0);      //loadFlags
        try {
-         channel.open().close();
+         channel.open2().close();
        } catch (e if e.result == Cr.NS_ERROR_FILE_NOT_FOUND) {
          return null;
        }

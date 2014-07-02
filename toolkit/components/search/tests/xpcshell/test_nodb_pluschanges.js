@@ -80,7 +80,7 @@ function run_test()
                                              null,      // requestingNode
                                              0,         // securityFlags
                                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
-                                             0).open(); // loadFlags
+                                             0).open2(); // loadFlags
             do_print("Parsing metadata");
             let json = parseJsonFromStream(stream);
             do_check_eq(json["[app]/test-search-engine.xml"].order, 1);

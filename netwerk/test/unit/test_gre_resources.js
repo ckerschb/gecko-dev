@@ -21,7 +21,7 @@ function check_file(file) {
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
   try {
-    let instr = wrapInputStream(channel.open());
+    let instr = wrapInputStream(channel.open2());
     do_check_true(instr.read(1024).length > 0)
   } catch (e) {
     do_throw("Failed to read " + file + " from gre-resources:"+e)

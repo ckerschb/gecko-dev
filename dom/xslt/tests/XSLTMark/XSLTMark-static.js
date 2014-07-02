@@ -32,7 +32,7 @@ function loadFile(aUriSpec)
                                 0);        // loadFlags
     var instream = 
         Components.classes[SIS_CTRID].createInstance(nsISIS);
-    instream.init(chan.open());
+    instream.init(chan.open2());
 
     return instream.read(instream.available());
 }

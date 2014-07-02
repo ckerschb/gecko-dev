@@ -43,7 +43,7 @@ function readBinaryURI(uri) {
                                       0);        // loadFlags
   let stream = Cc["@mozilla.org/binaryinputstream;1"].
                createInstance(Ci.nsIBinaryInputStream);
-  stream.setInputStream(channel.open());
+  stream.setInputStream(channel.open2());
 
   let data = "";
   while (true) {

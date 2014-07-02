@@ -242,7 +242,7 @@ public:
         rv = NS_NewLocalFileChannel(getter_AddRefs(inCh), mInPath);
         if (NS_FAILED(rv)) return rv;
 
-        rv = inCh->Open(getter_AddRefs(inStr));
+        rv = inCh->Open2(getter_AddRefs(inStr));
         if (NS_FAILED(rv)) return rv;
 
         //rv = NS_NewLocalFileChannel(getter_AddRefs(outCh), mOutPath);

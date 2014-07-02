@@ -74,7 +74,7 @@ function stream_from_channel(file) {
                                0,       //securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                0      //loadFlags
-                              ).open();
+                              ).open2();
 }
 
 function run_test() {

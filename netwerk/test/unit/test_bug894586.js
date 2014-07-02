@@ -50,7 +50,7 @@ ProtocolHandler.prototype = {
                                          0,       //securityFlags
                                          Ci.nsIContentPolicy.TYPE_OTHER,
                                          0      //loadFlags
-                                        ).open();
+                                        ).open2();
   },
   asyncOpen: function(aListener, aContext) {
     throw Components.Exception("Not implemented",

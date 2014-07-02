@@ -321,7 +321,7 @@ runItem.prototype =
                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                     0);        // loadFlags
         var instream = doCreate(SIS_CTRID, nsISIS);
-        instream.init(chan.open());
+        instream.init(chan.open2());
 
         return instream.read(instream.available());
     }

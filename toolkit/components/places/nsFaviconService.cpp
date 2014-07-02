@@ -343,7 +343,7 @@ nsFaviconService::ReplaceFaviconDataFromDataURL(nsIURI* aFaviconURI,
   // Blocking stream is OK for data URIs.
   nsCOMPtr<nsIInputStream> stream;
   // TODO: change to Open2 once the new API is in place
-  rv = channel->Open(getter_AddRefs(stream));
+  rv = channel->Open2(getter_AddRefs(stream));
   NS_ENSURE_SUCCESS(rv, rv);
 
   uint64_t available64;

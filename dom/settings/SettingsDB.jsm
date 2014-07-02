@@ -78,7 +78,7 @@ SettingsDB.prototype = {
                                    0,         // securityFlags
                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                    0);        // loadFlags
-    let stream = chan.open();
+    let stream = chan.open2();
     // Obtain a converter to read from a UTF-8 encoded input stream.
     let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                     .createInstance(Ci.nsIScriptableUnicodeConverter);
