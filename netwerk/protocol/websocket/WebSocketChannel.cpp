@@ -2661,6 +2661,7 @@ WebSocketChannel::AsyncOpen(nsIURI *aURI,
                             nsIWebSocketListener *aListener,
                             nsISupports *aContext)
 {
+  NS_ASSERTION(mUsesNewAPI, "AsyncOpen call did no go through new API");
   LOG(("WebSocketChannel::AsyncOpen() %p\n", this));
 
   NS_ABORT_IF_FALSE(NS_IsMainThread(), "not main thread");
