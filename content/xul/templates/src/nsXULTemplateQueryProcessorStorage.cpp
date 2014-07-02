@@ -27,6 +27,7 @@
 #include "mozIStorageService.h"
 #include "nsIChannel.h"
 #include "nsIDocument.h"
+#include "nsSystemPrincipal.h"
 
 //----------------------------------------------------------------------
 //
