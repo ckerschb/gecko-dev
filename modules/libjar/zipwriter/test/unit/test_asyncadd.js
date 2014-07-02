@@ -80,13 +80,13 @@ var methods = {
   {
     zipW.addEntryStream(entry, source.lastModifiedTime * PR_MSEC_PER_SEC,
                         Ci.nsIZipWriter.COMPRESSION_NONE,
-                        ioSvc.newChannelFromURI2(ioSvc.newFileURI(source)).open(),
-                                                Services.scriptSecurityManager.getSystemPrincipal(),
-                                                null, //requestingNode
-                                                0,       //securityFlags
-                                                Ci.nsIContentPolicy.TYPE_OTHER,
-                                                0      //loadFlags
-                                                ), true);
+                        ioSvc.newChannelFromURI2(ioSvc.newFileURI(source),
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 null, //requestingNode
+                                                 0,       //securityFlags
+                                                 Ci.nsIContentPolicy.TYPE_OTHER,
+                                                 0      //loadFlags
+                                                 ).open2(), true);
   }
 }
 
