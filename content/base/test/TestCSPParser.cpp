@@ -25,6 +25,7 @@ template<class T> class nsReadingIterator;
 #include "nsIContentSecurityPolicy.h"
 #include "nsNetUtil.h"
 #include "TestHarness.h"
+#include "nsSystemPrincipal.h"
 
 // TODO: what is the proper way to include nsScriptSecurityManager
 #include "../../../caps/include/nsScriptSecurityManager.h"
@@ -98,21 +99,18 @@ nsresult runTest(uint32_t aExpectedPolicyCount, // this should be 0 for policies
   // we also init the csp with a dummyChannel, which is unused
   // for the parser tests but surpresses assertions in SetRequestContext.
 
-  // nsCOMPtr<nsIPrincipal> systemPrincipal;
-  // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
-  // GetSystemPrincipal(getter_AddRefs(systemPrincipal));
-  // NS_ENSURE_SUCCESS(rv, rv);
-
   nsCOMPtr<nsIChannel> dummyChannel;
+  nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+
   rv = NS_NewChannel2(getter_AddRefs(dummyChannel),
                       selfURI,
-                      nullptr,
-                      nullptr,
-                      nullptr,
+                      nullptr, // ioService
+                      nullptr, // loadGroup
+                      nullptr, // callBacks
                       nsIRequest::LOAD_NORMAL,
                       nullptr, // channelPolicy
                       nsIContentPolicy::TYPE_OTHER,
-                      nullptr);
+                      systemPrincipal);
   NS_ENSURE_SUCCESS(rv, rv);
 
   // create a CSP object

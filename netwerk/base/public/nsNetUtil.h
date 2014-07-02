@@ -452,7 +452,7 @@ NS_NewChannel2(nsIChannel**           outResult,
     fprintf(stderr, "}\n\n");
   }
 
-  NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel with aRequestingPrincipal");
+  NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel without aRequestingPrincipal");
 
   // TODO: Is it likely that all channels created using this interface should have a nsContentPolicyType of TYPE_OTHER?
   // maybe we can assert that as well - we need to investigate that!
