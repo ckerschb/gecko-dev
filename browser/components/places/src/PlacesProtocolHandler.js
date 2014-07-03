@@ -30,6 +30,19 @@ PlacesProtocolHandler.prototype = {
   },
 
   newChannel: function PPH_newChannel(aUri) {
+    let depCallException = new Components.Exception(
+        "Calling newChannel in PlacesProtocolHandler.js is deprecated, use newChannel2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+
+    let chan = NetUtil.newChannel(URL);
+    chan.originalURI = aUri;
+    return chan;
+  },
+
+  newChannel2: function PPH_newChannel2(aUri) {
     let chan = NetUtil.newChannel2(URL,
                                    null,
                                    null,

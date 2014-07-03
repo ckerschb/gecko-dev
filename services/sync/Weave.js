@@ -183,6 +183,28 @@ AboutWeaveLog.prototype = {
   },
 
   newChannel: function(aURI) {
+    let depCallException = new Components.Exception(
+        "Calling newChannel in AboutRedirector.js is deprecated, use newChannel2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+
+    let dir = FileUtils.getDir("ProfD", ["weave", "logs"], true);
+    let uri = Services.io.newFileURI(dir);
+    let channel = Services.io.newChannelFromURI(uri);
+    channel.originalURI = aURI;
+
+    // Ensure that the about page has the same privileges as a regular directory
+    // view. That way links to files can be opened.
+    let ssm = Cc["@mozilla.org/scriptsecuritymanager;1"]
+                .getService(Ci.nsIScriptSecurityManager);
+    let principal = ssm.getNoAppCodebasePrincipal(uri);
+    channel.owner = principal;
+    return channel;
+  },
+
+  newChannel2: function(aURI) {
     let dir = FileUtils.getDir("ProfD", ["weave", "logs"], true);
     let uri = Services.io.newFileURI(dir);
     let channel = Services.io.newChannelFromURI2(uri,
@@ -200,7 +222,8 @@ AboutWeaveLog.prototype = {
     let principal = ssm.getNoAppCodebasePrincipal(uri);
     channel.owner = principal;
     return channel;
-  }
+  },
+
 };
 
 const components = [WeaveService, AboutWeaveLog];

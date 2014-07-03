@@ -74,6 +74,20 @@ Protocol.prototype = {
    * @return The newly created channel.
    */
   newChannel: function Proto_newChannel(aURI) {
+    let depCallException = new Components.Exception(
+        "Calling newChannel in PageThumbsProtocol.js is deprecated, use newChannel2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+
+    let {url} = parseURI(aURI);
+    let file = PageThumbsStorage.getFilePathForURL(url);
+    let fileuri = Services.io.newFileURI(new FileUtils.File(file));
+    return Services.io.newChannelFromURI(fileuri);
+  },
+
+  newChannel2: function Proto_newChannel2(aURI) {
     let {url} = parseURI(aURI);
     let file = PageThumbsStorage.getFilePathForURL(url);
     let fileuri = Services.io.newFileURI(new FileUtils.File(file));

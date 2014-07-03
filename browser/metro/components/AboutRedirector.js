@@ -69,6 +69,32 @@ AboutGeneric.prototype = {
   },
 
   newChannel: function(aURI) {
+    let depCallException = new Components.Exception(
+        "Calling newChannel in AboutRedirector.js is deprecated, use newChannel2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+
+    let moduleInfo = this._getModuleInfo(aURI);
+
+    var ios = Cc["@mozilla.org/network/io-service;1"].
+              getService(Ci.nsIIOService);
+
+    var channel = ios.newChannel(moduleInfo.uri, null, null);
+
+    if (!moduleInfo.privileged) {
+      // Setting the owner to null means that we'll go through the normal
+      // path in GetChannelPrincipal and create a codebase principal based
+      // on the channel's originalURI
+      channel.owner = null;
+    }
+
+    channel.originalURI = aURI;
+    return channel;
+  },
+
+  newChannel2: function(aURI) {
     let moduleInfo = this._getModuleInfo(aURI);
 
     var ios = Cc["@mozilla.org/network/io-service;1"].
@@ -92,7 +118,7 @@ AboutGeneric.prototype = {
 
     channel.originalURI = aURI;
     return channel;
-  }
+  },
 };
 
 const components = [AboutGeneric];

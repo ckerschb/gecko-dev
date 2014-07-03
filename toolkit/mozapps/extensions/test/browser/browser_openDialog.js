@@ -21,6 +21,20 @@ let CustomChromeProtocol = {
   },
 
   newChannel: function CCP_newChannel(aURI) {
+    let depCallException = new Components.Exception(
+        "Calling newChannel in browser_openDialog.js is deprecated, use newChannel2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+
+    let url = "chrome:" + aURI.path;
+    let ch = NetUtil.newChannel(url);
+    ch.originalURI = aURI;
+    return ch;
+  },
+
+  newChannel2: function CCP_newChannel2(aURI) {
     let url = "chrome:" + aURI.path;
     let ch = NetUtil.newChannel2(url,
                                  null,
