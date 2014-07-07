@@ -559,8 +559,7 @@ nsIOService::NewFileURI(nsIFile *file, nsIURI **result)
 NS_IMETHODIMP
 nsIOService::NewChannelFromURI(nsIURI *aURI, nsIChannel **result)
 {
-    // TODO, the following warning should turn into into an ASSERTION at some point
-    NS_WARNING("Deprecated, you should use NewChannelFromURI2");
+    NS_ASSERTION(false, "NewChannelFromURI is deprecated, use NewChannelFromURI2");
     return NewChannelFromURIWithProxyFlags(aURI, nullptr, 0, result);
 }
 
@@ -590,8 +589,8 @@ nsIOService::NewChannelFromURIWithProxyFlags(nsIURI *aURI,
                                              uint32_t aProxyFlags,
                                              nsIChannel **result)
 {
-    // TODO, the following warning should turn into into an ASSERTION at some point
-    NS_WARNING("Deprecated, you should use NewChannelFromURIWithProxyFlags2");
+    NS_ASSERTION(false, "NewChannelFromURIWithProxyFlags is deprecated, use NewChannelFromURIWithProxyFlags2");
+
     nsresult rv;
     NS_ENSURE_ARG_POINTER(aURI);
 
