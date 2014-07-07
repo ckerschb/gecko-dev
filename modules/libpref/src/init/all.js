@@ -346,6 +346,9 @@ pref("media.tabstreaming.time_per_frame", 40);
 pref("media.webvtt.enabled", true);
 pref("media.webvtt.regions.enabled", false);
 
+// AudioTrack and VideoTrack support
+pref("media.track.enabled", false);
+
 // Whether to enable MediaSource support
 pref("media.mediasource.enabled", false);
 
@@ -3702,7 +3705,12 @@ pref("canvas.image.cache.limit", 0);
 pref("image.onload.decode.limit", 0);
 
 // WebGL prefs
+#ifdef ANDROID
+// Disable MSAA on mobile.
+pref("gl.msaa-level", 0);
+#else
 pref("gl.msaa-level", 2);
+#endif
 pref("webgl.force-enabled", false);
 pref("webgl.disabled", false);
 pref("webgl.shader_validator", true);

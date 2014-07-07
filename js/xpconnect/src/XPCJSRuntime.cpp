@@ -88,6 +88,7 @@ const char* const XPCJSRuntime::mStrings[] = {
     "length",               // IDX_LENGTH
     "name",                 // IDX_NAME
     "undefined",            // IDX_UNDEFINED
+    "",                     // IDX_EMPTYSTRING
 };
 
 /***************************************************************************/
