@@ -57,6 +57,12 @@ CustomChannel.prototype = {
   name: null,
   status: Cr.NS_OK,
   asyncOpen: function(listener, context) {
+    let depCallException = new Components.Exception(
+        "Calling asyncOpen in test_bug682305.js is deprecated, use asyncOpen2",
+        Cr.NS_ERROR_INVALID_ARG,
+        Components.stack.caller
+      );
+      throw depCallException;
     let stream = this.open();
     try {
       listener.onStartRequest(this, context);
@@ -68,12 +74,40 @@ CustomChannel.prototype = {
       listener.onStopRequest(this, context, Cr.NS_OK);
     } catch(e) {}
   },
+
+  asyncOpen2: function(listener, context) {
+    let stream = this.open();
+    try {
+      listener.onStartRequest(this, context);
+    } catch(e) {}
+    try {
+      listener.onDataAvailable(this, context, stream, 0, stream.available());
+    } catch(e) {}
+    try {
+      listener.onStopRequest(this, context, Cr.NS_OK);
+    } catch(e) {}
+  },
+
   open: function() {
+    let depCallException = new Components.Exception(
+        "Calling open in test_bug682305.js is deprecated, use open2",
+        Cr.NS_ERROR_INVALID_ARG,
+        Components.stack.caller
+      );
+      throw depCallException;
     let data = "bar";
     let stream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
     stream.setData(data, data.length);
     return stream;
   },
+
+  open2: function() {
+    let data = "bar";
+    let stream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
+    stream.setData(data, data.length);
+    return stream;
+  },
+
   isPending: function() {
     return false;
   },

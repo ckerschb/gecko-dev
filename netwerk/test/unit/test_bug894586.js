@@ -41,6 +41,12 @@ ProtocolHandler.prototype = {
     throw Components.Exception("Setting content length", NS_ERROR_NOT_IMPLEMENTED);
   },
   open: function() {
+    let depCallException = new Components.Exception(
+        "Calling open in test_bug894586.js is deprecated, use opem2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
     var file = do_get_file("test_bug894586.js", false);
     do_check_true(file.exists());
     var url = Services.io.newFileURI(file);
@@ -52,6 +58,19 @@ ProtocolHandler.prototype = {
                                          0      //loadFlags
                                         ).open2();
   },
+  open2: function() {
+    var file = do_get_file("test_bug894586.js", false);
+    do_check_true(file.exists());
+    var url = Services.io.newFileURI(file);
+    return Services.io.newChannelFromURI2(url
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
+                                         null, //requestingNode
+                                         0,       //securityFlags
+                                         Ci.nsIContentPolicy.TYPE_OTHER,
+                                         0      //loadFlags
+                                        ).open2();
+  },
+
   asyncOpen: function(aListener, aContext) {
     throw Components.Exception("Not implemented",
                                Cr.NS_ERROR_NOT_IMPLEMENTED);

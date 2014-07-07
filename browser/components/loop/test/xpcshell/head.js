@@ -78,6 +78,21 @@ MockWebSocketChannel.prototype = {
    * See nsIWebSocketChannel.idl for API details.
    */
   asyncOpen: function(aURI, aOrigin, aListener, aContext) {
+    let depCallException = new Components.Exception(
+        "Calling asyncOpen in head.js is deprecated, use asyncOpen2",
+         Cr.NS_ERROR_INVALID_ARG,
+         Components.stack.caller
+      );
+      throw depCallException;
+    this.uri = aURI;
+    this.origin = aOrigin;
+    this.listener = aListener;
+    this.context = aContext;
+
+    this.listener.onStart(this.context);
+  },
+
+  asyncOpen2: function(aURI, aOrigin, aListener, aContext) {
     this.uri = aURI;
     this.origin = aOrigin;
     this.listener = aListener;
