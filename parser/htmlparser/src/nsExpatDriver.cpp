@@ -25,6 +25,7 @@
 #include "nsIContentPolicy.h"
 #include "nsContentPolicyUtils.h"
 #include "nsError.h"
+#include "nsSystemPrincipal.h"
 #include "nsXPCOMCIDInternal.h"
 #include "nsUnicharInputStream.h"
 
@@ -799,15 +800,29 @@ nsExpatDriver::OpenInputStreamFromExternalDTD(const char16_t* aFPIStr,
   CopyUTF8toUTF16(absURL, aAbsURL);
 
   nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewChannel3(getter_AddRefs(channel),
-                      uri,
-                      nullptr, // ioService
-                      nullptr, // loadGroup
-                      nullptr, // interFaceRequestor
-                      nsIRequest::LOAD_NORMAL,
-                      nullptr, // channelPolicy
-                      nsIContentPolicy::TYPE_DTD,
-                      doc); // TODO: might be null, do we want to use SystemPrincipal?
+  if (doc) {
+    rv = NS_NewChannel3(getter_AddRefs(channel),
+                        uri,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // interFaceRequestor
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_DTD,
+                        doc);
+  }
+  else {
+    nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
+    rv = NS_NewChannel2(getter_AddRefs(channel),
+                        uri,
+                        nullptr, // ioService
+                        nullptr, // loadGroup
+                        nullptr, // interFaceRequestor
+                        nsIRequest::LOAD_NORMAL,
+                        nullptr, // channelPolicy
+                        nsIContentPolicy::TYPE_DTD,
+                        systemPrincipal);
+  }
   NS_ENSURE_SUCCESS(rv, rv);
 
   channel->SetContentType(NS_LITERAL_CSTRING("application/xml"));
