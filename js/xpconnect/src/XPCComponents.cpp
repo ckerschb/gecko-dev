@@ -2679,7 +2679,7 @@ nsXPCComponents_Utils::EvalInSandbox(const nsAString& source,
     }
 
     return xpc::EvalInSandbox(cx, sandbox, source, filename, lineNo,
-                              jsVersion, false, retval);
+                              jsVersion, retval);
 }
 
 NS_IMETHODIMP
@@ -3084,7 +3084,7 @@ nsXPCComponents_Utils::MakeObjectPropsNormal(HandleValue vobj, JSContext *cx)
         if (!js::IsWrapper(propobj) || !JS_ObjectIsCallable(cx, propobj))
             continue;
 
-        if (!NewFunctionForwarder(cx, id, propobj, /* doclone = */ false, &v) ||
+        if (!NewNonCloningFunctionForwarder(cx, id, propobj, &v) ||
             !JS_SetPropertyById(cx, obj, id, v))
             return NS_ERROR_FAILURE;
     }
