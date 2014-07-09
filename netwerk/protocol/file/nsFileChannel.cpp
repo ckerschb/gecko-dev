@@ -187,6 +187,14 @@ private:
   nsCOMPtr<nsITransportEventSink> mSink;
 };
 
+namespace mozilla {
+template<>
+struct HasDangerousPublicDestructor<nsFileUploadContentStream>
+{
+  static const bool value = true;
+};
+}
+
 NS_IMPL_ISUPPORTS_INHERITED0(nsFileUploadContentStream,
                              nsBaseContentStream)
 
@@ -270,6 +278,10 @@ nsFileChannel::nsFileChannel(nsIURI *uri)
   } else {
     SetURI(uri);
   }
+}
+
+nsFileChannel::~nsFileChannel()
+{
 }
 
 nsresult

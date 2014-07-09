@@ -54,7 +54,6 @@ public:
   NS_IMETHOD Resume();
 
   FTPChannelChild(nsIURI* uri);
-  virtual ~FTPChannelChild();
 
   void AddIPDLReference();
   void ReleaseIPDLReference();
@@ -75,6 +74,8 @@ public:
   void FlushedForDiversion();
 
 protected:
+  virtual ~FTPChannelChild();
+
   bool RecvOnStartRequest(const nsresult& aChannelStatus,
                           const int64_t& aContentLength,
                           const nsCString& aContentType,
