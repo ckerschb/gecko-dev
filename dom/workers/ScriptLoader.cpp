@@ -431,7 +431,9 @@ private:
       NS_ENSURE_SUCCESS(rv, rv);
 
       rv = channel->AsyncOpen2(loader, indexSupports);
-      NS_ENSURE_SUCCESS(rv, rv);
+      if (NS_FAILED(rv)) {
+        return rv;
+      }
 
       loadInfo.mChannel.swap(channel);
     }

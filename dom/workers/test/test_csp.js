@@ -41,9 +41,13 @@ worker.onmessage = function(event) {
 msg = "Loading data:something";
 try {
   worker = new Worker("data:application/javascript;base64,ZHVtcCgnaGVsbG8gd29ybGQnKQo=");
-  ok(false, "Should have thrown!");
+  // TODO: this part of the test needs to be rewritten since contentPolicies are no longer
+  // called at creation, but rather when opening a channel. Hence the error does not get
+  // propagated up the callstack at creation time which formerly triggered the exception
+  // to be thrown.
+  // ok(false, "Should have thrown!");
 } catch (e) {
-  ok(true, "Threw as expected.");
+  // ok(true, "Threw as expected.");
 }
 
 worker = new Worker("javascript:dump(123);");
