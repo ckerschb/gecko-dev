@@ -16,10 +16,8 @@
 #include "plstr.h"
 #include "nsCOMArray.h"
 #include "nsIComponentRegistrar.h"
+#include "nsSystemPrincipal.h"
 #include <algorithm>
-
-// TODO: what is the proper way to include nsScriptSecurityManager
-#include "../../caps/include/nsScriptSecurityManager.h"
 
 namespace TestPageLoad {
 
@@ -302,10 +300,8 @@ nsresult auxLoad(char *uriBuf)
     printf("\n");
     uriList.AppendObject(uri);
 
-    // nsCOMPtr<nsIPrincipal> systemPrincipal;
-    // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
-    //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
-    // NS_ENSURE_SUCCESS(rv, rv);
+    nsCOMPtr<nsIPrincipal> systemPrincipal =
+      do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
     rv = NS_NewChannel2(getter_AddRefs(chan),
                         uri,
@@ -315,7 +311,7 @@ nsresult auxLoad(char *uriBuf)
                         nsIRequest::LOAD_NORMAL,
                         nullptr, // channelPolicy
                         nsIContentPolicy::TYPE_OTHER,
-                        nullptr);
+                        systemPrincipal);
     RETURN_IF_FAILED(rv, rv, "NS_NewChannel");
 
     gKeepRunning++;
@@ -359,10 +355,8 @@ int main(int argc, char **argv)
         rv = NS_NewURI(getter_AddRefs(baseURI), argv[1]);
         RETURN_IF_FAILED(rv, -1, "NS_NewURI");
 
-        // nsCOMPtr<nsIPrincipal> systemPrincipal;
-        // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
-        //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
-        // NS_ENSURE_SUCCESS(rv, -1);
+        nsCOMPtr<nsIPrincipal> systemPrincipal =
+          do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
         rv = NS_NewChannel2(getter_AddRefs(chan),
                             baseURI,
@@ -372,7 +366,7 @@ int main(int argc, char **argv)
                             nsIRequest::LOAD_NORMAL,
                             nullptr, // channelPolicy
                             nsIContentPolicy::TYPE_OTHER,
-                            nullptr);
+                            systemPrincipal);
         RETURN_IF_FAILED(rv, -1, "NS_OpenURI");
         gKeepRunning++;
 

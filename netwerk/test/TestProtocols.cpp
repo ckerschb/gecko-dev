@@ -57,9 +57,7 @@
 #include "nsStringAPI.h"
 #include "nsNetUtil.h"
 #include "prlog.h"
-
-// TODO: what is the proper way to include nsScriptSecurityManager
-#include "../../caps/include/nsScriptSecurityManager.h"
+#include "nsSystemPrincipal.h"
 
 using namespace mozilla;
 
@@ -633,10 +631,8 @@ nsresult StartLoadingURL(const char* aUrlString)
         }
         NS_ADDREF(callbacks);
 
-        // nsCOMPtr<nsIPrincipal> systemPrincipal;
-        // rv = nsScriptSecurityManager::GetScriptSecurityManager()->
-        //   GetSystemPrincipal(getter_AddRefs(systemPrincipal));
-        // NS_ENSURE_SUCCESS(rv, rv);
+        nsCOMPtr<nsIPrincipal> systemPrincipal =
+          do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
 
         // Async reading thru the calls of the event sink interface
         rv = NS_NewChannel2(getter_AddRefs(pChannel),
@@ -647,7 +643,7 @@ nsresult StartLoadingURL(const char* aUrlString)
                             nsIRequest::LOAD_NORMAL,
                             nullptr, // channelPolicy
                             nsIContentPolicy::TYPE_OTHER,
-                            nullptr);
+                            systemPrincipal);
         NS_RELEASE(callbacks);
         if (NS_FAILED(rv)) {
             LOG(("ERROR: NS_OpenURI failed for %s [rv=%x]\n", aUrlString, rv));
