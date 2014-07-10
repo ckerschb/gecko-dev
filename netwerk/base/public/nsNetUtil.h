@@ -434,23 +434,23 @@ NS_NewChannel2(nsIChannel**           outResult,
                nsContentPolicyType    aType,
                nsIPrincipal*          aRequestingPrincipal) // TODO, probably rename to SystemPrincipal
 {
-  { // debug
-    nsAutoCString spec;
-    aURI->GetSpec(spec);
-    fprintf(stderr, "\nNS_NewChannel2 {\n");
-    fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
-    fprintf(stderr, "  uri: %s\n", spec.get());
-    if (aRequestingPrincipal) {
-       nsCOMPtr<nsIURI> principalURI;
-       aRequestingPrincipal->GetURI(getter_AddRefs(principalURI));
-       if (principalURI) {
-         nsAutoCString princeSpec;
-         principalURI->GetSpec(princeSpec);
-         fprintf(stderr, "  aRequestingPrincipal: %s\n", princeSpec.get());
-      }
-    }
-    fprintf(stderr, "}\n\n");
-  }
+  // { // debug
+  //   nsAutoCString spec;
+  //   aURI->GetSpec(spec);
+  //   fprintf(stderr, "\nNS_NewChannel2 {\n");
+  //   fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
+  //   fprintf(stderr, "  uri: %s\n", spec.get());
+  //   if (aRequestingPrincipal) {
+  //      nsCOMPtr<nsIURI> principalURI;
+  //      aRequestingPrincipal->GetURI(getter_AddRefs(principalURI));
+  //      if (principalURI) {
+  //        nsAutoCString princeSpec;
+  //        principalURI->GetSpec(princeSpec);
+  //        fprintf(stderr, "  aRequestingPrincipal: %s\n", princeSpec.get());
+  //     }
+  //   }
+  //   fprintf(stderr, "}\n\n");
+  // }
 
   NS_ASSERTION(aRequestingPrincipal, "NS_NewChannel2 can not create channel without aRequestingPrincipal");
 
@@ -481,26 +481,26 @@ NS_NewChannel3(nsIChannel**           outResult,
                nsINode*               aRequestingNode)
 {
 
-  { // debug
-    nsAutoCString spec;
-    aURI->GetSpec(spec);
-    fprintf(stderr, "\nNS_NewChannel3 {\n");
-    fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
-    fprintf(stderr, "  aURI: %s\n", spec.get());
-    if (aRequestingNode) {
-      nsCOMPtr<nsIPrincipal> nodePrincipal = aRequestingNode->NodePrincipal();
-      if (nodePrincipal) {
-        nsCOMPtr<nsIURI> nodeURI;
-        nodePrincipal->GetURI(getter_AddRefs(nodeURI));
-        if (nodeURI) {
-          nsAutoCString nodeSpec;
-          nodeURI->GetSpec(nodeSpec);
-          fprintf(stderr, "  aRequestingNode: %s\n", nodeSpec.get());
-        }
-      }
-    }
-    fprintf(stderr, "}\n\n");
-  }
+  // { // debug
+  //   nsAutoCString spec;
+  //   aURI->GetSpec(spec);
+  //   fprintf(stderr, "\nNS_NewChannel3 {\n");
+  //   fprintf(stderr, "  contenType: %s\n", contentTypeToString(aType));
+  //   fprintf(stderr, "  aURI: %s\n", spec.get());
+  //   if (aRequestingNode) {
+  //     nsCOMPtr<nsIPrincipal> nodePrincipal = aRequestingNode->NodePrincipal();
+  //     if (nodePrincipal) {
+  //       nsCOMPtr<nsIURI> nodeURI;
+  //       nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+  //       if (nodeURI) {
+  //         nsAutoCString nodeSpec;
+  //         nodeURI->GetSpec(nodeSpec);
+  //         fprintf(stderr, "  aRequestingNode: %s\n", nodeSpec.get());
+  //       }
+  //     }
+  //   }
+  //   fprintf(stderr, "}\n\n");
+  // }
 
   NS_ASSERTION(aRequestingNode, "NS_NewChannel3 can not create channel without a node");
 

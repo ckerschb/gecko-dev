@@ -233,37 +233,37 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
   NS_ASSERTION(aContentLocation, "Can not perform check without a aContentLocation");
   NS_ASSERTION(aRequestingPrincipal, "Can not perform checkout with aRequestingPrincipal");
 
-  fprintf(stderr, "NS_CheckContentPolicy2 {\n");
-  fprintf(stderr, "  aContentPolicyType: %s\n", NS_CP_ContentTypeName(aContentPolicyType));
+  // fprintf(stderr, "NS_CheckContentPolicy2 {\n");
+  // fprintf(stderr, "  aContentPolicyType: %s\n", NS_CP_ContentTypeName(aContentPolicyType));
 
-  // print aContentLocation
-  nsAutoCString uri;
-  aContentLocation->GetSpec(uri);
-  fprintf(stderr, "  aContentLocation: %s\n", uri.get());
+  // // print aContentLocation
+  // nsAutoCString uri;
+  // aContentLocation->GetSpec(uri);
+  // fprintf(stderr, "  aContentLocation: %s\n", uri.get());
 
-  // print aRequestingPrincipal
-  nsCOMPtr<nsIURI> requestingPrincipalURI;
-  aRequestingPrincipal->GetURI(getter_AddRefs(requestingPrincipalURI));
-  if (requestingPrincipalURI) {
-    nsAutoCString spec;
-    requestingPrincipalURI->GetSpec(spec);
-    fprintf(stderr, "  aRequestingPrincipal: %s\n", spec.get());
-  }
+  // // print aRequestingPrincipal
+  // nsCOMPtr<nsIURI> requestingPrincipalURI;
+  // aRequestingPrincipal->GetURI(getter_AddRefs(requestingPrincipalURI));
+  // if (requestingPrincipalURI) {
+  //   nsAutoCString spec;
+  //   requestingPrincipalURI->GetSpec(spec);
+  //   fprintf(stderr, "  aRequestingPrincipal: %s\n", spec.get());
+  // }
 
-  // print aRequestingContext
-  nsCOMPtr<nsINode> node = do_QueryInterface(aRequestingContext);
-  if (node) {
-    nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
-    if (nodePrincipal) {
-      nsCOMPtr<nsIURI> nodeURI;
-      nodePrincipal->GetURI(getter_AddRefs(nodeURI));
-      if (nodeURI) {
-        nsAutoCString nodeSpec;
-        nodeURI->GetSpec(nodeSpec);
-        fprintf(stderr, "  aRequestingContext: %s\n", nodeSpec.get());
-      }
-    }
-  }
+  // // print aRequestingContext
+  // nsCOMPtr<nsINode> node = do_QueryInterface(aRequestingContext);
+  // if (node) {
+  //   nsCOMPtr<nsIPrincipal> nodePrincipal = node->NodePrincipal();
+  //   if (nodePrincipal) {
+  //     nsCOMPtr<nsIURI> nodeURI;
+  //     nodePrincipal->GetURI(getter_AddRefs(nodeURI));
+  //     if (nodeURI) {
+  //       nsAutoCString nodeSpec;
+  //       nodeURI->GetSpec(nodeSpec);
+  //       fprintf(stderr, "  aRequestingContext: %s\n", nodeSpec.get());
+  //     }
+  //   }
+  // }
 
   // TODO: the following code needs to be fixed, but if a channel is redirected
   // we do *not* want to call all contentPolicies, but probably CSP and MCB
@@ -285,10 +285,10 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
 
     if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
       if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
-        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
+        // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
         return NS_ERROR_CONTENT_BLOCKED;
       }
-      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
+      // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
       return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
     }
 
@@ -307,14 +307,14 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
 
     if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
       if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
-        fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
+        // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED) [REDIRECTED]\n}\n");
         return NS_ERROR_CONTENT_BLOCKED;
       }
-      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
+      // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT) [REDIRECTED]\n}\n");
       return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
     }
 
-    fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED [REDIRECTED]\n}\n");
+    // fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED [REDIRECTED]\n}\n");
     return NS_OK;
   }
 
@@ -331,14 +331,14 @@ NS_CheckContentLoadPolicy2(uint32_t        aContentPolicyType,
 
   if (NS_FAILED(rv) || NS_CP_REJECTED(shouldLoad)) {
     if (NS_FAILED(rv) || shouldLoad != nsIContentPolicy::REJECT_TYPE) {
-      fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED)\n}\n");
+      // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED)\n}\n");
       return NS_ERROR_CONTENT_BLOCKED;
     }
-    fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT)\n}\n");
+    // fprintf(stderr, "  NS_CheckContentLoadPolicy REJECTED (NS_ERROR_CONTENT_BLOCKED_SHOW_ALT)\n}\n");
     return NS_ERROR_CONTENT_BLOCKED_SHOW_ALT;
   }
 
-  fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
+  // fprintf(stderr, "  NS_CheckContentLoadPolicy ACCEPTED\n}\n");
   return NS_OK;
 }
 /**

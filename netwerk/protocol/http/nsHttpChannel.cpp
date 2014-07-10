@@ -4540,8 +4540,6 @@ nsHttpChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *context)
 nsresult
 nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
 {
-  fprintf(stderr, "\n\nnsHttpChannel::AsyncOpen2\n");
-
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
@@ -4564,39 +4562,6 @@ nsHttpChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *context)
   mUsesNewAPI = true;
   rv = AsyncOpen(listener, context);
   return rv;
-
-    //TANVI's notes - How do we figure out the context
-    /*In docshell we do:
-    nsCOMPtr<Element> requestingElement;
-    if (mScriptGlobal)
-       requestingElement = mScriptGlobal->GetFrameElementInternal();
-
-     nsISupports* context = requestingElement;
-     if (!context) {
-         context = ToSupports(mScriptGlobal);
-     } //what if there is no mScriptGlobal?
-     */
-     // But how do i get the context or the global window from the channel?
-     // You can't - you have to pass it in.
-     /*
-     //Is it from the loadGroup or from the nsILoadContext?
-     //
-     //From the loadcontext -
-     nsCOMPtr<nsIInterfaceRequestor> notificationCallbacks;
-     GetNotificationCallbacks(getter_AddRefs(notificationCallbacks));  //This is the right context.
-     nsCOMPtr<nsILoadContext> loadContext = do_GetInterface(notificationCallbacks);
-
-     //OR
-
-     //From the loadGroup -
-     nsCOMPtr<nsIInterfaceRequestor> notificationCallbacks2;
-     if (mLoadGroup) {
-       mLoadGroup->GetNotificationCallbacks(getter_AddRefs(notificationCallbacks2));
-       if (notificationCallbacks2) {
-         nsCOMPtr<nsILoadContext> loadContext2 = do_GetInterface(notificationCallbacks2);
-       }
-     }
-     */
 }
 
 nsresult

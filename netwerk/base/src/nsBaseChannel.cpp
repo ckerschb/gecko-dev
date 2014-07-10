@@ -628,10 +628,6 @@ nsBaseChannel::Open(nsIInputStream **result)
 NS_IMETHODIMP
 nsBaseChannel::Open2(nsIInputStream **result)
 {
-  // Do we even have to call ContentPolicies here?
-  // because we call chan->Open2 in nsBaseChannel::Open
-  fprintf(stderr, "\n\nnsBaseChannel::Open2\n");
-
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
@@ -701,8 +697,6 @@ nsBaseChannel::AsyncOpen(nsIStreamListener *listener, nsISupports *ctxt)
 NS_IMETHODIMP
 nsBaseChannel::AsyncOpen2(nsIStreamListener *listener, nsISupports *ctxt)
 {
-  fprintf(stderr, "\n\nnsBaseChannel::AsyncOpen2\n");
-
   nsresult rv = NS_CheckContentLoadPolicy2(mContentPolicyType,
                                            mURI,
                                            mRequestingPrincipal,
