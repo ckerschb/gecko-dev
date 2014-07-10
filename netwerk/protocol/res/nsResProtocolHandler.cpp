@@ -318,10 +318,12 @@ nsResProtocolHandler::NewChannel2(nsIURI* aURI,
                                  aContentPolicyType,
                                  aLoadFlags,
                                  outChannel);
-
     if (NS_FAILED(rv)) return rv;
 
-    return NS_OK;
+    nsLoadFlags loadFlags = 0;
+    (*outChannel)->GetLoadFlags(&loadFlags);
+    (*outChannel)->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
+    return (*outChannel)->SetOriginalURI(aURI);
 }
 
 NS_IMETHODIMP 
