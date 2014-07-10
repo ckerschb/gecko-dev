@@ -15,6 +15,7 @@
 #include "nsDOMJSUtils.h"
 #include "nsError.h"
 #include "nsPIDOMWindow.h"
+#include "mozilla/LoadInfo.h"
 #include "mozilla/dom/BindingUtils.h"
 
 using namespace mozilla;
@@ -249,8 +250,11 @@ DOMParser::ParseFromStream(nsIInputStream *stream,
                             systemPrincipal, nullptr, nsIContentPolicy::TYPE_OTHER);
   NS_ENSURE_STATE(parserChannel);
 
-  // More principal-faking here 
-  parserChannel->SetOwner(mOriginalPrincipal);
+  // More principal-faking here
+  nsCOMPtr<nsILoadInfo> loadInfo =
+    new LoadInfo(mOriginalPrincipal, LoadInfo::eInheritPrincipal,
+                 LoadInfo::eNotSandboxed);
+  parserChannel->SetLoadInfo(loadInfo);
 
   if (charset) {
     parserChannel->SetContentCharset(nsDependentCString(charset));
