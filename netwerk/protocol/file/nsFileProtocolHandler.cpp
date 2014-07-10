@@ -179,19 +179,24 @@ nsFileProtocolHandler::NewURI(const nsACString &spec,
 NS_IMETHODIMP
 nsFileProtocolHandler::NewChannel(nsIURI *uri, nsIChannel **result)
 {
-    nsFileChannel *chan = new nsFileChannel(uri);
-    if (!chan)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(chan);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv = chan->Init();
-    if (NS_FAILED(rv)) {
-        NS_RELEASE(chan);
-        return rv;
-    }
+    // nsFileChannel *chan = new nsFileChannel(uri);
+    // if (!chan)
+    //     return NS_ERROR_OUT_OF_MEMORY;
+    // NS_ADDREF(chan);
 
-    *result = chan;
-    return NS_OK;
+    // nsresult rv = chan->Init();
+    // if (NS_FAILED(rv)) {
+    //     NS_RELEASE(chan);
+    //     return rv;
+    // }
+
+    // *result = chan;
+    // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -203,13 +208,24 @@ nsFileProtocolHandler::NewChannel2(nsIURI* aURI,
                                    uint32_t aLoadFlags,
                                    nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+    nsFileChannel *chan = new nsFileChannel(aURI);
+    if (!chan)
+        return NS_ERROR_OUT_OF_MEMORY;
+    NS_ADDREF(chan);
+
+    nsresult rv = chan->Init();
+    if (NS_FAILED(rv)) {
+        NS_RELEASE(chan);
+        return rv;
+    }
+
+    chan->SetContentPolicyType(aContentPolicyType);
+    chan->SetRequestingContext(aRequestingNode);
+    chan->SetRequestingPrincipal(aRequestingPrincipal);
+
+    *outChannel = chan;
+    return NS_OK;
 }
 
 NS_IMETHODIMP 

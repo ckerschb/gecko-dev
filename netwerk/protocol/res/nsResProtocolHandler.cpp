@@ -276,21 +276,25 @@ nsResProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsResProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-    NS_WARNING("Deprecated, you should use nsResProtocolHandler::NewChannel2");
-    NS_ENSURE_ARG_POINTER(uri);
-    nsresult rv;
-    nsAutoCString spec;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    rv = ResolveURI(uri, spec);
-    if (NS_FAILED(rv)) return rv;
+    // NS_ENSURE_ARG_POINTER(uri);
+    // nsresult rv;
+    // nsAutoCString spec;
 
-    rv = mIOService->NewChannel(spec, nullptr, nullptr, result);
-    if (NS_FAILED(rv)) return rv;
+    // rv = ResolveURI(uri, spec);
+    // if (NS_FAILED(rv)) return rv;
 
-    nsLoadFlags loadFlags = 0;
-    (*result)->GetLoadFlags(&loadFlags);
-    (*result)->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
-    return (*result)->SetOriginalURI(uri);
+    // rv = mIOService->NewChannel(spec, nullptr, nullptr, result);
+    // if (NS_FAILED(rv)) return rv;
+
+    // nsLoadFlags loadFlags = 0;
+    // (*result)->GetLoadFlags(&loadFlags);
+    // (*result)->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
+    // return (*result)->SetOriginalURI(uri);
 }
 
 NS_IMETHODIMP
@@ -320,6 +324,7 @@ nsResProtocolHandler::NewChannel2(nsIURI* aURI,
                                  outChannel);
     if (NS_FAILED(rv)) return rv;
 
+    // we are setting principal, context in newChannel2
     nsLoadFlags loadFlags = 0;
     (*outChannel)->GetLoadFlags(&loadFlags);
     (*outChannel)->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);

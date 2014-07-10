@@ -1047,34 +1047,37 @@ nsGIOProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsGIOProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
 {
-  // TODO, the following warning should turn into into an ASSERTION at some point
-  NS_WARNING("Deprecated, you should use nsGIOProtocolHandler::NewChannel2");
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-  NS_ENSURE_ARG_POINTER(aURI);
-  nsresult rv;
 
-  nsAutoCString spec;
-  rv = aURI->GetSpec(spec);
-  if (NS_FAILED(rv))
-    return rv;
+  // NS_ENSURE_ARG_POINTER(aURI);
+  // nsresult rv;
 
-  nsRefPtr<nsGIOInputStream> stream = new nsGIOInputStream(spec);
-  if (!stream)
-  {
-    rv = NS_ERROR_OUT_OF_MEMORY;
-  }
-  else
-  {
-    // start out assuming an unknown content-type.  we'll set the content-type
-    // to something better once we open the URI.
-    rv = NS_NewInputStreamChannel(aResult,
-                                  aURI,
-                                  stream,
-                                  NS_LITERAL_CSTRING(UNKNOWN_CONTENT_TYPE));
-    if (NS_SUCCEEDED(rv))
-      stream->SetChannel(*aResult);
-  }
-  return rv;
+  // nsAutoCString spec;
+  // rv = aURI->GetSpec(spec);
+  // if (NS_FAILED(rv))
+  //   return rv;
+
+  // nsRefPtr<nsGIOInputStream> stream = new nsGIOInputStream(spec);
+  // if (!stream)
+  // {
+  //   rv = NS_ERROR_OUT_OF_MEMORY;
+  // }
+  // else
+  // {
+  //   // start out assuming an unknown content-type.  we'll set the content-type
+  //   // to something better once we open the URI.
+  //   rv = NS_NewInputStreamChannel(aResult,
+  //                                 aURI,
+  //                                 stream,
+  //                                 NS_LITERAL_CSTRING(UNKNOWN_CONTENT_TYPE));
+  //   if (NS_SUCCEEDED(rv))
+  //     stream->SetChannel(*aResult);
+  // }
+  // return rv;
 }
 
 NS_IMETHODIMP

@@ -1245,28 +1245,31 @@ nsJSProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsJSProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-    NS_WARNING("Deprecated, you should use nsJSProtocolHander::NewChannel2");
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv;
-    nsJSChannel * channel;
+    // nsresult rv;
+    // nsJSChannel * channel;
 
-    NS_ENSURE_ARG_POINTER(uri);
+    // NS_ENSURE_ARG_POINTER(uri);
 
-    channel = new nsJSChannel();
-    if (!channel) {
-        return NS_ERROR_OUT_OF_MEMORY;
-    }
-    NS_ADDREF(channel);
+    // channel = new nsJSChannel();
+    // if (!channel) {
+    //     return NS_ERROR_OUT_OF_MEMORY;
+    // }
+    // NS_ADDREF(channel);
 
-    // Init now takes 4 arguments.  Just putting nulls and 0s here because we don't have
-    // the loading info.
-    rv = channel->Init(uri, nullptr, nullptr, 0);
-    if (NS_SUCCEEDED(rv)) {
-        *result = channel;
-        NS_ADDREF(*result);
-    }
-    NS_RELEASE(channel);
-    return rv;
+    // // Init now takes 4 arguments.  Just putting nulls and 0s here because we don't have
+    // // the loading info.
+    // rv = channel->Init(uri, nullptr, nullptr, 0);
+    // if (NS_SUCCEEDED(rv)) {
+    //     *result = channel;
+    //     NS_ADDREF(*result);
+    // }
+    // NS_RELEASE(channel);
+    // return rv;
 }
 
 NS_IMETHODIMP
@@ -1302,9 +1305,10 @@ nsJSProtocolHandler::NewChannel2(nsIURI* aURI,
   }
   NS_RELEASE(channel);
 
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  // set info in NS_NewInputStreamChannel2 when calling channel->Init above
+  // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  // (*outChannel)->SetRequestingContext(aRequestingNode);
+  // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return rv;
 }
 

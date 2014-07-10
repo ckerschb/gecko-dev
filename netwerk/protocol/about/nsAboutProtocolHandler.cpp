@@ -120,60 +120,65 @@ nsAboutProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsAboutProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-    NS_ENSURE_ARG_POINTER(uri);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    // about:what you ask?
-    nsCOMPtr<nsIAboutModule> aboutMod;
-    nsresult rv = NS_GetAboutModule(uri, getter_AddRefs(aboutMod));
+    // NS_ENSURE_ARG_POINTER(uri);
 
-    nsAutoCString path;
-    nsresult rv2 = NS_GetAboutModuleName(uri, path);
-    if (NS_SUCCEEDED(rv2) && path.EqualsLiteral("srcdoc")) {
-        // about:srcdoc is meant to be unresolvable, yet is included in the 
-        // about lookup tables so that it can pass security checks when used in
-        // a srcdoc iframe.  To ensure that it stays unresolvable, we pretend
-        // that it doesn't exist.
-      rv = NS_ERROR_FACTORY_NOT_REGISTERED;
-    }
+    // // about:what you ask?
+    // nsCOMPtr<nsIAboutModule> aboutMod;
+    // nsresult rv = NS_GetAboutModule(uri, getter_AddRefs(aboutMod));
 
-    if (NS_SUCCEEDED(rv)) {
-        // The standard return case:
-        rv = aboutMod->NewChannel(uri, result);
-        if (NS_SUCCEEDED(rv)) {
-            // If this URI is safe for untrusted content, enforce that its
-            // principal be based on the channel's originalURI by setting the
-            // owner to null.
-            // Note: this relies on aboutMod's newChannel implementation
-            // having set the proper originalURI, which probably isn't ideal.
-            if (IsSafeForUntrustedContent(aboutMod, uri)) {
-                (*result)->SetOwner(nullptr);
-            }
+    // nsAutoCString path;
+    // nsresult rv2 = NS_GetAboutModuleName(uri, path);
+    // if (NS_SUCCEEDED(rv2) && path.EqualsLiteral("srcdoc")) {
+    //     // about:srcdoc is meant to be unresolvable, yet is included in the 
+    //     // about lookup tables so that it can pass security checks when used in
+    //     // a srcdoc iframe.  To ensure that it stays unresolvable, we pretend
+    //     // that it doesn't exist.
+    //   rv = NS_ERROR_FACTORY_NOT_REGISTERED;
+    // }
 
-            nsRefPtr<nsNestedAboutURI> aboutURI;
-            nsresult rv2 = uri->QueryInterface(kNestedAboutURICID,
-                                               getter_AddRefs(aboutURI));
-            if (NS_SUCCEEDED(rv2) && aboutURI->GetBaseURI()) {
-                nsCOMPtr<nsIWritablePropertyBag2> writableBag =
-                    do_QueryInterface(*result);
-                if (writableBag) {
-                    writableBag->
-                        SetPropertyAsInterface(NS_LITERAL_STRING("baseURI"),
-                                               aboutURI->GetBaseURI());
-                }
-            }
-        }
-        return rv;
-    }
+    // if (NS_SUCCEEDED(rv)) {
+    //     // The standard return case:
+    //     rv = aboutMod->NewChannel(uri, result);
+    //     if (NS_SUCCEEDED(rv)) {
+    //         // If this URI is safe for untrusted content, enforce that its
+    //         // principal be based on the channel's originalURI by setting the
+    //         // owner to null.
+    //         // Note: this relies on aboutMod's newChannel implementation
+    //         // having set the proper originalURI, which probably isn't ideal.
+    //         if (IsSafeForUntrustedContent(aboutMod, uri)) {
+    //             (*result)->SetOwner(nullptr);
+    //         }
 
-    // mumble...
+    //         nsRefPtr<nsNestedAboutURI> aboutURI;
+    //         nsresult rv2 = uri->QueryInterface(kNestedAboutURICID,
+    //                                            getter_AddRefs(aboutURI));
+    //         if (NS_SUCCEEDED(rv2) && aboutURI->GetBaseURI()) {
+    //             nsCOMPtr<nsIWritablePropertyBag2> writableBag =
+    //                 do_QueryInterface(*result);
+    //             if (writableBag) {
+    //                 writableBag->
+    //                     SetPropertyAsInterface(NS_LITERAL_STRING("baseURI"),
+    //                                            aboutURI->GetBaseURI());
+    //             }
+    //         }
+    //     }
+    //     return rv;
+    // }
 
-    if (rv == NS_ERROR_FACTORY_NOT_REGISTERED) {
-        // This looks like an about: we don't know about.  Convert
-        // this to an invalid URI error.
-        rv = NS_ERROR_MALFORMED_URI;
-    }
+    // // mumble...
 
-    return rv;
+    // if (rv == NS_ERROR_FACTORY_NOT_REGISTERED) {
+    //     // This looks like an about: we don't know about.  Convert
+    //     // this to an invalid URI error.
+    //     rv = NS_ERROR_MALFORMED_URI;
+    // }
+
+    // return rv;
 }
 
 NS_IMETHODIMP
@@ -317,8 +322,12 @@ nsSafeAboutProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsSafeAboutProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-    *result = nullptr;
-    return NS_ERROR_NOT_AVAILABLE;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
+    // *result = nullptr;
+    // return NS_ERROR_NOT_AVAILABLE;
 }
 
 NS_IMETHODIMP
@@ -331,12 +340,8 @@ nsSafeAboutProtocolHandler::NewChannel2(nsIURI* aURI,
                                         nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+  *outChannel = nullptr;
+  return NS_ERROR_NOT_AVAILABLE;
 }
 
 NS_IMETHODIMP 

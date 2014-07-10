@@ -92,20 +92,25 @@ nsViewSourceHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsViewSourceHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-    NS_ENSURE_ARG_POINTER(uri);
-    nsViewSourceChannel *channel = new nsViewSourceChannel();
-    if (!channel)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(channel);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv = channel->Init(uri);
-    if (NS_FAILED(rv)) {
-        NS_RELEASE(channel);
-        return rv;
-    }
+    // NS_ENSURE_ARG_POINTER(uri);
+    // nsViewSourceChannel *channel = new nsViewSourceChannel();
+    // if (!channel)
+    //     return NS_ERROR_OUT_OF_MEMORY;
+    // NS_ADDREF(channel);
 
-    *result = static_cast<nsIViewSourceChannel*>(channel);
-    return NS_OK;
+    // nsresult rv = channel->Init(uri);
+    // if (NS_FAILED(rv)) {
+    //     NS_RELEASE(channel);
+    //     return rv;
+    // }
+
+    // *result = static_cast<nsIViewSourceChannel*>(channel);
+    // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -117,38 +122,56 @@ nsViewSourceHandler::NewChannel2(nsIURI* aURI,
                                  uint32_t aLoadFlags,
                                  nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+    NS_ENSURE_ARG_POINTER(aURI);
+    nsViewSourceChannel *channel = new nsViewSourceChannel();
+    if (!channel)
+        return NS_ERROR_OUT_OF_MEMORY;
+    NS_ADDREF(channel);
+
+    nsresult rv = channel->Init(aURI);
+    if (NS_FAILED(rv)) {
+        NS_RELEASE(channel);
+        return rv;
+    }
+
+    *outChannel = static_cast<nsIViewSourceChannel*>(channel);
+    (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    (*outChannel)->SetRequestingContext(aRequestingNode);
+    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    return NS_OK;
 }
 
 nsresult
 nsViewSourceHandler::NewSrcdocChannel(nsIURI* uri, const nsAString &srcdoc,
                                       nsIURI* baseURI, nsIChannel* *result)
 {
-    NS_ENSURE_ARG_POINTER(uri);
-    nsViewSourceChannel *channel = new nsViewSourceChannel();
-    if (!channel)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(channel);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv = channel->InitSrcdoc(uri, srcdoc, baseURI);
-    if (NS_FAILED(rv)) {
-        NS_RELEASE(channel);
-        return rv;
-    }
+    // NS_ENSURE_ARG_POINTER(uri);
+    // nsViewSourceChannel *channel = new nsViewSourceChannel();
+    // if (!channel)
+    //     return NS_ERROR_OUT_OF_MEMORY;
+    // NS_ADDREF(channel);
 
-    *result = static_cast<nsIViewSourceChannel*>(channel);
-    return NS_OK;
+    // nsresult rv = channel->InitSrcdoc(uri, srcdoc, baseURI);
+    // if (NS_FAILED(rv)) {
+    //     NS_RELEASE(channel);
+    //     return rv;
+    // }
+
+    // *result = static_cast<nsIViewSourceChannel*>(channel);
+    // return NS_OK;
 }
 
 nsresult
-nsViewSourceHandler::NewSrcdocChannel2(nsIURI* uri, const nsAString &srcdoc,
-                                       nsIURI* baseURI, nsIChannel* *result,
+nsViewSourceHandler::NewSrcdocChannel2(nsIURI* uri,
+                                       const nsAString &srcdoc,
+                                       nsIURI* baseURI,
+                                       nsIChannel* *result, // TODO: rearrange so result is at the end of arglist
                                        nsIPrincipal* aRequestingPrincipal,
                                        nsINode* aRequestingNode,
                                        nsContentPolicyType aContentPolicyType)
@@ -159,7 +182,9 @@ nsViewSourceHandler::NewSrcdocChannel2(nsIURI* uri, const nsAString &srcdoc,
         return NS_ERROR_OUT_OF_MEMORY;
     NS_ADDREF(channel);
 
-    nsresult rv = channel->InitSrcdoc2(uri, srcdoc, baseURI,
+    nsresult rv = channel->InitSrcdoc2(uri,
+                                       srcdoc,
+                                       baseURI,
                                        aRequestingPrincipal, 
                                        aRequestingNode,
                                        aContentPolicyType); 

@@ -211,19 +211,24 @@ nsJARProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsJARProtocolHandler::NewChannel(nsIURI *uri, nsIChannel **result)
 {
-    nsJARChannel *chan = new nsJARChannel();
-    if (!chan)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(chan);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv = chan->Init(uri);
-    if (NS_FAILED(rv)) {
-        NS_RELEASE(chan);
-        return rv;
-    }
+    // nsJARChannel *chan = new nsJARChannel();
+    // if (!chan)
+    //     return NS_ERROR_OUT_OF_MEMORY;
+    // NS_ADDREF(chan);
 
-    *result = chan;
-    return NS_OK;
+    // nsresult rv = chan->Init(uri);
+    // if (NS_FAILED(rv)) {
+    //     NS_RELEASE(chan);
+    //     return rv;
+    // }
+
+    // *result = chan;
+    // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -236,12 +241,22 @@ nsJARProtocolHandler::NewChannel2(nsIURI* aURI,
                                   nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    nsJARChannel *chan = new nsJARChannel();
+    if (!chan)
+        return NS_ERROR_OUT_OF_MEMORY;
+    NS_ADDREF(chan);
+
+    nsresult rv = chan->Init(aURI);
+    if (NS_FAILED(rv)) {
+        NS_RELEASE(chan);
+        return rv;
+    }
+
+    *outChannel = chan;
+    (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    (*outChannel)->SetRequestingContext(aRequestingNode);
+    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    return NS_OK;
 }
 
 NS_IMETHODIMP

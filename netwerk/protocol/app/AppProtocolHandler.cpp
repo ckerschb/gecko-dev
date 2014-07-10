@@ -400,15 +400,100 @@ AppProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 AppProtocolHandler::NewChannel(nsIURI* aUri, nsIChannel* *aResult)
 {
-  NS_ENSURE_ARG_POINTER(aUri);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
+
+
+  // NS_ENSURE_ARG_POINTER(aUri);
+  // nsRefPtr<nsJARChannel> channel = new nsJARChannel();
+
+  // nsAutoCString host;
+  // nsresult rv = aUri->GetHost(host);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // nsAutoCString fileSpec;
+  // nsCOMPtr<nsIURL> url = do_QueryInterface(aUri);
+  // rv = url->GetFilePath(fileSpec);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // mozilla::dom::AppInfo *appInfo;
+
+  // if (!mAppInfoCache.Get(host, &appInfo)) {
+  //   nsCOMPtr<nsIAppsService> appsService = do_GetService(APPS_SERVICE_CONTRACTID);
+  //   if (!appsService) {
+  //     return NS_ERROR_FAILURE;
+  //   }
+
+  //   mozilla::AutoSafeJSContext cx;
+  //   JS::RootedValue jsInfo(cx);
+  //   rv = appsService->GetAppInfo(NS_ConvertUTF8toUTF16(host), &jsInfo);
+  //   if (NS_FAILED(rv) || !jsInfo.isObject()) {
+  //     // Return a DummyChannel.
+  //     printf_stderr("!! Creating a dummy channel for %s (no appInfo)\n", host.get());
+  //     NS_IF_ADDREF(*aResult = new DummyChannel());
+  //     return NS_OK;
+  //   }
+
+  //   appInfo = new mozilla::dom::AppInfo();
+  //   JSAutoCompartment ac(cx, &jsInfo.toObject());
+  //   if (!appInfo->Init(cx, jsInfo) || appInfo->mPath.IsEmpty()) {
+  //     // Return a DummyChannel.
+  //     printf_stderr("!! Creating a dummy channel for %s (invalid appInfo)\n", host.get());
+  //     NS_IF_ADDREF(*aResult = new DummyChannel());
+  //     return NS_OK;
+  //   }
+  //   mAppInfoCache.Put(host, appInfo);
+  // }
+
+  // bool noRemote = (appInfo->mIsCoreApp ||
+  //                  XRE_GetProcessType() == GeckoProcessType_Default);
+
+  // // In-parent and CoreApps can directly access files, so use jar:file://
+  // nsAutoCString jarSpec(noRemote ? "jar:file://"
+  //                                : "jar:remoteopenfile://");
+  // jarSpec += NS_ConvertUTF16toUTF8(appInfo->mPath) +
+  //            NS_LITERAL_CSTRING("/application.zip!") +
+  //            fileSpec;
+
+  // nsCOMPtr<nsIURI> jarURI;
+  // rv = NS_NewURI(getter_AddRefs(jarURI),
+  //                jarSpec, nullptr, nullptr);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // rv = channel->Init(jarURI);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // rv = channel->SetAppURI(aUri);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // rv = channel->SetOriginalURI(aUri);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // channel.forget(aResult);
+  // return NS_OK;
+}
+
+NS_IMETHODIMP
+AppProtocolHandler::NewChannel2(nsIURI* aURI,
+                                nsIPrincipal* aRequestingPrincipal,
+                                /* nsINode* */ nsISupports* aRequestingNode,
+                                uint32_t aSecurityFlags,
+                                nsContentPolicyType aContentPolicyType,
+                                uint32_t aLoadFlags,
+                                nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+  NS_ENSURE_ARG_POINTER(aURI);
   nsRefPtr<nsJARChannel> channel = new nsJARChannel();
 
   nsAutoCString host;
-  nsresult rv = aUri->GetHost(host);
+  nsresult rv = aURI->GetHost(host);
   NS_ENSURE_SUCCESS(rv, rv);
 
   nsAutoCString fileSpec;
-  nsCOMPtr<nsIURL> url = do_QueryInterface(aUri);
+  nsCOMPtr<nsIURL> url = do_QueryInterface(aURI);
   rv = url->GetFilePath(fileSpec);
   NS_ENSURE_SUCCESS(rv, rv);
 
@@ -426,7 +511,10 @@ AppProtocolHandler::NewChannel(nsIURI* aUri, nsIChannel* *aResult)
     if (NS_FAILED(rv) || !jsInfo.isObject()) {
       // Return a DummyChannel.
       printf_stderr("!! Creating a dummy channel for %s (no appInfo)\n", host.get());
-      NS_IF_ADDREF(*aResult = new DummyChannel());
+      NS_IF_ADDREF(*outChannel = new DummyChannel());
+      (*outChannel)->SetContentPolicyType(aContentPolicyType);
+      (*outChannel)->SetRequestingContext(aRequestingNode);
+      (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
       return NS_OK;
     }
 
@@ -435,7 +523,10 @@ AppProtocolHandler::NewChannel(nsIURI* aUri, nsIChannel* *aResult)
     if (!appInfo->Init(cx, jsInfo) || appInfo->mPath.IsEmpty()) {
       // Return a DummyChannel.
       printf_stderr("!! Creating a dummy channel for %s (invalid appInfo)\n", host.get());
-      NS_IF_ADDREF(*aResult = new DummyChannel());
+      NS_IF_ADDREF(*outChannel = new DummyChannel());
+      (*outChannel)->SetContentPolicyType(aContentPolicyType);
+      (*outChannel)->SetRequestingContext(aRequestingNode);
+      (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
       return NS_OK;
     }
     mAppInfoCache.Put(host, appInfo);
@@ -459,31 +550,17 @@ AppProtocolHandler::NewChannel(nsIURI* aUri, nsIChannel* *aResult)
   rv = channel->Init(jarURI);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  rv = channel->SetAppURI(aUri);
+  rv = channel->SetAppURI(aURI);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  rv = channel->SetOriginalURI(aUri);
+  rv = channel->SetOriginalURI(aURI);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  channel.forget(aResult);
-  return NS_OK;
-}
+  channel->SetContentPolicyType(aContentPolicyType);
+  channel->SetRequestingContext(aRequestingNode);
+  channel->SetRequestingPrincipal(aRequestingPrincipal);
 
-NS_IMETHODIMP
-AppProtocolHandler::NewChannel2(nsIURI* aURI,
-                                nsIPrincipal* aRequestingPrincipal,
-                                /* nsINode* */ nsISupports* aRequestingNode,
-                                uint32_t aSecurityFlags,
-                                nsContentPolicyType aContentPolicyType,
-                                uint32_t aLoadFlags,
-                                nsIChannel** outChannel)
-{
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  channel.forget(outChannel);
   return NS_OK;
 }
 
@@ -494,4 +571,3 @@ AppProtocolHandler::AllowPort(int32_t aPort, const char *aScheme, bool *aRetval)
   *aRetval = false;
   return NS_OK;
 }
-

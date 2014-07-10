@@ -74,20 +74,25 @@ NS_IMETHODIMP nsIconProtocolHandler::NewURI(const nsACString &aSpec,
 
 NS_IMETHODIMP nsIconProtocolHandler::NewChannel(nsIURI* url, nsIChannel* *result)
 {
-  NS_ENSURE_ARG_POINTER(url);
-  nsIconChannel* channel = new nsIconChannel;
-  if (!channel)
-    return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(channel);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-  nsresult rv = channel->Init(url);
-  if (NS_FAILED(rv)) {
-    NS_RELEASE(channel);
-    return rv;
-  }
+  // NS_ENSURE_ARG_POINTER(url);
+  // nsIconChannel* channel = new nsIconChannel;
+  // if (!channel)
+  //   return NS_ERROR_OUT_OF_MEMORY;
+  // NS_ADDREF(channel);
 
-  *result = channel;
-  return NS_OK;
+  // nsresult rv = channel->Init(url);
+  // if (NS_FAILED(rv)) {
+  //   NS_RELEASE(channel);
+  //   return rv;
+  // }
+
+  // *result = channel;
+  // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -100,11 +105,22 @@ nsIconProtocolHandler::NewChannel2(nsIURI* aURI,
                                    nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  NS_ENSURE_ARG_POINTER(aURI);
+  nsIconChannel* channel = new nsIconChannel;
+  if (!channel)
+    return NS_ERROR_OUT_OF_MEMORY;
+  NS_ADDREF(channel);
+
+  nsresult rv = channel->Init(aURI);
+  if (NS_FAILED(rv)) {
+    NS_RELEASE(channel);
+    return rv;
+  }
+  channel->SetContentPolicyType(aContentPolicyType);
+  channel->SetRequestingContext(aRequestingNode);
+  channel->SetRequestingPrincipal(aRequestingPrincipal);
+
+  *outChannel = channel;
   return NS_OK;
 }
 

@@ -103,110 +103,114 @@ NS_IMETHODIMP
 nsChromeProtocolHandler::NewChannel(nsIURI* aURI,
                                     nsIChannel* *aResult)
 {
-    NS_WARNING("Deprecated, you should use nsChromeProtocolHandler::NewChannel2");
-    nsresult rv;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    NS_ENSURE_ARG_POINTER(aURI);
-    NS_PRECONDITION(aResult, "Null out param");
+//     nsresult rv;
 
-#ifdef DEBUG
-    // Check that the uri we got is already canonified
-    nsresult debug_rv;
-    nsCOMPtr<nsIURI> debugClone;
-    debug_rv = aURI->Clone(getter_AddRefs(debugClone));
-    if (NS_SUCCEEDED(debug_rv)) {
-        nsCOMPtr<nsIURL> debugURL (do_QueryInterface(debugClone));
-        debug_rv = nsChromeRegistry::Canonify(debugURL);
-        if (NS_SUCCEEDED(debug_rv)) {
-            bool same;
-            debug_rv = aURI->Equals(debugURL, &same);
-            if (NS_SUCCEEDED(debug_rv)) {
-                NS_ASSERTION(same, "Non-canonified chrome uri passed to nsChromeProtocolHandler::NewChannel!");
-            }
-        }
-    }
-#endif
+//     NS_ENSURE_ARG_POINTER(aURI);
+//     NS_PRECONDITION(aResult, "Null out param");
 
-    nsCOMPtr<nsIChannel> result;
+// #ifdef DEBUG
+//     // Check that the uri we got is already canonified
+//     nsresult debug_rv;
+//     nsCOMPtr<nsIURI> debugClone;
+//     debug_rv = aURI->Clone(getter_AddRefs(debugClone));
+//     if (NS_SUCCEEDED(debug_rv)) {
+//         nsCOMPtr<nsIURL> debugURL (do_QueryInterface(debugClone));
+//         debug_rv = nsChromeRegistry::Canonify(debugURL);
+//         if (NS_SUCCEEDED(debug_rv)) {
+//             bool same;
+//             debug_rv = aURI->Equals(debugURL, &same);
+//             if (NS_SUCCEEDED(debug_rv)) {
+//                 NS_ASSERTION(same, "Non-canonified chrome uri passed to nsChromeProtocolHandler::NewChannel!");
+//             }
+//         }
+//     }
+// #endif
 
-    if (!nsChromeRegistry::gChromeRegistry) {
-        // We don't actually want this ref, we just want the service to
-        // initialize if it hasn't already.
-        nsCOMPtr<nsIChromeRegistry> reg =
-            mozilla::services::GetChromeRegistryService();
-        NS_ENSURE_TRUE(nsChromeRegistry::gChromeRegistry, NS_ERROR_FAILURE);
-    }
+//     nsCOMPtr<nsIChannel> result;
 
-    nsCOMPtr<nsIURI> resolvedURI;
-    rv = nsChromeRegistry::gChromeRegistry->ConvertChromeURL(aURI, getter_AddRefs(resolvedURI));
-    if (NS_FAILED(rv)) {
-#ifdef DEBUG
-        nsAutoCString spec;
-        aURI->GetSpec(spec);
-        printf("Couldn't convert chrome URL: %s\n", spec.get());
-#endif
-        return rv;
-    }
+//     if (!nsChromeRegistry::gChromeRegistry) {
+//         // We don't actually want this ref, we just want the service to
+//         // initialize if it hasn't already.
+//         nsCOMPtr<nsIChromeRegistry> reg =
+//             mozilla::services::GetChromeRegistryService();
+//         NS_ENSURE_TRUE(nsChromeRegistry::gChromeRegistry, NS_ERROR_FAILURE);
+//     }
 
-    nsCOMPtr<nsIIOService> ioServ(do_GetIOService(&rv));
-    NS_ENSURE_SUCCESS(rv, rv);
+//     nsCOMPtr<nsIURI> resolvedURI;
+//     rv = nsChromeRegistry::gChromeRegistry->ConvertChromeURL(aURI, getter_AddRefs(resolvedURI));
+//     if (NS_FAILED(rv)) {
+// #ifdef DEBUG
+//         nsAutoCString spec;
+//         aURI->GetSpec(spec);
+//         printf("Couldn't convert chrome URL: %s\n", spec.get());
+// #endif
+//         return rv;
+//     }
 
-    rv = ioServ->NewChannelFromURI(resolvedURI, getter_AddRefs(result));
-    if (NS_FAILED(rv)) return rv;
+//     nsCOMPtr<nsIIOService> ioServ(do_GetIOService(&rv));
+//     NS_ENSURE_SUCCESS(rv, rv);
 
-#ifdef DEBUG
-    nsCOMPtr<nsIFileChannel> fileChan(do_QueryInterface(result));
-    if (fileChan) {
-        nsCOMPtr<nsIFile> file;
-        fileChan->GetFile(getter_AddRefs(file));
+//     rv = ioServ->NewChannelFromURI(resolvedURI, getter_AddRefs(result));
+//     if (NS_FAILED(rv)) return rv;
 
-        bool exists = false;
-        file->Exists(&exists);
-        if (!exists) {
-            nsAutoCString path;
-            file->GetNativePath(path);
-            printf("Chrome file doesn't exist: %s\n", path.get());
-        }
-    }
-#endif
+// #ifdef DEBUG
+//     nsCOMPtr<nsIFileChannel> fileChan(do_QueryInterface(result));
+//     if (fileChan) {
+//         nsCOMPtr<nsIFile> file;
+//         fileChan->GetFile(getter_AddRefs(file));
 
-    // Make sure that the channel remembers where it was
-    // originally loaded from.
-    nsLoadFlags loadFlags = 0;
-    result->GetLoadFlags(&loadFlags);
-    result->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
-    rv = result->SetOriginalURI(aURI);
-    if (NS_FAILED(rv)) return rv;
+//         bool exists = false;
+//         file->Exists(&exists);
+//         if (!exists) {
+//             nsAutoCString path;
+//             file->GetNativePath(path);
+//             printf("Chrome file doesn't exist: %s\n", path.get());
+//         }
+//     }
+// #endif
 
-    // Get a system principal for content files and set the owner
-    // property of the result
-    nsCOMPtr<nsIURL> url = do_QueryInterface(aURI);
-    nsAutoCString path;
-    rv = url->GetPath(path);
-    if (StringBeginsWith(path, NS_LITERAL_CSTRING("/content/")))
-    {
-        nsCOMPtr<nsIScriptSecurityManager> securityManager =
-                 do_GetService(NS_SCRIPTSECURITYMANAGER_CONTRACTID, &rv);
-        if (NS_FAILED(rv)) return rv;
+//     // Make sure that the channel remembers where it was
+//     // originally loaded from.
+//     nsLoadFlags loadFlags = 0;
+//     result->GetLoadFlags(&loadFlags);
+//     result->SetLoadFlags(loadFlags & ~nsIChannel::LOAD_REPLACE);
+//     rv = result->SetOriginalURI(aURI);
+//     if (NS_FAILED(rv)) return rv;
 
-        nsCOMPtr<nsIPrincipal> principal;
-        rv = securityManager->GetSystemPrincipal(getter_AddRefs(principal));
-        if (NS_FAILED(rv)) return rv;
+//     // Get a system principal for content files and set the owner
+//     // property of the result
+//     nsCOMPtr<nsIURL> url = do_QueryInterface(aURI);
+//     nsAutoCString path;
+//     rv = url->GetPath(path);
+//     if (StringBeginsWith(path, NS_LITERAL_CSTRING("/content/")))
+//     {
+//         nsCOMPtr<nsIScriptSecurityManager> securityManager =
+//                  do_GetService(NS_SCRIPTSECURITYMANAGER_CONTRACTID, &rv);
+//         if (NS_FAILED(rv)) return rv;
 
-        nsCOMPtr<nsISupports> owner = do_QueryInterface(principal);
-        result->SetOwner(owner);
-    }
+//         nsCOMPtr<nsIPrincipal> principal;
+//         rv = securityManager->GetSystemPrincipal(getter_AddRefs(principal));
+//         if (NS_FAILED(rv)) return rv;
 
-    // XXX Removed dependency-tracking code from here, because we're not
-    // tracking them anyways (with fastload we checked only in DEBUG
-    // and with startupcache not at all), but this is where we would start
-    // if we need to re-add.
-    // See bug 531886, bug 533038.
-    result->SetContentCharset(NS_LITERAL_CSTRING("UTF-8"));
+//         nsCOMPtr<nsISupports> owner = do_QueryInterface(principal);
+//         result->SetOwner(owner);
+//     }
 
-    *aResult = result;
-    NS_ADDREF(*aResult);
-    return NS_OK;
+//     // XXX Removed dependency-tracking code from here, because we're not
+//     // tracking them anyways (with fastload we checked only in DEBUG
+//     // and with startupcache not at all), but this is where we would start
+//     // if we need to re-add.
+//     // See bug 531886, bug 533038.
+//     result->SetContentCharset(NS_LITERAL_CSTRING("UTF-8"));
+
+//     *aResult = result;
+//     NS_ADDREF(*aResult);
+//     return NS_OK;
 }
 
 NS_IMETHODIMP

@@ -87,50 +87,55 @@ nsWyciwygProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsWyciwygProtocolHandler::NewChannel(nsIURI* url, nsIChannel* *result)
 {
-  if (mozilla::net::IsNeckoChild())
-    mozilla::net::NeckoChild::InitNeckoChild();
+  NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+  // ckerschb: commenting rest of function to get merge conflicts
+  // when merging with master
+  return NS_ERROR_NOT_IMPLEMENTED;
 
-  NS_ENSURE_ARG_POINTER(url);
-  nsresult rv;
+  // if (mozilla::net::IsNeckoChild())
+  //   mozilla::net::NeckoChild::InitNeckoChild();
 
-  nsCOMPtr<nsIWyciwygChannel> channel;
-  if (IsNeckoChild()) {
-    NS_ENSURE_TRUE(gNeckoChild != nullptr, NS_ERROR_FAILURE);
+  // NS_ENSURE_ARG_POINTER(url);
+  // nsresult rv;
 
-    WyciwygChannelChild *wcc = static_cast<WyciwygChannelChild *>(
-                                 gNeckoChild->SendPWyciwygChannelConstructor());
-    if (!wcc)
-      return NS_ERROR_OUT_OF_MEMORY;
+  // nsCOMPtr<nsIWyciwygChannel> channel;
+  // if (IsNeckoChild()) {
+  //   NS_ENSURE_TRUE(gNeckoChild != nullptr, NS_ERROR_FAILURE);
 
-    channel = wcc;
-    rv = wcc->Init(url);
-    if (NS_FAILED(rv))
-      PWyciwygChannelChild::Send__delete__(wcc);
-  } else
-  {
-    // If original channel used https, make sure PSM is initialized
-    // (this may be first channel to load during a session restore)
-    nsAutoCString path;
-    rv = url->GetPath(path);
-    NS_ENSURE_SUCCESS(rv, rv);
-    int32_t slashIndex = path.FindChar('/', 2);
-    if (slashIndex == kNotFound)
-      return NS_ERROR_FAILURE;
-    if (path.Length() < (uint32_t)slashIndex + 1 + 5)
-      return NS_ERROR_FAILURE;
-    if (!PL_strncasecmp(path.get() + slashIndex + 1, "https", 5))
-      net_EnsurePSMInit();
+  //   WyciwygChannelChild *wcc = static_cast<WyciwygChannelChild *>(
+  //                                gNeckoChild->SendPWyciwygChannelConstructor());
+  //   if (!wcc)
+  //     return NS_ERROR_OUT_OF_MEMORY;
 
-    nsWyciwygChannel *wc = new nsWyciwygChannel();
-    channel = wc;
-    rv = wc->Init(url);
-  }
+  //   channel = wcc;
+  //   rv = wcc->Init(url);
+  //   if (NS_FAILED(rv))
+  //     PWyciwygChannelChild::Send__delete__(wcc);
+  // } else
+  // {
+  //   // If original channel used https, make sure PSM is initialized
+  //   // (this may be first channel to load during a session restore)
+  //   nsAutoCString path;
+  //   rv = url->GetPath(path);
+  //   NS_ENSURE_SUCCESS(rv, rv);
+  //   int32_t slashIndex = path.FindChar('/', 2);
+  //   if (slashIndex == kNotFound)
+  //     return NS_ERROR_FAILURE;
+  //   if (path.Length() < (uint32_t)slashIndex + 1 + 5)
+  //     return NS_ERROR_FAILURE;
+  //   if (!PL_strncasecmp(path.get() + slashIndex + 1, "https", 5))
+  //     net_EnsurePSMInit();
 
-  if (NS_FAILED(rv))
-    return rv;
+  //   nsWyciwygChannel *wc = new nsWyciwygChannel();
+  //   channel = wc;
+  //   rv = wc->Init(url);
+  // }
 
-  channel.forget(result);
-  return NS_OK;
+  // if (NS_FAILED(rv))
+  //   return rv;
+
+  // channel.forget(result);
+  // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -143,11 +148,53 @@ nsWyciwygProtocolHandler::NewChannel2(nsIURI* aURI,
                                       nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  if (mozilla::net::IsNeckoChild())
+    mozilla::net::NeckoChild::InitNeckoChild();
+
+  NS_ENSURE_ARG_POINTER(aURI);
+  nsresult rv;
+
+  nsCOMPtr<nsIWyciwygChannel> channel;
+  if (IsNeckoChild()) {
+    NS_ENSURE_TRUE(gNeckoChild != nullptr, NS_ERROR_FAILURE);
+
+    WyciwygChannelChild *wcc = static_cast<WyciwygChannelChild *>(
+                                 gNeckoChild->SendPWyciwygChannelConstructor());
+    if (!wcc)
+      return NS_ERROR_OUT_OF_MEMORY;
+
+    channel = wcc;
+    rv = wcc->Init(aURI);
+    if (NS_FAILED(rv))
+      PWyciwygChannelChild::Send__delete__(wcc);
+  } else
+  {
+    // If original channel used https, make sure PSM is initialized
+    // (this may be first channel to load during a session restore)
+    nsAutoCString path;
+    rv = aURI->GetPath(path);
+    NS_ENSURE_SUCCESS(rv, rv);
+    int32_t slashIndex = path.FindChar('/', 2);
+    if (slashIndex == kNotFound)
+      return NS_ERROR_FAILURE;
+    if (path.Length() < (uint32_t)slashIndex + 1 + 5)
+      return NS_ERROR_FAILURE;
+    if (!PL_strncasecmp(path.get() + slashIndex + 1, "https", 5))
+      net_EnsurePSMInit();
+
+    nsWyciwygChannel *wc = new nsWyciwygChannel();
+    channel = wc;
+    rv = wc->Init(aURI);
+  }
+
+  if (NS_FAILED(rv))
+    return rv;
+
+  channel->SetContentPolicyType(aContentPolicyType);
+  channel->SetRequestingContext(aRequestingNode);
+  channel->SetRequestingPrincipal(aRequestingPrincipal);
+
+  channel.forget(outChannel);
   return NS_OK;
 }
 

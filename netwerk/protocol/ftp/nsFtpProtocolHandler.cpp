@@ -205,7 +205,11 @@ nsFtpProtocolHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsFtpProtocolHandler::NewChannel(nsIURI* url, nsIChannel* *result)
 {
-    return NewProxiedChannel(url, nullptr, 0, nullptr, result);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
+    // return NewProxiedChannel(url, nullptr, 0, nullptr, result);
 }
 
 NS_IMETHODIMP
@@ -218,13 +222,18 @@ nsFtpProtocolHandler::NewChannel2(nsIURI* aURI,
                                   nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+  return NewProxiedChannel2(aURI,
+                            nullptr,     // givenProxyInfo
+                            0,           // proxyResolveFlags
+                            nullptr,     // proxyURI
+                            aRequestingPrincipal,
+                            aRequestingNode,
+                            aSecurityFlags,
+                            aContentPolicyType,
+                            aLoadFlags,
+                            outChannel);
 }
+
 
 NS_IMETHODIMP
 nsFtpProtocolHandler::NewProxiedChannel(nsIURI* uri, nsIProxyInfo* proxyInfo,
@@ -232,20 +241,25 @@ nsFtpProtocolHandler::NewProxiedChannel(nsIURI* uri, nsIProxyInfo* proxyInfo,
                                         nsIURI *proxyURI,
                                         nsIChannel* *result)
 {
-    NS_ENSURE_ARG_POINTER(uri);
-    nsRefPtr<nsBaseChannel> channel;
-    if (IsNeckoChild())
-        channel = new FTPChannelChild(uri);
-    else
-        channel = new nsFtpChannel(uri, proxyInfo);
+    NS_ASSERTION(false, "Deprecated, you should use NewProxiedChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv = channel->Init();
-    if (NS_FAILED(rv)) {
-        return rv;
-    }
+    // NS_ENSURE_ARG_POINTER(uri);
+    // nsRefPtr<nsBaseChannel> channel;
+    // if (IsNeckoChild())
+    //     channel = new FTPChannelChild(uri);
+    // else
+    //     channel = new nsFtpChannel(uri, proxyInfo);
+
+    // nsresult rv = channel->Init();
+    // if (NS_FAILED(rv)) {
+    //     return rv;
+    // }
     
-    channel.forget(result);
-    return rv;
+    // channel.forget(result);
+    // return rv;
 }
 
 NS_IMETHODIMP
@@ -260,13 +274,25 @@ nsFtpProtocolHandler::NewProxiedChannel2(nsIURI *uri,
                                          uint32_t aLoadFlags,
                                          nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create proxied channel without aRequestingPrincipal");
-  nsresult rv = NewProxiedChannel(uri, givenProxyInfo, proxyResolveFlags, proxyURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create proxied channel without aRequestingPrincipal");
+    NS_ENSURE_ARG_POINTER(uri);
+    nsRefPtr<nsBaseChannel> channel;
+    if (IsNeckoChild())
+        channel = new FTPChannelChild(uri);
+    else
+        channel = new nsFtpChannel(uri, givenProxyInfo);
+
+    nsresult rv = channel->Init();
+    if (NS_FAILED(rv)) {
+        return rv;
+    }
+
+    channel->SetContentPolicyType(aContentPolicyType);
+    channel->SetRequestingContext(aRequestingNode);
+    channel->SetRequestingPrincipal(aRequestingPrincipal);
+
+    channel.forget(outChannel);
+    return rv;
 }
 
 NS_IMETHODIMP 

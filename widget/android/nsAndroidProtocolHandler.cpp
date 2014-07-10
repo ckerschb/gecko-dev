@@ -162,11 +162,16 @@ NS_IMETHODIMP
 nsAndroidProtocolHandler::NewChannel(nsIURI* aURI,
                                      nsIChannel* *aResult)
 {
-    nsCOMPtr<nsIChannel> channel = AndroidChannel::CreateChannel(aURI);
-    if (!channel)
-        return NS_ERROR_FAILURE;
-    NS_ADDREF(*aResult = channel);
-    return NS_OK;
+      NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
+
+//     nsCOMPtr<nsIChannel> channel = AndroidChannel::CreateChannel(aURI);
+//     if (!channel)
+//         return NS_ERROR_FAILURE;
+//     NS_ADDREF(*aResult = channel);
+//     return NS_OK;
 }
 
 
@@ -186,10 +191,13 @@ nsAndroidProtocolHandler::NewChannel2(nsIURI* aURI,
                                       nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  nsCOMPtr<nsIChannel> channel = AndroidChannel::CreateChannel(aURI);
+  if (!channel)
+      return NS_ERROR_FAILURE;
+  channel->SetContentPolicyType(aContentPolicyType);
+  channel->SetRequestingContext(aRequestingNode);
+  channel->SetRequestingPrincipal(aRequestingPrincipal);
+
+  NS_ADDREF(*outChannel = channel);
   return NS_OK;
 }

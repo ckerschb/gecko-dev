@@ -12,20 +12,25 @@ NS_IMPL_ISUPPORTS(nsAboutBlank, nsIAboutModule)
 NS_IMETHODIMP
 nsAboutBlank::NewChannel(nsIURI *aURI, nsIChannel **result)
 {
-    NS_ENSURE_ARG_POINTER(aURI);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsCOMPtr<nsIInputStream> in;
-    nsresult rv = NS_NewCStringInputStream(getter_AddRefs(in), EmptyCString());
-    if (NS_FAILED(rv)) return rv;
+    // NS_ENSURE_ARG_POINTER(aURI);
 
-    nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, in,
-                                  NS_LITERAL_CSTRING("text/html"),
-                                  NS_LITERAL_CSTRING("utf-8"));
-    if (NS_FAILED(rv)) return rv;
+    // nsCOMPtr<nsIInputStream> in;
+    // nsresult rv = NS_NewCStringInputStream(getter_AddRefs(in), EmptyCString());
+    // if (NS_FAILED(rv)) return rv;
 
-    channel.forget(result);
-    return rv;
+    // nsCOMPtr<nsIChannel> channel;
+    // rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, in,
+    //                               NS_LITERAL_CSTRING("text/html"),
+    //                               NS_LITERAL_CSTRING("utf-8"));
+    // if (NS_FAILED(rv)) return rv;
+
+    // channel.forget(result);
+    // return rv;
 }
 
 NS_IMETHODIMP
@@ -58,9 +63,10 @@ nsAboutBlank::NewChannel2(nsIURI* aURI,
 
     channel.forget(outChannel);
 
-    (*outChannel)->SetContentPolicyType(aContentPolicyType);
-    (*outChannel)->SetRequestingContext(aRequestingNode);
-    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    // info gets set in NS_NewInputStreamChannel2
+    // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    // (*outChannel)->SetRequestingContext(aRequestingNode);
+    // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
     return rv;
 }
 

@@ -131,31 +131,35 @@ GetAboutModuleName(nsIURI *aURI)
 NS_IMETHODIMP
 AboutRedirector::NewChannel(nsIURI *aURI, nsIChannel **result)
 {
-  NS_WARNING("Deprecated, you should use AboutRedirector::NewChannel2");
-  NS_ENSURE_ARG_POINTER(aURI);
-  NS_ASSERTION(result, "must not be null");
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-  nsAutoCString path = GetAboutModuleName(aURI);
+  // NS_ENSURE_ARG_POINTER(aURI);
+  // NS_ASSERTION(result, "must not be null");
 
-  nsresult rv;
-  nsCOMPtr<nsIIOService> ioService = do_GetIOService(&rv);
-  NS_ENSURE_SUCCESS(rv, rv);
+  // nsAutoCString path = GetAboutModuleName(aURI);
 
-  for (int i = 0; i < kRedirTotal; i++) {
-    if (!strcmp(path.get(), kRedirMap[i].id)) {
-      nsCOMPtr<nsIChannel> tempChannel;
-      rv = ioService->NewChannel(nsDependentCString(kRedirMap[i].url),
-                                 nullptr, nullptr, getter_AddRefs(tempChannel));
-      NS_ENSURE_SUCCESS(rv, rv);
+  // nsresult rv;
+  // nsCOMPtr<nsIIOService> ioService = do_GetIOService(&rv);
+  // NS_ENSURE_SUCCESS(rv, rv);
 
-      tempChannel->SetOriginalURI(aURI);
+  // for (int i = 0; i < kRedirTotal; i++) {
+  //   if (!strcmp(path.get(), kRedirMap[i].id)) {
+  //     nsCOMPtr<nsIChannel> tempChannel;
+  //     rv = ioService->NewChannel(nsDependentCString(kRedirMap[i].url),
+  //                                nullptr, nullptr, getter_AddRefs(tempChannel));
+  //     NS_ENSURE_SUCCESS(rv, rv);
 
-      NS_ADDREF(*result = tempChannel);
-      return rv;
-    }
-  }
+  //     tempChannel->SetOriginalURI(aURI);
 
-  return NS_ERROR_ILLEGAL_VALUE;
+  //     NS_ADDREF(*result = tempChannel);
+  //     return rv;
+  //   }
+  // }
+
+  // return NS_ERROR_ILLEGAL_VALUE;
 }
 
 NS_IMETHODIMP

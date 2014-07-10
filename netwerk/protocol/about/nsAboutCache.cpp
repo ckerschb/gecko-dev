@@ -27,94 +27,99 @@ NS_IMPL_ISUPPORTS(nsAboutCache, nsIAboutModule, nsICacheStorageVisitor)
 NS_IMETHODIMP
 nsAboutCache::NewChannel(nsIURI *aURI, nsIChannel **result)
 {
-    NS_ENSURE_ARG_POINTER(aURI);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsresult rv;
+    // NS_ENSURE_ARG_POINTER(aURI);
 
-    *result = nullptr;
+    // nsresult rv;
 
-    nsCOMPtr<nsIInputStream> inputStream;
-    rv = NS_NewPipe(getter_AddRefs(inputStream), getter_AddRefs(mStream),
-                    16384, (uint32_t)-1,
-                    true, // non-blocking input
-                    false // blocking output
-    );
-    if (NS_FAILED(rv)) return rv;
+    // *result = nullptr;
 
-    nsAutoCString storageName;
-    rv = ParseURI(aURI, storageName);
-    if (NS_FAILED(rv)) return rv;
+    // nsCOMPtr<nsIInputStream> inputStream;
+    // rv = NS_NewPipe(getter_AddRefs(inputStream), getter_AddRefs(mStream),
+    //                 16384, (uint32_t)-1,
+    //                 true, // non-blocking input
+    //                 false // blocking output
+    // );
+    // if (NS_FAILED(rv)) return rv;
 
-    mOverview = storageName.IsEmpty();
-    if (mOverview) {
-        // ...and visit all we can
-        mStorageList.AppendElement(NS_LITERAL_CSTRING("memory"));
-        mStorageList.AppendElement(NS_LITERAL_CSTRING("disk"));
-        mStorageList.AppendElement(NS_LITERAL_CSTRING("appcache"));
-    } else {
-        // ...and visit just the specified storage, entries will output too
-        mStorageList.AppendElement(storageName);
-    }
+    // nsAutoCString storageName;
+    // rv = ParseURI(aURI, storageName);
+    // if (NS_FAILED(rv)) return rv;
 
-    // The entries header is added on encounter of the first entry
-    mEntriesHeaderAdded = false;
+    // mOverview = storageName.IsEmpty();
+    // if (mOverview) {
+    //     // ...and visit all we can
+    //     mStorageList.AppendElement(NS_LITERAL_CSTRING("memory"));
+    //     mStorageList.AppendElement(NS_LITERAL_CSTRING("disk"));
+    //     mStorageList.AppendElement(NS_LITERAL_CSTRING("appcache"));
+    // } else {
+    //     // ...and visit just the specified storage, entries will output too
+    //     mStorageList.AppendElement(storageName);
+    // }
 
-    nsCOMPtr<nsIChannel> channel;
-    rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, inputStream,
-                                  NS_LITERAL_CSTRING("text/html"),
-                                  NS_LITERAL_CSTRING("utf-8"));
-    if (NS_FAILED(rv)) return rv;
+    // // The entries header is added on encounter of the first entry
+    // mEntriesHeaderAdded = false;
 
-    mBuffer.AssignLiteral(
-        "<!DOCTYPE html>\n"
-        "<html>\n"
-        "<head>\n"
-        "  <title>Network Cache Storage Information</title>\n"
-        "  <meta charset=\"utf-8\">\n"
-        "  <link rel=\"stylesheet\" href=\"chrome://global/skin/about.css\"/>\n"
-        "  <link rel=\"stylesheet\" href=\"chrome://global/skin/aboutCache.css\"/>\n"
-        "  <script src=\"chrome://global/content/aboutCache.js\"></script>"
-        "</head>\n"
-        "<body class=\"aboutPageWideContainer\">\n"
-        "<h1>Information about the Network Cache Storage Service</h1>\n");
+    // nsCOMPtr<nsIChannel> channel;
+    // rv = NS_NewInputStreamChannel(getter_AddRefs(channel), aURI, inputStream,
+    //                               NS_LITERAL_CSTRING("text/html"),
+    //                               NS_LITERAL_CSTRING("utf-8"));
+    // if (NS_FAILED(rv)) return rv;
 
-    // Add the context switch controls
-    mBuffer.AppendLiteral(
-        "<label><input id='priv' type='checkbox'/> Private</label>\n"
-        "<label><input id='anon' type='checkbox'/> Anonymous</label>\n"
-    );
+    // mBuffer.AssignLiteral(
+    //     "<!DOCTYPE html>\n"
+    //     "<html>\n"
+    //     "<head>\n"
+    //     "  <title>Network Cache Storage Information</title>\n"
+    //     "  <meta charset=\"utf-8\">\n"
+    //     "  <link rel=\"stylesheet\" href=\"chrome://global/skin/about.css\"/>\n"
+    //     "  <link rel=\"stylesheet\" href=\"chrome://global/skin/aboutCache.css\"/>\n"
+    //     "  <script src=\"chrome://global/content/aboutCache.js\"></script>"
+    //     "</head>\n"
+    //     "<body class=\"aboutPageWideContainer\">\n"
+    //     "<h1>Information about the Network Cache Storage Service</h1>\n");
 
-    if (CacheObserver::UseNewCache()) {
-        // Visit scoping by browser and appid is not implemented for
-        // the old cache, simply don't add these controls.
-        // The appid/inbrowser entries are already mixed in the default
-        // view anyway.
-        mBuffer.AppendLiteral(
-            "<label><input id='appid' type='text' size='6'/> AppID</label>\n"
-            "<label><input id='inbrowser' type='checkbox'/> In Browser Element</label>\n"
-        );
-    }
+    // // Add the context switch controls
+    // mBuffer.AppendLiteral(
+    //     "<label><input id='priv' type='checkbox'/> Private</label>\n"
+    //     "<label><input id='anon' type='checkbox'/> Anonymous</label>\n"
+    // );
 
-    mBuffer.AppendLiteral(
-        "<label><input id='submit' type='button' value='Update' onclick='navigate()'/></label>\n"
-    );
+    // if (CacheObserver::UseNewCache()) {
+    //     // Visit scoping by browser and appid is not implemented for
+    //     // the old cache, simply don't add these controls.
+    //     // The appid/inbrowser entries are already mixed in the default
+    //     // view anyway.
+    //     mBuffer.AppendLiteral(
+    //         "<label><input id='appid' type='text' size='6'/> AppID</label>\n"
+    //         "<label><input id='inbrowser' type='checkbox'/> In Browser Element</label>\n"
+    //     );
+    // }
 
-    if (!mOverview) {
-        mBuffer.AppendLiteral("<a href=\"about:cache?storage=&amp;context=");
-        char* escapedContext = nsEscapeHTML(mContextString.get());
-        mBuffer.Append(escapedContext);
-        nsMemory::Free(escapedContext);
-        mBuffer.AppendLiteral("\">Back to overview</a>");
-    }
+    // mBuffer.AppendLiteral(
+    //     "<label><input id='submit' type='button' value='Update' onclick='navigate()'/></label>\n"
+    // );
 
-    FlushBuffer();
+    // if (!mOverview) {
+    //     mBuffer.AppendLiteral("<a href=\"about:cache?storage=&amp;context=");
+    //     char* escapedContext = nsEscapeHTML(mContextString.get());
+    //     mBuffer.Append(escapedContext);
+    //     nsMemory::Free(escapedContext);
+    //     mBuffer.AppendLiteral("\">Back to overview</a>");
+    // }
 
-    // Kick it, this goes async.
-    rv = VisitNextStorage();
-    if (NS_FAILED(rv)) return rv;
+    // FlushBuffer();
 
-    channel.forget(result);
-    return NS_OK;
+    // // Kick it, this goes async.
+    // rv = VisitNextStorage();
+    // if (NS_FAILED(rv)) return rv;
+
+    // channel.forget(result);
+    // return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -221,9 +226,10 @@ nsAboutCache::NewChannel2(nsIURI* aURI,
 
     channel.forget(outChannel);
 
-    (*outChannel)->SetContentPolicyType(aContentPolicyType);
-    (*outChannel)->SetRequestingContext(aRequestingNode);
-    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+    // info gets set in NS_NewInputStreamChannel2
+    // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    // (*outChannel)->SetRequestingContext(aRequestingNode);
+    // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
     return NS_OK;
 }
 

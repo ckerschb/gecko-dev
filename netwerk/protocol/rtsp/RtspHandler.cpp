@@ -68,6 +68,42 @@ RtspHandler::NewURI(const nsACString & aSpec,
 NS_IMETHODIMP
 RtspHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
 {
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
+
+  // bool isRtsp = false;
+  // nsRefPtr<nsBaseChannel> rtspChannel;
+
+  // nsresult rv = aURI->SchemeIs("rtsp", &isRtsp);
+  // NS_ENSURE_SUCCESS(rv, rv);
+  // NS_ENSURE_TRUE(isRtsp, NS_ERROR_UNEXPECTED);
+
+  // if (IsNeckoChild()) {
+  //   rtspChannel = new RtspChannelChild(aURI);
+  // } else {
+  //   rtspChannel = new RtspChannelParent(aURI);
+  // }
+
+  // rv = rtspChannel->Init();
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // rtspChannel.forget(aResult);
+  // return NS_OK;
+}
+
+NS_IMETHODIMP
+RtspHandler::NewChannel2(nsIURI* aURI,
+                         nsIPrincipal* aRequestingPrincipal,
+                         /* nsINode* */ nsISupports* aRequestingNode,
+                         uint32_t aSecurityFlags,
+                         nsContentPolicyType aContentPolicyType,
+                         uint32_t aLoadFlags,
+                         nsIChannel** outChannel)
+{
+  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+
   bool isRtsp = false;
   nsRefPtr<nsBaseChannel> rtspChannel;
 
@@ -84,25 +120,11 @@ RtspHandler::NewChannel(nsIURI *aURI, nsIChannel **aResult)
   rv = rtspChannel->Init();
   NS_ENSURE_SUCCESS(rv, rv);
 
-  rtspChannel.forget(aResult);
-  return NS_OK;
-}
+  rtspChannel->SetContentPolicyType(aContentPolicyType);
+  rtspChannel->SetRequestingContext(aRequestingNode);
+  rtspChannel->SetRequestingPrincipal(aRequestingPrincipal);
 
-NS_IMETHODIMP
-RtspHandler::NewChannel2(nsIURI* aURI,
-                         nsIPrincipal* aRequestingPrincipal,
-                         /* nsINode* */ nsISupports* aRequestingNode,
-                         uint32_t aSecurityFlags,
-                         nsContentPolicyType aContentPolicyType,
-                         uint32_t aLoadFlags,
-                         nsIChannel** outChannel)
-{
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  rtspChannel.forget(outChannel);
   return NS_OK;
 }
 

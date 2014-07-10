@@ -272,8 +272,13 @@ BaseWebSocketChannel::NewURI(const nsACString & aSpec, const char *aOriginCharse
 NS_IMETHODIMP
 BaseWebSocketChannel::NewChannel(nsIURI *aURI, nsIChannel **_retval)
 {
-  LOG(("BaseWebSocketChannel::NewChannel() %p\n", this));
+  NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+  // ckerschb: commenting rest of function to get merge conflicts
+  // when merging with master
   return NS_ERROR_NOT_IMPLEMENTED;
+
+  // LOG(("BaseWebSocketChannel::NewChannel() %p\n", this));
+  // return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
@@ -297,12 +302,7 @@ BaseWebSocketChannel::NewChannel2(nsIURI* aURI,
                                   nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+  return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 //-----------------------------------------------------------------------------

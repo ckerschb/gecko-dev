@@ -1640,26 +1640,31 @@ nsHttpHandler::NewURI(const nsACString &aSpec,
 NS_IMETHODIMP
 nsHttpHandler::NewChannel(nsIURI *uri, nsIChannel **result)
 {
-    LOG(("nsHttpHandler::NewChannel\n"));
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    NS_ENSURE_ARG_POINTER(uri);
-    NS_ENSURE_ARG_POINTER(result);
+    // LOG(("nsHttpHandler::NewChannel\n"));
 
-    bool isHttp = false, isHttps = false;
+    // NS_ENSURE_ARG_POINTER(uri);
+    // NS_ENSURE_ARG_POINTER(result);
 
-    // Verify that we have been given a valid scheme
-    nsresult rv = uri->SchemeIs("http", &isHttp);
-    if (NS_FAILED(rv)) return rv;
-    if (!isHttp) {
-        rv = uri->SchemeIs("https", &isHttps);
-        if (NS_FAILED(rv)) return rv;
-        if (!isHttps) {
-            NS_WARNING("Invalid URI scheme");
-            return NS_ERROR_UNEXPECTED;
-        }
-    }
+    // bool isHttp = false, isHttps = false;
 
-    return NewProxiedChannel(uri, nullptr, 0, nullptr, result);
+    // // Verify that we have been given a valid scheme
+    // nsresult rv = uri->SchemeIs("http", &isHttp);
+    // if (NS_FAILED(rv)) return rv;
+    // if (!isHttp) {
+    //     rv = uri->SchemeIs("https", &isHttps);
+    //     if (NS_FAILED(rv)) return rv;
+    //     if (!isHttps) {
+    //         NS_WARNING("Invalid URI scheme");
+    //         return NS_ERROR_UNEXPECTED;
+    //     }
+    // }
+
+    // return NewProxiedChannel(uri, nullptr, 0, nullptr, result);
 }
 
 NS_IMETHODIMP
@@ -1671,13 +1676,34 @@ nsHttpHandler::NewChannel2(nsIURI* aURI,
                            uint32_t aLoadFlags,
                            nsIChannel** outChannel)
 {
-  NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
+    NS_ENSURE_ARG_POINTER(aURI);
+    NS_ENSURE_ARG_POINTER(outChannel);
+
+    bool isHttp = false, isHttps = false;
+
+    // Verify that we have been given a valid scheme
+    nsresult rv = aURI->SchemeIs("http", &isHttp);
+    if (NS_FAILED(rv)) return rv;
+    if (!isHttp) {
+        rv = aURI->SchemeIs("https", &isHttps);
+        if (NS_FAILED(rv)) return rv;
+        if (!isHttps) {
+            NS_WARNING("Invalid URI scheme");
+            return NS_ERROR_UNEXPECTED;
+        }
+    }
+
+    return NewProxiedChannel2(aURI,
+                              nullptr,              // givenProxyInfo
+                              0,                    // proxyResolveFlags
+                              nullptr,              // proxyURI
+                              aRequestingPrincipal,
+                              aRequestingNode,
+                              0,                    // aSecurityFlags
+                              aContentPolicyType,
+                              0,                    // aLoadFlags
+                              outChannel);
 }
 
 NS_IMETHODIMP
@@ -1699,10 +1725,69 @@ nsHttpHandler::NewProxiedChannel(nsIURI *uri,
                                  nsIURI *proxyURI,
                                  nsIChannel **result)
 {
-    nsRefPtr<HttpBaseChannel> httpChannel;
+    NS_ASSERTION(false, "Deprecated, you should use NewProxiedChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    LOG(("nsHttpHandler::NewProxiedChannel [proxyInfo=%p]\n",
-        givenProxyInfo));
+    // nsRefPtr<HttpBaseChannel> httpChannel;
+
+    // LOG(("nsHttpHandler::NewProxiedChannel [proxyInfo=%p]\n",
+    //     givenProxyInfo));
+
+    // nsCOMPtr<nsProxyInfo> proxyInfo;
+    // if (givenProxyInfo) {
+    //     proxyInfo = do_QueryInterface(givenProxyInfo);
+    //     NS_ENSURE_ARG(proxyInfo);
+    // }
+
+    // bool https;
+    // nsresult rv = uri->SchemeIs("https", &https);
+    // if (NS_FAILED(rv))
+    //     return rv;
+
+    // if (IsNeckoChild()) {
+    //     httpChannel = new HttpChannelChild();
+    // } else {
+    //     httpChannel = new nsHttpChannel();
+    // }
+
+    // uint32_t caps = mCapabilities;
+
+    // if (https) {
+    //     // enable pipelining over SSL if requested
+    //     if (mPipeliningOverSSL)
+    //         caps |= NS_HTTP_ALLOW_PIPELINING;
+    // }
+
+    // if (!IsNeckoChild()) {
+    //     // HACK: make sure PSM gets initialized on the main thread.
+    //     net_EnsurePSMInit();
+    // }
+
+    // rv = httpChannel->Init(uri, caps, proxyInfo, proxyResolveFlags, proxyURI);
+    // if (NS_FAILED(rv))
+    //     return rv;
+
+    // httpChannel.forget(result);
+    // return NS_OK;
+}
+
+NS_IMETHODIMP
+nsHttpHandler::NewProxiedChannel2(nsIURI *uri,
+                                  nsIProxyInfo* givenProxyInfo,
+                                  uint32_t proxyResolveFlags,
+                                  nsIURI *proxyURI,
+                                  nsIPrincipal* aRequestingPrincipal,
+                                  /* nsINode* */ nsISupports* aRequestingNode,
+                                  uint32_t aSecurityFlags,
+                                  nsContentPolicyType aContentPolicyType,
+                                  uint32_t aLoadFlags,
+                                  nsIChannel** outChannel)
+{
+    NS_ASSERTION(aRequestingPrincipal, "Can not create proxied channel without aRequestingPrincipal");
+
+    nsRefPtr<HttpBaseChannel> httpChannel;
 
     nsCOMPtr<nsProxyInfo> proxyInfo;
     if (givenProxyInfo) {
@@ -1738,29 +1823,12 @@ nsHttpHandler::NewProxiedChannel(nsIURI *uri,
     if (NS_FAILED(rv))
         return rv;
 
-    httpChannel.forget(result);
-    return NS_OK;
-}
+    httpChannel->SetContentPolicyType(aContentPolicyType);
+    httpChannel->SetRequestingContext(aRequestingNode);
+    httpChannel->SetRequestingPrincipal(aRequestingPrincipal);
 
-NS_IMETHODIMP
-nsHttpHandler::NewProxiedChannel2(nsIURI *uri,
-                                  nsIProxyInfo* givenProxyInfo,
-                                  uint32_t proxyResolveFlags,
-                                  nsIURI *proxyURI,
-                                  nsIPrincipal* aRequestingPrincipal,
-                                  /* nsINode* */ nsISupports* aRequestingNode,
-                                  uint32_t aSecurityFlags,
-                                  nsContentPolicyType aContentPolicyType,
-                                  uint32_t aLoadFlags,
-                                  nsIChannel** outChannel)
-{
-  NS_ASSERTION(aRequestingPrincipal, "Can not create proxied channel without aRequestingPrincipal");
-  nsresult rv = NewProxiedChannel(uri, givenProxyInfo, proxyResolveFlags, proxyURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+    httpChannel.forget(outChannel);
+    return NS_OK;
 }
 
 //-----------------------------------------------------------------------------

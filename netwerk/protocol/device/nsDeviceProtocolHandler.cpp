@@ -56,11 +56,16 @@ nsDeviceProtocolHandler::NewURI(const nsACString &spec,
 NS_IMETHODIMP
 nsDeviceProtocolHandler::NewChannel(nsIURI* aURI, nsIChannel **aResult)
 {
-  nsRefPtr<nsDeviceChannel> channel = new nsDeviceChannel();
-  nsresult rv = channel->Init(aURI);
-  NS_ENSURE_SUCCESS(rv, rv);
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-  return CallQueryInterface(channel, aResult);
+  // nsRefPtr<nsDeviceChannel> channel = new nsDeviceChannel();
+  // nsresult rv = channel->Init(aURI);
+  // NS_ENSURE_SUCCESS(rv, rv);
+
+  // return CallQueryInterface(channel, aResult);
 }
 
 NS_IMETHODIMP
@@ -73,7 +78,11 @@ nsDeviceProtocolHandler::NewChannel2(nsIURI* aURI,
                                      nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
+  nsRefPtr<nsDeviceChannel> channel = new nsDeviceChannel();
+  nsresult rv = channel->Init(aURI);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  rv = CallQueryInterface(channel, outChannel);
   NS_ENSURE_SUCCESS(rv, rv);
   (*outChannel)->SetContentPolicyType(aContentPolicyType);
   (*outChannel)->SetRequestingContext(aRequestingNode);

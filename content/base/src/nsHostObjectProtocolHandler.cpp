@@ -470,68 +470,72 @@ nsHostObjectProtocolHandler::NewURI(const nsACString& aSpec,
 NS_IMETHODIMP
 nsHostObjectProtocolHandler::NewChannel(nsIURI* uri, nsIChannel* *result)
 {
-  NS_WARNING("Deprecated, you should use nsHostObjectProtocolHandler::NewChannel2");
-  *result = nullptr;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-  nsCString spec;
-  uri->GetSpec(spec);
+//   *result = nullptr;
 
-  DataInfo* info = GetDataInfo(spec);
+//   nsCString spec;
+//   uri->GetSpec(spec);
 
-  if (!info) {
-    return NS_ERROR_DOM_BAD_URI;
-  }
+//   DataInfo* info = GetDataInfo(spec);
 
-  nsCOMPtr<PIDOMFileImpl> blobImpl = do_QueryInterface(info->mObject);
-  if (!blobImpl) {
-    return NS_ERROR_DOM_BAD_URI;
-  }
+//   if (!info) {
+//     return NS_ERROR_DOM_BAD_URI;
+//   }
 
-#ifdef DEBUG
-  {
-    nsCOMPtr<nsIURIWithPrincipal> uriPrinc = do_QueryInterface(uri);
-    nsCOMPtr<nsIPrincipal> principal;
-    uriPrinc->GetPrincipal(getter_AddRefs(principal));
-    NS_ASSERTION(info->mPrincipal == principal, "Wrong principal!");
-  }
-#endif
+//   nsCOMPtr<PIDOMFileImpl> blobImpl = do_QueryInterface(info->mObject);
+//   if (!blobImpl) {
+//     return NS_ERROR_DOM_BAD_URI;
+//   }
 
-  DOMFileImpl* blob = static_cast<DOMFileImpl*>(blobImpl.get());
-  nsCOMPtr<nsIInputStream> stream;
-  nsresult rv = blob->GetInternalStream(getter_AddRefs(stream));
-  NS_ENSURE_SUCCESS(rv, rv);
+// #ifdef DEBUG
+//   {
+//     nsCOMPtr<nsIURIWithPrincipal> uriPrinc = do_QueryInterface(uri);
+//     nsCOMPtr<nsIPrincipal> principal;
+//     uriPrinc->GetPrincipal(getter_AddRefs(principal));
+//     NS_ASSERTION(info->mPrincipal == principal, "Wrong principal!");
+//   }
+// #endif
 
-  nsCOMPtr<nsIChannel> channel;
-  rv = NS_NewInputStreamChannel(getter_AddRefs(channel),
-                                uri,
-                                stream);
-  NS_ENSURE_SUCCESS(rv, rv);
+//   DOMFileImpl* blob = static_cast<DOMFileImpl*>(blobImpl.get());
+//   nsCOMPtr<nsIInputStream> stream;
+//   nsresult rv = blob->GetInternalStream(getter_AddRefs(stream));
+//   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsCOMPtr<nsISupports> owner = do_QueryInterface(info->mPrincipal);
+//   nsCOMPtr<nsIChannel> channel;
+//   rv = NS_NewInputStreamChannel(getter_AddRefs(channel),
+//                                 uri,
+//                                 stream);
+//   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsString type;
-  rv = blob->GetType(type);
-  NS_ENSURE_SUCCESS(rv, rv);
+//   nsCOMPtr<nsISupports> owner = do_QueryInterface(info->mPrincipal);
 
-  if (blob->IsFile()) {
-    nsString filename;
-    rv = blob->GetName(filename);
-    NS_ENSURE_SUCCESS(rv, rv);
-    channel->SetContentDispositionFilename(filename);
-  }
+//   nsString type;
+//   rv = blob->GetType(type);
+//   NS_ENSURE_SUCCESS(rv, rv);
 
-  uint64_t size;
-  rv = blob->GetSize(&size);
-  NS_ENSURE_SUCCESS(rv, rv);
+//   if (blob->IsFile()) {
+//     nsString filename;
+//     rv = blob->GetName(filename);
+//     NS_ENSURE_SUCCESS(rv, rv);
+//     channel->SetContentDispositionFilename(filename);
+//   }
 
-  channel->SetOwner(owner);
-  channel->SetOriginalURI(uri);
-  channel->SetContentType(NS_ConvertUTF16toUTF8(type));
-  channel->SetContentLength(size);
+//   uint64_t size;
+//   rv = blob->GetSize(&size);
+//   NS_ENSURE_SUCCESS(rv, rv);
 
-  channel.forget(result);
+//   channel->SetOwner(owner);
+//   channel->SetOriginalURI(uri);
+//   channel->SetContentType(NS_ConvertUTF16toUTF8(type));
+//   channel->SetContentLength(size);
 
-  return NS_OK;
+//   channel.forget(result);
+
+//   return NS_OK;
 }
 
 NS_IMETHODIMP
@@ -543,7 +547,6 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
                                          uint32_t aLoadFlags,
                                          nsIChannel** outChannel)
 {
-  printf("\n\n\nTANVI2 - in nsHostObjectProtocolHandler::NewChannel2\n\n\n");
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
 
   // NewChannel() calls NS_NewInputStreamChannel().  We need to pass the load info
@@ -612,9 +615,10 @@ nsHostObjectProtocolHandler::NewChannel2(nsIURI* aURI,
 
   channel.forget(outChannel);
 
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
+  // that info gets already set in NS_NewInputStreamChannel2
+  // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+  // (*outChannel)->SetRequestingContext(aRequestingNode);
+  // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
   return NS_OK;
 }
 

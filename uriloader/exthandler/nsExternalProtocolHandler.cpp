@@ -437,28 +437,33 @@ NS_IMETHODIMP nsExternalProtocolHandler::NewURI(const nsACString &aSpec,
 
 NS_IMETHODIMP nsExternalProtocolHandler::NewChannel(nsIURI *aURI, nsIChannel **_retval)
 {
-  // Only try to return a channel if we have a protocol handler for the url.
-  // nsOSHelperAppService::LoadUriInternal relies on this to check trustedness
-  // for some platforms at least.  (win uses ::ShellExecute and unix uses
-  // gnome_url_show.)
-  bool haveExternalHandler = HaveExternalProtocolHandler(aURI);
-  if (haveExternalHandler)
-  {
-    nsCOMPtr<nsIChannel> channel = new nsExtProtocolChannel();
-    if (!channel) return NS_ERROR_OUT_OF_MEMORY;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    ((nsExtProtocolChannel*) channel.get())->SetURI(aURI);
-    channel->SetOriginalURI(aURI);
+  // // Only try to return a channel if we have a protocol handler for the url.
+  // // nsOSHelperAppService::LoadUriInternal relies on this to check trustedness
+  // // for some platforms at least.  (win uses ::ShellExecute and unix uses
+  // // gnome_url_show.)
+  // bool haveExternalHandler = HaveExternalProtocolHandler(aURI);
+  // if (haveExternalHandler)
+  // {
+  //   nsCOMPtr<nsIChannel> channel = new nsExtProtocolChannel();
+  //   if (!channel) return NS_ERROR_OUT_OF_MEMORY;
 
-    if (_retval)
-    {
-      *_retval = channel;
-      NS_IF_ADDREF(*_retval);
-      return NS_OK;
-    }
-  }
+  //   ((nsExtProtocolChannel*) channel.get())->SetURI(aURI);
+  //   channel->SetOriginalURI(aURI);
 
-  return NS_ERROR_UNKNOWN_PROTOCOL;
+  //   if (_retval)
+  //   {
+  //     *_retval = channel;
+  //     NS_IF_ADDREF(*_retval);
+  //     return NS_OK;
+  //   }
+  // }
+
+  // return NS_ERROR_UNKNOWN_PROTOCOL;
 }
 
 NS_IMETHODIMP
@@ -471,12 +476,35 @@ nsExternalProtocolHandler::NewChannel2(nsIURI* aURI,
                                        nsIChannel** outChannel)
 {
   NS_ASSERTION(aRequestingPrincipal, "Can not create channel without aRequestingPrincipal");
-  nsresult rv = NewChannel(aURI, outChannel);
-  NS_ENSURE_SUCCESS(rv, rv);
-  (*outChannel)->SetContentPolicyType(aContentPolicyType);
-  (*outChannel)->SetRequestingContext(aRequestingNode);
-  (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-  return NS_OK;
+
+  // Only try to return a channel if we have a protocol handler for the url.
+  // nsOSHelperAppService::LoadUriInternal relies on this to check trustedness
+  // for some platforms at least.  (win uses ::ShellExecute and unix uses
+  // gnome_url_show.)
+  bool haveExternalHandler = HaveExternalProtocolHandler(aURI);
+  if (haveExternalHandler)
+  {
+    // ckerschb: nsExtProtocoChannel should be nsExtProtocolChannel2
+    // that takes aContentPolicyType, etc as an argument
+    nsCOMPtr<nsIChannel> channel = new nsExtProtocolChannel();
+    if (!channel) return NS_ERROR_OUT_OF_MEMORY;
+
+    ((nsExtProtocolChannel*) channel.get())->SetURI(aURI);
+    channel->SetOriginalURI(aURI);
+
+    channel->SetContentPolicyType(aContentPolicyType);
+    channel->SetRequestingContext(aRequestingNode);
+    channel->SetRequestingPrincipal(aRequestingPrincipal);
+
+    if (outChannel)
+    {
+      *outChannel = channel;
+      NS_IF_ADDREF(*outChannel);
+      return NS_OK;
+    }
+  }
+
+  return NS_ERROR_UNKNOWN_PROTOCOL;
 }
 
 ///////////////////////////////////////////////////////////////////////

@@ -89,16 +89,21 @@ NS_IMPL_ISUPPORTS(nsAboutCacheEntry,
 NS_IMETHODIMP
 nsAboutCacheEntry::NewChannel(nsIURI *uri, nsIChannel **result)
 {
-    NS_ENSURE_ARG_POINTER(uri);
-    nsresult rv;
+    NS_ASSERTION(false, "Deprecated, you should use NewChannel2");
+    // ckerschb: commenting rest of function to get merge conflicts
+    // when merging with master
+    return NS_ERROR_NOT_IMPLEMENTED;
 
-    nsCOMPtr<nsIInputStream> stream;
-    rv = GetContentStream(uri, getter_AddRefs(stream));
-    if (NS_FAILED(rv)) return rv;
+    // NS_ENSURE_ARG_POINTER(uri);
+    // nsresult rv;
 
-    return NS_NewInputStreamChannel(result, uri, stream,
-                                    NS_LITERAL_CSTRING("text/html"),
-                                    NS_LITERAL_CSTRING("utf-8"));
+    // nsCOMPtr<nsIInputStream> stream;
+    // rv = GetContentStream(uri, getter_AddRefs(stream));
+    // if (NS_FAILED(rv)) return rv;
+
+    // return NS_NewInputStreamChannel(result, uri, stream,
+    //                                 NS_LITERAL_CSTRING("text/html"),
+    //                                 NS_LITERAL_CSTRING("utf-8"));
 }
 
 NS_IMETHODIMP
@@ -120,25 +125,17 @@ nsAboutCacheEntry::NewChannel2(nsIURI* aURI,
     rv = GetContentStream(aURI, getter_AddRefs(stream));
     if (NS_FAILED(rv)) return rv;
 
-    rv =  NS_NewInputStreamChannel2(outChannel, aURI, stream,
-                                    NS_LITERAL_CSTRING("text/html"),
-                                    NS_LITERAL_CSTRING("utf-8"),
-                                    aRequestingPrincipal,
-                                    aRequestingNode,
-                                    aContentPolicyType);
+    return NS_NewInputStreamChannel2(outChannel, aURI, stream,
+                                     NS_LITERAL_CSTRING("text/html"),
+                                     NS_LITERAL_CSTRING("utf-8"),
+                                     aRequestingPrincipal,
+                                     aRequestingNode,
+                                     aContentPolicyType);
 
-    if (NS_FAILED(rv)) return rv;
-
-    // In this case, we only have one channel - outChannel.  NS_NewInputStreamChannel2() will set
-    // the loading info on the channel, so we don't have to here.
-    // Alternatively, we could set the load info here and call NewChannel() directly (instead of implementing it 
-    // inline in NewChannel2()) which calls NS_NewInputStreamChannel() instead of calling NS_NewInputStreamChannel2()
-    /*
-    (*outChannel)->SetContentPolicyType(aContentPolicyType);
-    (*outChannel)->SetRequestingContext(aRequestingNode);
-    (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
-    */
-    return NS_OK;
+    // info gets set in NS_NewInputStreamChannel2
+    // (*outChannel)->SetContentPolicyType(aContentPolicyType);
+    // (*outChannel)->SetRequestingContext(aRequestingNode);
+    // (*outChannel)->SetRequestingPrincipal(aRequestingPrincipal);
 }
 
 NS_IMETHODIMP
