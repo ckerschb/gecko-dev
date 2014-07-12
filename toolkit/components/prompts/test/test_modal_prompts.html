@@ -1171,7 +1171,7 @@ function runTests() {
                                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                         null,      // requestingNode
                                         0,         // securityFlags
-                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                        SpecialPowers.Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                         0);        // loadFlags
     var level = Ci.nsIAuthPrompt2.LEVEL_NONE;
     var authinfo = {
