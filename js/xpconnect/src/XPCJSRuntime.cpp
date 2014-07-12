@@ -90,6 +90,11 @@ const char* const XPCJSRuntime::mStrings[] = {
     "name",                 // IDX_NAME
     "undefined",            // IDX_UNDEFINED
     "",                     // IDX_EMPTYSTRING
+    "fileName",             // IDX_FILENAME
+    "lineNumber",           // IDX_LINENUMBER
+    "columnNumber",         // IDX_COLUMNNUMBER
+    "stack",                // IDX_STACK
+    "message"               // IDX_MESSAGE
 };
 
 /***************************************************************************/
@@ -379,7 +384,8 @@ bool CompartmentPrivate::TryParseLocationURI(CompartmentPrivate::LocationHint aL
         // Strip current item and continue.
         chain = Substring(chain, 0, idx);
     }
-    MOZ_ASSUME_UNREACHABLE("Chain parser loop does not terminate");
+
+    MOZ_CRASH("Chain parser loop does not terminate");
 }
 
 static bool
@@ -1568,10 +1574,13 @@ ReloadPrefsCallback(const char *pref, void *data)
 
     sDiscardSystemSource = Preferences::GetBool(JS_OPTIONS_DOT_STR "discardSystemSource");
 
+    bool werror = Preferences::GetBool(JS_OPTIONS_DOT_STR "werror");
+
     JS::RuntimeOptionsRef(rt).setBaseline(useBaseline)
                              .setIon(useIon)
                              .setAsmJS(useAsmJS)
-                             .setNativeRegExp(useNativeRegExp);
+                             .setNativeRegExp(useNativeRegExp)
+                             .setWerror(werror);
 
     JS_SetParallelParsingEnabled(rt, parallelParsing);
     JS_SetOffthreadIonCompilationEnabled(rt, offthreadIonCompilation);
