@@ -73,7 +73,7 @@ function makeTest(id, expectedJSON, useReportOnlyPolicy, callback) {
   var selfchan = NetUtil.newChannel2(selfuri,
                                      null,
                                      null,
-                                     Services.scriptSecurityManager.getSystemPrincipal(),
+                                     SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,

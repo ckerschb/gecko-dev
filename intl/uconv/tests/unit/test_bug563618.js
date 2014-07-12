@@ -37,7 +37,7 @@ function testCase(testText, expectedText, bufferLength, charset)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                Services.scriptSecurityManager.getSystemPrincipal(),
+                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
