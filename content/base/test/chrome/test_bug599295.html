@@ -60,7 +60,7 @@ function runTest() {
             getService(Components.interfaces.nsIIOService);
   var uri = ios.newURI("https://redirproxy.example.com/test", "",  null);
   var channel = ios.newChannelFromURI2(uri,
-                                       Services.scriptSecurityManager.getSystemPrincipal(),
+                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                        null,    //requestingNode
                                        0,       //securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,

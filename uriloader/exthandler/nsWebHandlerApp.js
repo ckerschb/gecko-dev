@@ -81,7 +81,7 @@ nsWebHandlerApp.prototype = {
 
       // create a channel from this URI
       var channel = ioService.newChannelFromURI2(uriToSend,
-                                                 Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                                  null,    //requestingNode
                                                  0,       //securityFlags
                                                  Ci.nsIContentPolicy.TYPE_OTHER,
