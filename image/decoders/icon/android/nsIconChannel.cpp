@@ -109,7 +109,7 @@ moz_icon_to_channel(nsIURI *aURI, const nsACString& aFileExt, uint32_t aIconSize
   nsCOMPtr<nsIPrincipal> systemPrincipal = do_GetService(NS_SYSTEMPRINCIPAL_CONTRACTID);
   return NS_NewInputStreamChannel2(aChannel, aURI, stream,
                                    NS_LITERAL_CSTRING(IMAGE_ICON_MS),
-                                   systemPrincipal
+                                   systemPrincipal,
                                    nullptr,
                                    nsIContentPolicyType::TYPE_IMAGE);
 }
