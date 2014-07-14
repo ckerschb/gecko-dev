@@ -148,6 +148,9 @@ CustomProtocol.prototype = {
   newChannel: function newChannel(URI) {    
     return new CustomChannel(URI);
   },
+  newChannel2: function newChannel2(URI) {
+    return new CustomChannel(URI);
+  },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
                                          Ci.nsISupportsWeakReference,
                                          Ci.nsIProtocolHandler])
