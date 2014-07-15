@@ -44,7 +44,7 @@ function run_test() {
                                      SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
-                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     Ci.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
   let channel2 = NetUtil.newChannel2(uri2,
                                      null,
@@ -52,7 +52,7 @@ function run_test() {
                                      SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
-                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     Ci.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
 
   // Create some file:// URIs.
@@ -66,7 +66,7 @@ function run_test() {
                                          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
-                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                         Ci.nsIContentPolicy.TYPE_OTHER,
                                          0);        // loadFlags
   let filechannel2 = NetUtil.newChannel2(fileuri2,
                                          null,
@@ -74,7 +74,7 @@ function run_test() {
                                          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
-                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                         Ci.nsIContentPolicy.TYPE_OTHER,
                                          0);        // loadFlags
 
   // Test isThirdPartyURI.

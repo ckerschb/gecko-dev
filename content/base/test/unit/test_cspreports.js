@@ -76,7 +76,7 @@ function makeTest(id, expectedJSON, useReportOnlyPolicy, callback) {
                                      SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
-                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                     Ci.nsIContentPolicy.TYPE_OTHER,
                                      0);        // loadFlags
 
   dump("Created test " + id + " : " + policy + "\n\n");

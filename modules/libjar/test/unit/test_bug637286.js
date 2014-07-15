@@ -17,7 +17,7 @@ function open_inner_zip(base, idx) {
                                   Services.scriptSecurityManager.getSystemPrincipal(),
                                   null,      // requestingNode
                                   0,         // securityFlags
-                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                  Ci.nsIContentPolicy.TYPE_OTHER,
                                   0);        // loadFlags
     var stream = channel.open2();
 }

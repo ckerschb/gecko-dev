@@ -54,11 +54,11 @@ function run_test() {
   dataFile = do_get_file("data/bug121341-2.properties");
 
   channel = ios.newChannelFromURI2(ios.newFileURI(dataFile, null, null),
-                                                  Services.scriptSecurityManager.getSystemPrincipal(),
-                                                  null,    //requestingNode
-                                                  0,       //securityFlags
-                                                  Components.interfaces.nsIContentPolicy.TYPE_OTHER,
-                                                  0);      //loadFlags
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
+                                   null,    //requestingNode
+                                   0,       //securityFlags
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   0);      //loadFlags
   inp = channel.open2();
 
   var properties2 = Components.classes["@mozilla.org/persistent-properties;1"].

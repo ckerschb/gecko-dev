@@ -85,11 +85,11 @@ function run_test() {
   let uri = ioService.newURI("http://localhost:" + gHttpServer.identity.primaryPort,
                              null, null);
   let channel = ioService.newChannelFromURI2(uri,
-                                            Services.scriptSecurityManager.getSystemPrincipal(),
-                                            null, //requestingNode
-                                            0,       //securityFlags
-                                            Ci.nsIContentPolicy.TYPE_OTHER,
-                                            0);      //loadFlags
+                                             Services.scriptSecurityManager.getSystemPrincipal(),
+                                             null, //requestingNode
+                                             0,       //securityFlags
+                                             Ci.nsIContentPolicy.TYPE_OTHER,
+                                             0);      //loadFlags
   channel.open2();
 
   gServerSocket.init(-1, true, -1);

@@ -20,7 +20,7 @@ function run_test() {
                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags
-                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                    Ci.nsIContentPolicy.TYPE_OTHER,
                                     0);        // loadFlags
   var badChannel = ios.newChannel2(badSpec,
                                    null,
@@ -28,7 +28,7 @@ function run_test() {
                                    Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,      // requestingNode
                                    0,         // securityFlags
-                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                   Ci.nsIContentPolicy.TYPE_OTHER,
                                    0);        // loadFlags
 
   try {
