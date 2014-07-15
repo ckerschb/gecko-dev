@@ -46,7 +46,7 @@ function test1() {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
   var chan = ios.newChannel2("data:text/plain,", null, null,
-                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                              null,   //requestingNode
                              0,      //securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -64,7 +64,7 @@ function test2() {
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
                       .getService(Components.interfaces.nsIIOService);
   var chan = ios.newChannel2("http://localhost:0/", null, null,
-                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                              null,   //requestingNode
                              0,      //securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,

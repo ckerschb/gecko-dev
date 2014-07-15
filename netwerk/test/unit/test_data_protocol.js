@@ -42,7 +42,7 @@ function run_test() {
     var chan = ios.newChannel2(urls[i][0],
                                "",
                                null,
-                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                null,      // requestingNode
                                0,         // securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,

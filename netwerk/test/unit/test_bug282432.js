@@ -34,11 +34,11 @@ function run_test() {
   do_check_false(file.exists());
 
   let channel = ios.newChannelFromURI2(ios.newFileURI(file),
-                                      Services.scriptSecurityManager.getSystemPrincipal(),
-                                      null, //requestingNode
-                                      0,       //securityFlags
-                                      Components.interfaces.nsIContentPolicy.TYPE_OTHER,
-                                      0);      //loadFlags
+                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                       null, //requestingNode
+                                       0,       //securityFlags
+                                       Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                       0);      //loadFlags
 
 
   channel.asyncOpen2(listener, null);

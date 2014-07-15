@@ -12,7 +12,7 @@ function make_channel(flags, vary, value) {
   var chan = ios.newChannel2("http://localhost:" +
                              httpserver.identity.primaryPort +
                              "/bug633743", null, null,
-                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                              null,   //requestingNode
                              0,      //securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,

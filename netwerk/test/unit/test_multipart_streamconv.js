@@ -12,7 +12,7 @@ function make_channel(url) {
   return ios.newChannel2(url,
                          "",
                          null,
-                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                          null,      // requestingNode
                          0,         // securityFlags
                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -27,7 +27,7 @@ function make_channel(url) {
   return ios.newChannel2(url,
                          "",
                          null,
-                         Services.scriptSecurityManager.getSystemPrincipal(),
+                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                          null,      // requestingNode
                          0,         // securityFlags
                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,

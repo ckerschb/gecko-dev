@@ -69,7 +69,7 @@ function stream_from_channel(file) {
                       .getService(Components.interfaces.nsIIOService);
   var uri = ios.newFileURI(file);
   return ios.newChannelFromURI2(uri,
-                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                null, //requestingNode
                                0,       //securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,

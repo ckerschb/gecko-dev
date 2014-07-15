@@ -25,7 +25,7 @@ function run_test() {
       getService(Components.interfaces.nsIIOService).
       newChannel2("http://localhost:" + httpserv.identity.primaryPort +
                  "/bug412945", null, null,
-                  Services.scriptSecurityManager.getSystemPrincipal(),
+                  SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                   null,   //requestingNode
                   0,      //securityFlags
                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,

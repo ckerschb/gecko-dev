@@ -82,7 +82,7 @@ function setupChannel(path) {
   let chan = ios.newChannel2("http://localhost:4444" + path,
                              "",
                              null,
-                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                              null,      // requestingNode
                              0,         // securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,

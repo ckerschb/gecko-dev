@@ -5,7 +5,7 @@ function getTestReferrer(server_uri, referer_uri) {
   var chan = ios.newChannel2(server_uri,
                              "",
                              null,
-                             Services.scriptSecurityManager.getSystemPrincipal(),
+                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                              null,      // requestingNode
                              0,         // securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,

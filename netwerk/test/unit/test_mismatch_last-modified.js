@@ -72,7 +72,7 @@ XPCOMUtils.defineLazyGetter(this, "listener_2", function() {
 	var chan = ios.newChannel2("http://localhost:" +
 				  httpserver.identity.primaryPort +
 				  "/test1", "", null,
-          Services.scriptSecurityManager.getSystemPrincipal(),
+          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
           null,   //requestingNode
           0,      //securityFlags
           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -109,7 +109,7 @@ XPCOMUtils.defineLazyGetter(this, "listener_1", function() {
 	var chan = ios.newChannel2("http://localhost:" +
 				  httpserver.identity.primaryPort +
 				  "/test1", "", null,
-          Services.scriptSecurityManager.getSystemPrincipal(),
+          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
           null,   //requestingNode
           0,      //securityFlags
           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -134,7 +134,7 @@ function run_test() {
     var chan = ios.newChannel2("http://localhost:" + port + "/test1",
                                "",
                                null,
-                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
                                null,      // requestingNode
                                0,         // securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
