@@ -1,3 +1,5 @@
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 function run_test() {
   var feedFeedURI = ios.newURI("feed://example.com/feed.xml", null, null);
   var httpFeedURI = ios.newURI("feed:http://example.com/feed.xml", null, null);
@@ -8,24 +10,24 @@ function run_test() {
   var httpsURI = ios.newURI("https://example.com/feed.xml", null, null);
 
   var feedChannel = ios.newChannelFromURI2(feedFeedURI,
-                                          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
-                                          null, //requestingNode
-                                          0,       //securityFlags
-                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
-                                          0);      //loadFlags
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null, //requestingNode
+                                           0,       //securityFlags
+                                           Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
 
   var httpChannel = ios.newChannelFromURI2(httpFeedURI,
-                                          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
-                                          null, //requestingNode
-                                          0,       //securityFlags
-                                          Ci.nsIContentPolicy.TYPE_OTHER,
-                                          0);      //loadFlags
+                                           Services.scriptSecurityManager.getSystemPrincipal(),
+                                           null, //requestingNode
+                                           0,       //securityFlags
+                                           Ci.nsIContentPolicy.TYPE_OTHER,
+                                           0);      //loadFlags
   var httpsChannel = ios.newChannelFromURI2(httpsFeedURI,
-                                          SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
-                                          null, //requestingNode
-                                          0,       //securityFlags
-                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER,
-                                          0);      //loadFlags
+                                            Services.scriptSecurityManager.getSystemPrincipal(),
+                                            null, //requestingNode
+                                            0,       //securityFlags
+                                            Components.interfaces.nsIContentPolicy.TYPE_OTHER,
+                                            0);      //loadFlags
 
   // not setting .originalURI to the original URI is naughty
   do_check_true(feedFeedURI.equals(feedChannel.originalURI));

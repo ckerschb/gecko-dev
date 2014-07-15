@@ -4,6 +4,8 @@
  *
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 const test = [
 // 0: 0x8e followed by hi byte, not valid JIS X 0201
 	      ["abcdefghijklmnopqrstuvwxyz12test00%8e%80foobar",
@@ -37,7 +39,7 @@ function testCase(testText, expectedText, bufferLength, charset)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,

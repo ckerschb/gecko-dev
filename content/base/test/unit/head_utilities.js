@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 Components.utils.import("resource://testing-common/httpd.js");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const nsIDocumentEncoder = Components.interfaces.nsIDocumentEncoder;
 const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
@@ -17,7 +18,7 @@ function loadContentFile(aFile, aCharset) {
     var ios = Components.classes['@mozilla.org/network/io-service;1']
             .getService(Components.interfaces.nsIIOService);
     var chann = ios.newChannelFromURI2 ( ios.newFileURI (file),
-                                        SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                        Services.scriptSecurityManager.getSystemPrincipal(),
                                         null, //requestingNode
                                         0,       //securityFlags
                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER,

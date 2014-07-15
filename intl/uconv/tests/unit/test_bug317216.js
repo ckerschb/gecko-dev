@@ -9,6 +9,8 @@
  * UTF16 character and mid-surrogate pair
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 const test = [
 // 0: Valid surrogate pair
               ["%D8%35%DC%20%00%2D%00%2D",
@@ -74,7 +76,7 @@ function testCase(testText, expectedText, bufferLength, charset)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,

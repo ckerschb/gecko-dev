@@ -11,6 +11,8 @@
  * is an eight-bit character.
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 const beBOM="%FE%FF";
 const leBOM="%FF%FE";
 const sampleUTF16BE="%00%22%04%12%04%41%04%35%00%20%04%41%04%47%04%30%04%41%04%42%04%3B%04%38%04%32%04%4B%04%35%00%20%04%41%04%35%04%3C%04%4C%04%38%00%20%04%3F%04%3E%04%45%04%3E%04%36%04%38%00%20%04%34%04%40%04%43%04%33%00%20%04%3D%04%30%00%20%04%34%04%40%04%43%04%33%04%30%00%2C%00%20%04%3A%04%30%04%36%04%34%04%30%04%4F%00%20%04%3D%04%35%04%41%04%47%04%30%04%41%04%42%04%3B%04%38%04%32%04%30%04%4F%00%20%04%41%04%35%04%3C%04%4C%04%4F%00%20%04%3D%04%35%04%41%04%47%04%30%04%41%04%42%04%3B%04%38%04%32%04%30%00%20%04%3F%04%3E%00%2D%04%41%04%32%04%3E%04%35%04%3C%04%43%00%2E%00%22";
@@ -46,7 +48,7 @@ function testCase(withBOM, charset, charsetDec, decoder, bufferLength)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,
