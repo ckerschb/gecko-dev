@@ -1,4 +1,5 @@
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /*
  * This xpcshell test checks whether we detect infinite HTTP redirect loops.

@@ -1,6 +1,7 @@
 // This is essentially a debug mode crashtest to make sure everything
 // involved in a reload runs on the right thread. It relies on the
 // assertions in necko.
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var listener = {
   onStartRequest: function test_onStartR(request, ctx) {

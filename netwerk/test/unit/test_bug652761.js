@@ -1,4 +1,5 @@
 // This is just a crashtest for a url that is rejected at parse time (port 80,000)
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 function completeTest(request, data, ctx)
 {

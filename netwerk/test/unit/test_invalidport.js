@@ -1,6 +1,7 @@
 // This is essentially a crashtest for accessing an out of range port
 // Perform the async open several times in order to induce exponential
 // scheduling behavior bugs.
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const CC = Components.Constructor;
 

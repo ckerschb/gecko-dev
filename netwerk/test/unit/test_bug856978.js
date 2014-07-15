@@ -10,6 +10,7 @@
 // passes iff both succeeds.
 
 Components.utils.import("resource://testing-common/httpd.js");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var notification = "http-on-modify-request";
 

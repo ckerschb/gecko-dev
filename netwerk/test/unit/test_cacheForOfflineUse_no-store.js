@@ -2,6 +2,7 @@
 // https://bugzilla.mozilla.org/show_bug.cgi?id=760955
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var httpServer = null;
 const testFileName = "test_nsHttpChannel_CacheForOfflineUse-no-store";

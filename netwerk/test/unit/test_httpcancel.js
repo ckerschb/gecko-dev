@@ -5,6 +5,7 @@
 // expected: see comments that start with ENSURE_CALLED_BEFORE_CONNECT:
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var ios = Components.classes["@mozilla.org/network/io-service;1"]
                     .getService(Components.interfaces.nsIIOService);

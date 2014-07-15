@@ -6,6 +6,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const PATH = "/file.meh";
 var httpserver = new HttpServer();

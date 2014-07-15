@@ -22,6 +22,7 @@ var lastTest = 4;    // set to test of interest when debugging
 // Note: sets Cc and Ci variables
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "URL", function() {
   return "http://localhost:" + httpserver.identity.primaryPort;

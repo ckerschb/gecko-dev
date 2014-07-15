@@ -7,6 +7,7 @@
 "use strict";
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var baseURL;
 const kResponseTimeoutPref = "network.http.response.timeout";

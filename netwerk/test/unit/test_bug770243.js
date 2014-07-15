@@ -8,6 +8,7 @@
 */
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var httpserv;
 

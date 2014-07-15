@@ -1,6 +1,7 @@
 // This file tests the flag LOAD_TREAT_APPLICATION_OCTET_STREAM_AS_UNKNOWN.
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const octetStreamType = "application/octet-stream";
 const sniffedType = "application/x-sniffed";

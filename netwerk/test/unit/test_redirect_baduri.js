@@ -1,4 +1,5 @@
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /*
  * Test whether we fail bad URIs in HTTP redirect as CORRUPTED_CONTENT.

@@ -1,4 +1,5 @@
 // Tests bug 304414
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const PR_RDONLY = 0x1;  // see prio.h
 

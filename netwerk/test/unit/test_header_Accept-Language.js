@@ -1,6 +1,7 @@
 //
 //  HTTP Accept-Language header test
 //
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var testpath = "/bug672448";
 

@@ -1,6 +1,7 @@
 // This file tests nsIContentSniffer, introduced in bug 324985
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const unknownType = "application/x-unknown-content-type";
 const sniffedType = "application/x-sniffed";

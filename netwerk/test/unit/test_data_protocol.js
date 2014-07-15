@@ -1,5 +1,7 @@
 /* run some tests on the data: protocol handler */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 // The behaviour wrt spaces is:
 // - Textual content keeps all spaces
 // - Other content strips unescaped spaces

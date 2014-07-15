@@ -5,6 +5,7 @@
 // Note: sets Cc and Ci variables
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var httpserver = new HttpServer();
 var testpath = "/simple";

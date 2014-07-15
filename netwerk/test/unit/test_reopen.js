@@ -2,6 +2,7 @@
 // See https://bugzilla.mozilla.org/show_bug.cgi?id=372486
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const NS_ERROR_IN_PROGRESS = 0x804b000f;
 const NS_ERROR_ALREADY_OPENED = 0x804b0049;
