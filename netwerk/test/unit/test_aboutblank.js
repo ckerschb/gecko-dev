@@ -8,14 +8,14 @@ function run_test() {
   var about2 = ioServ.newURI("about:blank", null, base);
 
   var chan1 = ioServ.newChannelFromURI2(about1,
-                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                        null, //requestingNode
                                        0,       //securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                        0)      //loadFlags
                     .QueryInterface(Components.interfaces.nsIPropertyBag2);
   var chan2 = ioServ.newChannelFromURI2(about2,
-                                       SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                       Services.scriptSecurityManager.getSystemPrincipal(),
                                        null, //requestingNode
                                        0,       //securityFlags
                                        Components.interfaces.nsIContentPolicy.TYPE_OTHER,

@@ -28,7 +28,7 @@ function testCase(bufferLength)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,

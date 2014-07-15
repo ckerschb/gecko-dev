@@ -49,7 +49,7 @@ function setupChannel(url)
     var chan = ios.newChannel2("http://localhost:" + port + url,
                                "",
                                null,
-                               SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                               Services.scriptSecurityManager.getSystemPrincipal(),
                                null,      // requestingNode
                                0,         // securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,

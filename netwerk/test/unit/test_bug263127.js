@@ -42,7 +42,7 @@ function run_test() {
                   .getService(Ci.nsIIOService)
                   .newChannel2("http://localhost:" +
                                server.identity.primaryPort + "/", null, null,
-                               SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                               Services.scriptSecurityManager.getSystemPrincipal(),
                                null,   //requestingNode
                                0,      //securityFlags
                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,

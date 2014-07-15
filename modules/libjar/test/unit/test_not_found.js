@@ -11,10 +11,10 @@ function run_test() {
   var channel = ios.newChannel2(spec + "file_that_isnt_in.archive",
                                 null,
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
-                                Ci.nsIContentPolicy.TYPE_OTHER,
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
   try {
     instr = channel.open2();

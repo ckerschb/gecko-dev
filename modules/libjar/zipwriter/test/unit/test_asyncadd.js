@@ -69,7 +69,7 @@ var methods = {
     zipW.addEntryChannel(entry, source.lastModifiedTime * PR_MSEC_PER_SEC,
                          Ci.nsIZipWriter.COMPRESSION_NONE,
                          ioSvc.newChannelFromURI2(ioSvc.newFileURI(source),
-                                                 SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                                 Services.scriptSecurityManager.getSystemPrincipal(),
                                                  null, //requestingNode
                                                  0,       //securityFlags
                                                  Ci.nsIContentPolicy.TYPE_OTHER,

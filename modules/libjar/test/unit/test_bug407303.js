@@ -34,7 +34,7 @@ function run_test() {
 
   var channel = ios.newChannel2("jar:http://test.invalid/test.jar!/index.html",
                                 null, null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,   //requestingNode
                                 0,      //securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,

@@ -105,7 +105,7 @@ function run_test() {
   var chan = ios.newChannel2("http://" + host,
                              "",
                              null,
-                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                             Services.scriptSecurityManager.getSystemPrincipal(),
                              null,      // requestingNode
                              0,         // securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,
@@ -209,7 +209,7 @@ function run_test() {
     var ftpchan = ios.newChannel2("ftp://" + host,
                                   "",
                                   null,
-                                  SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
                                   null,      // requestingNode
                                   0,         // securityFlags
                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,

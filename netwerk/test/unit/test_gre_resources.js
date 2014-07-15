@@ -15,7 +15,7 @@ function check_file(file) {
   var channel = ios.newChannel2("resource://gre-resources/"+file,
                                 null,
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER,

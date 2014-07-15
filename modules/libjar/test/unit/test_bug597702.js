@@ -17,18 +17,18 @@ function run_test() {
   var goodChannel = ios.newChannel2(goodSpec,
                                     null,
                                     null,
-                                    SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                    Services.scriptSecurityManager.getSystemPrincipal(),
                                     null,      // requestingNode
                                     0,         // securityFlags
-                                    Ci.nsIContentPolicy.TYPE_OTHER,
+                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                     0);        // loadFlags
   var badChannel = ios.newChannel2(badSpec,
                                    null,
                                    null,
-                                   SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,      // requestingNode
                                    0,         // securityFlags
-                                   Ci.nsIContentPolicy.TYPE_OTHER,
+                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                    0);        // loadFlags
 
   try {

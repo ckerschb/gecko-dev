@@ -19,7 +19,7 @@ function setupChannel(path) {
     var ios =
         Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
     return chan = ios.newChannel2(path, "", null,
-                                  SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                  Services.scriptSecurityManager.getSystemPrincipal(),
                                   null,   //requestingNode
                                   0,      //securityFlags
                                   Components.interfaces.nsIContentPolicy.TYPE_OTHER,

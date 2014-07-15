@@ -15,7 +15,7 @@ function setupChannel(suffix)
         .getService(Ci.nsIIOService);
     var chan = ios.newChannel2("http://localhost:" +
 			     httpserver.identity.primaryPort + suffix, "", null,
-           SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+           Services.scriptSecurityManager.getSystemPrincipal(),
            null,   //requestingNode
            0,      //securityFlags
            Components.interfaces.nsIContentPolicy.TYPE_OTHER,

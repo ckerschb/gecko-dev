@@ -106,10 +106,10 @@ function testCaseInputStream(inStr, expected)
   var channel = ios.newChannel2(dataURI,
                                 "",
                                 null,
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                Services.scriptSecurityManager.getSystemPrincipal(),
                                 null,      // requestingNode
                                 0,         // securityFlags
-                                Ci.nsIContentPolicy.TYPE_OTHER,
+                                Components.interfaces.nsIContentPolicy.TYPE_OTHER,
                                 0);        // loadFlags
   var testInputStream = channel.open2();
   var testConverter = new ConverterInputStream(testInputStream,

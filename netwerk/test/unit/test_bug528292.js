@@ -56,7 +56,7 @@ function run_test()
   // requires such a channel in order to successfully set a cookie) and then
   // to load the pre-redirect URI.
   var chan = ioService.newChannel2(preRedirectURL, "", null,
-                                   SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                   Services.scriptSecurityManager.getSystemPrincipal(),
                                    null,   //requestingNode
                                    0,      //securityFlags
                                    Components.interfaces.nsIContentPolicy.TYPE_OTHER,

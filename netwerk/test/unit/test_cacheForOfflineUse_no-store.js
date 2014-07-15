@@ -24,7 +24,7 @@ function make_channel_for_offline_use(url, callback, ctx) {
   var chan = ios.newChannel2(url,
                              "",
                              null,
-                             SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                             Services.scriptSecurityManager.getSystemPrincipal(),
                              null,      // requestingNode
                              0,         // securityFlags
                              Components.interfaces.nsIContentPolicy.TYPE_OTHER,

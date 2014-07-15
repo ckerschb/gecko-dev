@@ -38,12 +38,12 @@ function new_file_channel(file) {
   var ios =
       Cc["@mozilla.org/network/io-service;1"].
       getService(Ci.nsIIOService);
-  return ios.newChannelFromURI2(ios.newFileURI(file),
-                                SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
-                                null, //requestingNode
-                                0,    //securityFlags
-                                Ci.nsIContentPolicy.TYPE_OTHER,
-                                0);      //loadFlags
+  return ios.newChannelFromURI2(ios.newFileURI(file)
+                               Services.scriptSecurityManager.getSystemPrincipal(),
+                               null, //requestingNode
+                               0,    //securityFlags
+                               Ci.nsIContentPolicy.TYPE_OTHER,
+                               0);      //loadFlags
 }
 
 /*
