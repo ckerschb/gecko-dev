@@ -5,6 +5,9 @@
 // - HTTPS
 // - Proxies
 
+
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 const nsIAuthInformation = Components.interfaces.nsIAuthInformation;
 const nsIAuthPromptAdapterFactory = Components.interfaces.nsIAuthPromptAdapterFactory;
 

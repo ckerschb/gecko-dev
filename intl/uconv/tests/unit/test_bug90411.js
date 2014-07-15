@@ -6,6 +6,7 @@
  * 问他谁是傻瓜了5分钟。但是，他谁不要求仍然是一个傻瓜永远
  * 我听见 我忘记; 我看见 我记住; 我做 我了解。
  */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const sample = "~{NJK{K-JGI59OAK~}5~{7VVS!%235+JG%23,K{K-2;R*GsHTH;JGR;8vI59OS@T6!%23~} ~{NRL}<{~} ~{NRM|<G~}; ~{NR?4<{~} ~{NR<GW!~}; ~{NRWv~} ~{NRAK=b!%23~}";
 

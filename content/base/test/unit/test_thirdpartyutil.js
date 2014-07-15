@@ -5,6 +5,7 @@
 // Test ThirdPartyUtil methods. See mozIThirdPartyUtil.
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 let Cc = Components.classes;
 let Ci = Components.interfaces;
@@ -41,7 +42,7 @@ function run_test() {
   let channel1 = NetUtil.newChannel2(uri1,
                                      null,
                                      null,
-                                     SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Ci.nsIContentPolicy.TYPE_OTHER,
@@ -49,7 +50,7 @@ function run_test() {
   let channel2 = NetUtil.newChannel2(uri2,
                                      null,
                                      null,
-                                     SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Ci.nsIContentPolicy.TYPE_OTHER,
@@ -63,7 +64,7 @@ function run_test() {
   let filechannel1 = NetUtil.newChannel2(fileuri1,
                                          null,
                                          null,
-                                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
                                          Ci.nsIContentPolicy.TYPE_OTHER,
@@ -71,7 +72,7 @@ function run_test() {
   let filechannel2 = NetUtil.newChannel2(fileuri2,
                                          null,
                                          null,
-                                         SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                         Services.scriptSecurityManager.getSystemPrincipal(),
                                          null,      // requestingNode
                                          0,         // securityFlags
                                          Ci.nsIContentPolicy.TYPE_OTHER,

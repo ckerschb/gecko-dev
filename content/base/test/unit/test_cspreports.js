@@ -8,6 +8,7 @@ const Cu = Components.utils;
 const Cr = Components.results;
 
 Cu.import('resource://gre/modules/NetUtil.jsm');
+Cu.import("resource://gre/modules/Services.jsm");
 
 var httpServer = new HttpServer();
 httpServer.start(-1);
@@ -73,7 +74,7 @@ function makeTest(id, expectedJSON, useReportOnlyPolicy, callback) {
   var selfchan = NetUtil.newChannel2(selfuri,
                                      null,
                                      null,
-                                     SpecialPowers.Services.scriptSecurityManager.getSystemPrincipal(),
+                                     Services.scriptSecurityManager.getSystemPrincipal(),
                                      null,      // requestingNode
                                      0,         // securityFlags
                                      Ci.nsIContentPolicy.TYPE_OTHER,

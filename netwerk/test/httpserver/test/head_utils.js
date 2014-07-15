@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 /**
  * Loads _HTTPD_JS_PATH file, which is dynamically defined by
  * <runxpcshelltests.py>.

@@ -1,3 +1,5 @@
+Cu.import("resource://gre/modules/Services.jsm");
+
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 

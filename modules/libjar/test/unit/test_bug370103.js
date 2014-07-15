@@ -1,6 +1,8 @@
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 // Regression test for bug 370103 - crash when passing a null listener to
 // nsIChannel.asyncOpen
 function run_test() {

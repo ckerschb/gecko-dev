@@ -3,6 +3,8 @@
 const Cc = Components.Constructor;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 const tests = [
 { inStrings: ["%80",                 // Illegal or incomplete sequences
               "%8f",

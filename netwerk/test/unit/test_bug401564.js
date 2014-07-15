@@ -1,6 +1,7 @@
 /* -*- indent-tabs-mode: nil; js-indent-level: 2 -*- */
 "use strict";
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var httpserver = null;
 const noRedirectURI = "/content";

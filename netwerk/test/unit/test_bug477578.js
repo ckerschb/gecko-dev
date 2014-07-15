@@ -36,6 +36,8 @@ const testMethods = [
   ["Foo"]
 ]
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 function run_test() {
   var ios =
     Cc["@mozilla.org/network/io-service;1"].

@@ -1,4 +1,5 @@
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const VALUE_HDR_NAME = "X-HTTP-VALUE-HEADER";
 const VARY_HDR_NAME = "X-HTTP-VARY-HEADER";

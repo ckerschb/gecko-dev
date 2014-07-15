@@ -1,4 +1,5 @@
 /* run some tests on the file:// protocol handler */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const PR_RDONLY = 0x1;  // see prio.h
 

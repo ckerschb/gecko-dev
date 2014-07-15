@@ -5,6 +5,7 @@
 // take precedence
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 const BUGID = "203271";
 
 var httpserver = new HttpServer();

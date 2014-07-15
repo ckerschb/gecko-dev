@@ -1,4 +1,5 @@
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const SERVER_PORT = 8080;
 const baseURL = "http://localhost:" + SERVER_PORT + "/";

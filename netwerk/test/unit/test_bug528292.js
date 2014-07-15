@@ -1,4 +1,5 @@
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const sentCookieVal     = "foo=bar";
 const responseBody      = "response body";

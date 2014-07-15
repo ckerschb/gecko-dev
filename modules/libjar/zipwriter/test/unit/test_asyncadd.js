@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 // Values taken from using zipinfo to list the test.zip contents
 var TESTS = [
   {

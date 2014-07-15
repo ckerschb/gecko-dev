@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const gDashboard = Cc['@mozilla.org/network/dashboard;1']
   .getService(Ci.nsIDashboard);

@@ -5,6 +5,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 // Check that reading non existant inner jars results in the right error
 
 function run_test() {

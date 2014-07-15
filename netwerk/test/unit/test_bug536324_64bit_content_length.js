@@ -2,6 +2,7 @@
    a simple HTTP case */
 
 Cu.import("resource://testing-common/httpd.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 // This C-L is significantly larger than (U)INT32_MAX, to make sure we do
 // 64-bit properly.

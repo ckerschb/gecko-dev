@@ -4,6 +4,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const path = "data/test_bug333423.zip";
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 function run_test() {
   var ios = Cc["@mozilla.org/network/io-service;1"].
             getService(Ci.nsIIOService);

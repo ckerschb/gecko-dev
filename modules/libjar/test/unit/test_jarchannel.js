@@ -6,6 +6,7 @@
  * Tests some basic jar channel functionality
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const {classes: Cc,
        interfaces: Ci,

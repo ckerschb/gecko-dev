@@ -4,6 +4,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 // XXX: NS_ERROR_UNKNOWN_HOST is not in Components.results
 const NS_ERROR_UNKNOWN_HOST = 0x804B001E;
 
