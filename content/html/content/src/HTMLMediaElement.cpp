@@ -1435,13 +1435,13 @@ HTMLMediaElement::Seek(double aTime,
   }
 
   // Clamp the seek target to inside the seekable ranges.
-  dom::TimeRanges seekable;
-  if (NS_FAILED(mDecoder->GetSeekable(&seekable))) {
+  nsRefPtr<dom::TimeRanges> seekable = new dom::TimeRanges();
+  if (NS_FAILED(mDecoder->GetSeekable(seekable))) {
     aRv.Throw(NS_ERROR_DOM_INVALID_STATE_ERR);
     return;
   }
   uint32_t length = 0;
-  seekable.GetLength(&length);
+  seekable->GetLength(&length);
   if (!length) {
     return;
   }
@@ -1453,7 +1453,7 @@ HTMLMediaElement::Seek(double aTime,
   // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-video-element.html#seeking
   int32_t range = 0;
   bool isInRange = false;
-  if (NS_FAILED(IsInRanges(seekable, aTime, isInRange, range))) {
+  if (NS_FAILED(IsInRanges(*seekable, aTime, isInRange, range))) {
     aRv.Throw(NS_ERROR_DOM_INVALID_STATE_ERR);
     return;
   }
@@ -1463,11 +1463,11 @@ HTMLMediaElement::Seek(double aTime,
       // for |range| is -1.
       if (uint32_t(range + 1) < length) {
         double leftBound, rightBound;
-        if (NS_FAILED(seekable.End(range, &leftBound))) {
+        if (NS_FAILED(seekable->End(range, &leftBound))) {
           aRv.Throw(NS_ERROR_DOM_INVALID_STATE_ERR);
           return;
         }
-        if (NS_FAILED(seekable.Start(range + 1, &rightBound))) {
+        if (NS_FAILED(seekable->Start(range + 1, &rightBound))) {
           aRv.Throw(NS_ERROR_DOM_INVALID_STATE_ERR);
           return;
         }
@@ -1482,7 +1482,7 @@ HTMLMediaElement::Seek(double aTime,
       } else {
         // Seek target is after the end last range in seekable data.
         // Clamp the seek target to the end of the last seekable range.
-        if (NS_FAILED(seekable.End(length - 1, &aTime))) {
+        if (NS_FAILED(seekable->End(length - 1, &aTime))) {
           aRv.Throw(NS_ERROR_DOM_INVALID_STATE_ERR);
           return;
         }
@@ -1490,7 +1490,7 @@ HTMLMediaElement::Seek(double aTime,
     } else {
       // aTime is before the first range in |seekable|, the closest point we can
       // seek to is the start of the first range.
-      seekable.Start(0, &aTime);
+      seekable->Start(0, &aTime);
     }
   }
 

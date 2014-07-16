@@ -1474,11 +1474,13 @@ public:
     MOZ_COUNT_CTOR(SelectorCacheKeyDeleter);
   }
 
+protected:
   ~SelectorCacheKeyDeleter()
   {
     MOZ_COUNT_DTOR(SelectorCacheKeyDeleter);
   }
 
+public:
   NS_IMETHOD Run()
   {
     return NS_OK;
